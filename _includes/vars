@@ -1,0 +1,4 @@
+{% assign title='Ruby on Rails 教程（第二版）' %}
+{% assign subtitle='学习使用 Rails 进行 Web 开发' %}
+{% assign authors='原作者：Michael Hartl 译者：Andor Chen' %}
+{% assign versions='Ruby 1.9.3&nbsp;&nbsp;Rails 3.2.8' %}

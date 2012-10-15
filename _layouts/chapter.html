@@ -1,0 +1,18 @@
+{% include vars %}
+{% include _header.html %}
+
+<div id="header">
+	<img align="left" src="assets/images/cover.png" width="116" height="150" alt="Ruby on Rails 教程" title="Ruby on Rails 教程" />
+	<h2 class="title">{{ title }}</h2>
+	<h3 class="subtitle">{{ subtitle }}</h3>
+	<h3 class="authors">{{ authors }}</h3>
+	<h3 class="versions">{{ versions }}</h3>
+</div>
+
+<div id="content">
+	<h1>{{ page.title }}</h1>
+	<ol id="toc"></ol>
+	{{ content }}
+</div>
+
+{% include _footer.html %}
