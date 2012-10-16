@@ -254,3 +254,411 @@ Using /Users/mhartl/.rvm/gems/ruby-1.9.3 with gemset rails3tutorial2ndEd
 $ rvm --help
 $ rvm gemset --help
 {% endhighlight %}
+
+<h4>安装 RubyGems</h4>
+
+RubyGems 是 Ruby 项目的包管理程序，有很多有用的代码库（包括 Rails）都可以通过包（或叫做 gem）的形式获取。安装 Ruby 后再安装 RubyGems 就很简单了。如果你安装了 RVM 就已经安装 RubyGems 了，因为 RVM 已经自动将其安装了：
+
+{% highlight sh %}
+$ which gem
+/Users/mhartl/.rvm/rubies/ruby-1.9.3-p0/bin/gem
+{% endhighlight %}
+
+如果你还没有安装 RubyGems，你可以[下载 RubyGems](http://rubyforge.org/frs/?group_id=126)，解压文件，然后进入 `rubygems` 目录运行安装程序：
+
+{% highlight sh %}
+ruby setup.rb
+{% endhighlight %}
+
+（如果你遇到了权限错误的提示，参照 [1.1.3](#sec-1-1-3) 节所说的，你要使用 `sudo`。）
+
+安装 RubyGems 之后，你要确保你使用的版本和本书一致：
+
+{% highlight sh %}
+gem update --system 1.8.24
+{% endhighlight %}
+
+将你的系统定格在这个版本可以避免以后因为 RubyGems 升级而产生的差异。
+
+安装 gem 时，默认情况下 RubyGems 会生成两种不同的文档（ri 和 rdoc），但是很多 Ruby 和 Rails 开发者认为花时间生成这些文档没什么必要。（很多程序员更依靠在线文档，而不是内置的 ri 和 rdoc 文档。）为了禁止自动生成文档，我建议你执行代码 1.1 中的命令在你的家目录中创建一个名为 `.gemrc` 的 gem 配置文件，文件的内容参加代码 1.2。（波浪号“~”代表“家目录”，`.gemrc` 中的点号代表这是个隐藏文件，配置文件一般都是隐藏的。）
+
+**代码 1.1** 创建 gem 配置文件
+
+{% highlight sh %}
+$ subl ~/.gemrc
+{% endhighlight %}
+
+这里的 `subl` 是 OS X 中启动 Sublime Text 的命令，你可以参照 [Sublime Text 2 文档中的 “OS X 命令”](http://www.sublimetext.com/docs/2/osx_command_line.html) 进行设置。你过你使用的是其他系统，或者你使用的是其他的编辑器，只需换用其他相应的命令（例如，你可以直接双击来启动程序，或者使用其他的命令，如 `mate`、`vim`、`gvim` 或 `mvim`）。为了行文简洁，在本书后续的内容中当我说使用 `subl` 时，我的意思是“使用你喜好的文本编辑器打开”。
+
+**代码 1.2** 在 `.gemrc` 中配置不生成 ri 和 rdoc 文档
+
+{% highlight sh %}
+install: --no-rdoc --no-ri
+update: --no-rdoc --no-ri
+{% endhighlight %}
+
+<h4>安装 Rails</h4>
+
+安装玩 RubyGems 后安装 Rails 也就简单了。本教程使用 Rails 3.2，通过以下命令安装：
+
+{% highlight sh %}
+$ gem install rails -v 3.2.8
+{% endhighlight %}
+
+检查 Rails 是否安装成功，执行以下命令显示 Rails 的版本号：
+
+{% highlight sh %}
+$ rails -v
+Rails 3.2.8
+{% endhighlight %}
+
+注意：如果你是通过上述的 Rails Installer 安装的 Rails，你所得到的版本号可能会有些不同。在写这本书的时候，这些不同还不会带来大的问题，但是如果 Rails 升级到了更高的版本，问题可能就很严重了。我目前正在和 Engine Yard 一起工作来创建一个 Rails Installer 版本列表。
+
+如果你使用的是 Linux，现在或许你还需要安装一些其他的代码包：
+
+{% highlight sh %}
+$ sudo apt-get install libxslt-dev libxml2-dev libsqlite3-dev # 只针对 Linux
+{% endhighlight %}
+
+<h3 id="sec-1-2-3">1.2.3 第一个程序</h3>
+
+Rails 程序一般都是从 `rails` 命令开始的，这个命令会在你指定的文件夹中创建一个 Rails 程序模板。首先为你的 Rails 程序新建一个文件夹，然后执行 `rails` 命令 创建第一个程序（参加代码 1.3）：
+
+**代码 1.3** 运行 `rails` 生成一个新程序
+
+{% highlight sh %}
+$ mkdir rails_projects
+$ cd rails_projects
+$ rails new first_app
+      create
+      create  README.rdoc
+      create  Rakefile
+      create  config.ru
+      create  .gitignore
+      create  Gemfile
+      create  app
+      create  app/assets/images/rails.png
+      create  app/assets/javascripts/application.js
+      create  app/assets/stylesheets/application.css
+      create  app/controllers/application_controller.rb
+      create  app/helpers/application_helper.rb
+      create  app/mailers
+      create  app/models
+      create  app/views/layouts/application.html.erb
+      create  app/mailers/.gitkeep
+      create  app/models/.gitkeep
+      create  config
+      create  config/routes.rb
+      create  config/application.rb
+      create  config/environment.rb
+      .
+      .
+      .
+      create  vendor/plugins
+      create  vendor/plugins/.gitkeep
+         run  bundle install
+Fetching source index for https://rubygems.org/
+.
+.
+.
+Your bundle is complete! Use `bundle show [gemname]` to see where a bundled
+gem is installed.
+{% endhighlight %}
+
+
+如代码 1.3 所示，运行 `rails` 命令会在文件创建完之后自动执行 `bundle install`。如果这一步没有正确执行，先不要担心，按照 [1.2.4 节](#sec-1-2-4)中的步骤来做应该就可以了。
+
+留意以下 `rails` 命令创建的文件和文件夹。这些标准的文件夹和文件结构（如图 1.2）是 Rails 的很多优势之一，它让你从零开始快速的创建一个可运行的简单的程序。而且因为这样的结构对 Rails 程序都是一致的，你在阅读其他人的代码时就显得很亲切。表格 1.1 是这些文件的简洁，在本书的后续内容中将介绍其中的大多数。从 [5.2.1 节](#sec-5-2-1) 开始，首先将介绍 `app/assets` 文件夹，它是 asset pipeline（Rails 3.1 新增）的一部分，这个功能让组织和部署 CSS 和 JavaScript 等资源文件变得异常简单。
+
+![directory_structure_rails_31](assets/images/figures/directory_structure_rails_31.png)
+
+<p class="caption">图 1.2：新创建的 Rails 程序的文件结构</p>
+
+<table class="tabular">
+	<tbody>
+		<tr>
+			<th class="align_left"><strong>文件/文件夹</strong></th>
+			<th class="align_left"><strong>说明</strong></th>
+		</tr>
+		<tr class="top_bar">
+			<td class="align_left"><code>app/</code></td>
+			<td class="align_left">程序的核心文件，包含模型、视图、控制器和帮助方法</td>
+		</tr>
+		<tr>
+			<td class="align_left"><code>app/assets</code></td>
+			<td class="align_left">程序的资源文件，如 CSS、JavaScript 和图片</td>
+		</tr>
+		<tr>
+			<td class="align_left"><code>config/</code></td>
+			<td class="align_left">程序的设置</td>
+		</tr>
+		<tr>
+			<td class="align_left"><code>db/</code></td>
+			<td class="align_left">数据库文件</td>
+		</tr>
+		<tr>
+			<td class="align_left"><code>doc/</code></td>
+			<td class="align_left">程序的文档</td>
+		</tr>
+		<tr>
+			<td class="align_left"><code>lib/</code></td>
+			<td class="align_left">代码库文件</td>
+		</tr>
+		<tr>
+			<td class="align_left"><code>lib/assets</code></td>
+			<td class="align_left">代码库包含的资源文件，如 CSS、JavaScript 和 图片</td>
+		</tr>
+		<tr>
+			<td class="align_left"><code>log/</code></td>
+			<td class="align_left">程序的日志文件</td>
+		</tr>
+		<tr>
+			<td class="align_left"><code>public/</code></td>
+			<td class="align_left">公共（例如浏览器）可访问的数据，如出错页面</td>
+		</tr>
+		<tr>
+			<td class="align_left"><code>script/rails</code></td>
+			<td class="align_left">生成代码、打开终端会话或开启本地服务器的脚本</td>
+		</tr>
+		<tr>
+			<td class="align_left"><code>test/</code></td>
+			<td class="align_left">程序的测试文件（在 <a class="ref" href="chapter3.html#sec-3-1-2">3.1.2 节</a> 中被 <code>spec/</code> 替代）</td>
+		</tr>
+		<tr>
+			<td class="align_left"><code>tmp/</code></td>
+			<td class="align_left">临时文件</td>
+		</tr>
+		<tr>
+			<td class="align_left"><code>vendor/</code></td>
+			<td class="align_left">第三方代码，如插件和 gem</td>
+		</tr>
+		<tr>
+			<td class="align_left"><code>vendor/assets</code></td>
+			<td class="align_left">第三方代码包含的资源文件，如 CSS、JavaScript 和图片</td>
+		</tr>
+		<tr>
+			<td class="align_left"><code>README.rdoc</code></td>
+			<td class="align_left">程序的简介</td>
+		</tr>
+		<tr>
+			<td class="align_left"><code>Rakefile</code></td>
+			<td class="align_left"><code>rake</code> 命令包含的任务</td>
+		</tr>
+		<tr>
+			<td class="align_left"><code>Gemfile</code></td>
+			<td class="align_left">该程序所需的 gem</td>
+		</tr>
+		<tr>
+			<td class="align_left"><code>Gemfile.lock</code></td>
+			<td class="align_left">一个 gem 的列表，确保本程序的复制版本使用相同版本的 gem</td>
+		</tr>
+		<tr>
+			<td class="align_left"><code>config.ru</code></td>
+			<td class="align_left"><a href="http://rack.rubyforge.org/doc/">Rack 中间件</a> 的配置文件</td>
+		</tr>
+		<tr>
+			<td class="align_left"><code>.gitignore</code></td>
+			<td class="align_left">git 忽略的文件类型</td>
+		</tr>
+	</tbody>
+</table>
+
+<p class="caption">表格 1.1：Rails 默认文件结构的简介</p>
+
+<h3 id="sec-1-2-4">1.2.4 Bundler</h3>
+
+创建完一个新的 Rails 程序后，你可以使用 Bundler 来安装和包含该程序所需的 gem。在 [1.2.3 节](#sec-1-2-3) 中提到过，Bundler 会被 `rails` 命令自动执行（通过 `bundle install`），不过本节将对程序默认包含的 gem 做些修改，然后再运行 Bundler。首先在你喜好的文本编辑器中打开 `Gemfile` 文件：
+
+{% highlight sh %}
+$ cd first_app/
+$ subl Gemfile
+{% endhighlight %}
+
+该文件内容如代码 1.4。这些代码就是常规的 Ruby 代码，现在无需关注句法，第四章将会详细的介绍 Ruby。
+
+**代码 1.4** `first_app` 默认的 `Gemfile` 文件
+
+{% highlight ruby %}
+source 'https://rubygems.org'
+
+gem 'rails', '3.2.8'
+
+# Bundle edge Rails instead:
+# gem 'rails', :git => 'git://github.com/rails/rails.git'
+
+gem 'sqlite3'
+
+
+# Gems used only for assets and not required
+# in production environments by default.
+group :assets do
+  gem 'sass-rails',   '~> 3.2.3'
+  gem 'coffee-rails', '~> 3.2.2'
+
+  gem 'uglifier', '>= 1.2.3'
+end
+
+gem 'jquery-rails'
+
+# To use ActiveModel has_secure_password
+# gem 'bcrypt-ruby', '~> 3.0.0'
+
+# To use Jbuilder templates for JSON
+# gem 'jbuilder'
+
+# Use unicorn as the web server
+# gem 'unicorn'
+
+# Deploy with Capistrano
+# gem 'capistrano'
+
+# To use debugger
+# gem 'ruby-debug19', :require => 'ruby-debug'
+{% endhighlight %}
+
+其中很多行代码都用 `#` 注释掉了，这些代码放在这是告诉你一些常用的 gem，也展示了 Bundler 的句法。现在，去了默认的 gem 我们还不需要其他的 gem：Rails，一些 asset pipeline 相关的 gem（[5.2.1 节](chapter5.html/#sec-5-2-1)）—— jQuery 库 gem，[SQLite 数据库](http://www.sqlite.org/)的 Ruby 接口 gem。
+
+如果不为 `gem` 命令指定一个版本号，Bundler 会自动安装 gem 的最新版本。有些 gem 的更新会带来细微但有时会破坏代码的差异，所以在本教程中我们特意加入了可以正常运行的 gem 版本号，如代码 1.5 所示（同时我们也将注释掉的代码去掉了）。
+
+**代码 1.5** 指定了 gem 版本号的 `Gemfile` 文件
+
+{% highlight ruby %}
+source 'https://rubygems.org'
+
+gem 'rails', '3.2.8'
+
+group :development do
+  gem 'sqlite3', '1.3.5'
+end
+
+
+# Gems used only for assets and not required
+# in production environments by default.
+group :assets do
+  gem 'sass-rails',   '3.2.5'
+  gem 'coffee-rails', '3.2.2'
+
+  gem 'uglifier', '1.2.3'
+end
+
+gem 'jquery-rails', '2.0.2'
+{% endhighlight %}
+
+代码 1.5 将 Rails 默认使用的 JavaScript 库 jQuery 的 gem 从
+
+{% highlight ruby %}
+gem 'jquery-rails'
+{% endhighlight %}
+
+改为
+
+{% highlight ruby %}
+gem 'jquery-rails', '2.0.2'
+{% endhighlight %}
+
+同时也将
+
+{% highlight ruby %}
+gem 'sqlite3'
+{% endhighlight %}
+
+修改成
+
+{% highlight ruby %}
+group :development do
+  gem 'sqlite3', '1.3.5'
+end
+{% endhighlight %}
+
+强制 Bundler 安装 `sqlite3` gem 的 `1.3.5` 版。注意，我们仅仅把 SQLite 放到了开发环境中（[7.1.1 节](chapter7.html/#sec-7-1-1)），这样可以避免和 Heroku（[1.4 节](#sec-1-4)）的数据库冲突。
+
+代码 1.5 也修改了其他几行，将
+
+{% highlight ruby %}
+group :assets do
+  gem 'sass-rails',   '~> 3.2.3'
+  gem 'coffee-rails', '~> 3.2.2'
+  gem 'uglifier', '>= 1.2.3'
+end
+{% endhighlight %}
+
+改成了
+
+{% highlight ruby %}
+group :assets do
+  gem 'sass-rails',   '3.2.5'
+  gem 'coffee-rails', '3.2.2'
+  gem 'uglifier', '1.2.3'
+end
+{% endhighlight %}
+
+如下代码
+
+{% highlight ruby %}
+gem 'uglifier', '>=1.2.3'
+{% endhighlight %}
+
+会安装 `1.2.3` 版以上的最新版 `uglifier` gem（在 asset pipeline 中处理文件的压缩），当然也可以安装 `7.2` 版。而下面的代码
+
+{% highlight ruby %}
+gem 'coffee-rails', '~> 3.2.2'
+{% endhighlight %}
+
+只会安装低于 `3.3` 版的 `coffee-rails`（也是 asset pipeline 用到的）。换句话说，`>=` 总会升级到最新版；`~> 3.2.2` 只会升级补丁版本的更新（例如从 `3.1.1` 到 `3.1.2`），而不会升级到次版本或主版本的更新（例如从 `3.1` 到 `3.2`）。不过，经验告诉我们，即使是补丁版本的升级也可能会产生错误，所以在本教程中我们基本上会为所以的 gem 指定明确的版本号。（在写作本书时处于 RC 或 Beta 测试阶段的 gem 是个例外，这些 gem 会使用 `~>` 以便正式发布后包含正式版。）
+
+修改完 `Gemfile` 后，运行 `bundle install` 安装所需的 gem：
+
+{% highlight sh %}
+$ bundle install
+Fetching source index for https://rubygems.org/
+.
+.
+.
+{% endhighlight %}
+
+如果你使用的是 OS X，得到一个错误信息提示缺少 Ruby 头文件（例如 `ruby.h`），那么你需要安装 Xcode。Xcode 是 OS X 安装盘中附带的开发者工具包，相对于安装整个工具包我更推荐你安装较小的 [Xcode 命令行工具包](https://developer.apple.com/downloads/) <sup>[13](#fn-13)</sup>。如果在安装 Nokogiri gem 时提示 libxslt 错误，重新安装 Ruby 试一下：
+
+{% highlight sh %}
+$ rvm reinstall 1.9.3
+$ bundle install
+{% endhighlight %}
+
+`bundle install` 命令会花费一点时间，一旦结束我们的程序就可以运行了。注意：这里只是对我们的第一个应用做个演示，这是理想的情况。[第三章](chapter3.html)会介绍使用 Bundler 安装 Ruby gem 更强大的方法。
+
+<h3 id="sec-1-2-5">1.2.5 <code>rails server</code></h3>
+
+运行完 [1.2.3 节](#sec-1-2-3)中介绍的 `rails new` 和 [1.2.4 节](#sec-1-2-4) 中介绍的 `bundle install` 后我们的程序就可以运行了，但怎么运行呢？Rails 自带了一个命令行程序可以在开发电脑上运行一个本地服务器：<sup>[14](#fn-14)</sup>
+
+{% highlight sh %}
+$ rails server
+=> Booting WEBrick
+=> Rails application starting on http://0.0.0.0:3000
+=> Call with -d to detach
+=> Ctrl-C to shutdown server
+{% endhighlight %}
+
+（如果系统提示缺少 JavaScript 运行时，查看 [execjs 位于 github 的页面](https://github.com/sstephenson/execjs)）查看一些可选的运行时，我建议安装 [Node.js](http://nodejs.org/)。）上述代码的提示信息告诉我们这个应用程序在 `0.0.0.0` 地址的 3000<sup>[15](#fn-15)</sup> 端口运行。这个地址告诉系统监听那台电脑上的每一个可用的 IP 地址。一般来说，我们可以通过一个特殊的地址 `127.0.0.1` 来查看应用程序，或者也可以使用 `localhost`。通过 <http://localhost:3000> 查看结果，如图 1.3。
+
+![riding_rails_31](assets/images/figures/riding_rails_31.png)
+
+<p class="caption">图 1.3：默认的 Rails 页面</p>
+
+点击“About your application's environment” 可以查看应用程序的信息。结果如图 1.4 所示。（图 1.4 显示的时截图时我电脑上的环境信息，你的结果可能会与我的不同。）
+
+![riding_rails_32_environment](assets/images/figures/riding_rails_32_environment.png)
+
+<p class="caption">图 1.4：默认页面中的应用程序信息</p>
+
+当然我们不是真的想用默认的 Rails 页面，但这个页面会告诉我们 Rails 可以正常运行了。我们会在 [5.3.2 节](chapter5.html/#sec-5-3-2)中移除默认页面。
+
+<h3 id="sec-1-2-6">1.2.6 模型-视图-控制器（MVC）</h3>
+
+在初期阶段，概览一下 Rails 程序的工作方式（如图 1.5）多少是会有些帮助的。你可能已经注意到了，在 Rails 应用程序的文件结构（如图 1.2）中又一个文件夹叫 `app/`，其中有三个子文件夹：`models`、`views` 和 `controllers`。这暗示 Rails 采用了 MVC 架构模式，这种模式强制将“域逻辑（domain logic）”（也叫“业务逻辑（business logic）”）和图形用户界面（GUI）的输入、表现逻辑分开。在 Web 应用程序中，“域逻辑”的典型代表是“用户（users）”、“文章（articles）”和“产品（products）”等数据模型，GUI 则是浏览器中的网页。
+
+在 Rails 交互中，浏览器发送一个请求（request），网络服务器收到请求然后将其传送到 Rails 的控制器，然后决定下一步做什么。某些情况下，控制器会立即渲染视图（view）模板，生成 HTML 让后将结果发送回浏览器。对于动态网站来说，控制器会和模型（model）交互。模型是一个 Ruby 对象，表示网站中的一个元素（例如一个用户），并且负责和数据库通信。调用模型后，控制器再渲染视图并将生成的 HTML 代码返回给浏览器。
+
+![mvc_schematic](assets/images/figures/mvc_schematic.png)
+
+<p class="caption">图 1.5：MVC 架构的图解</p>
+
+如果这些内容对你来说有点抽象，不用担心，后续会经常讲到 MVC。在 [2.2.2 节](chapter2.html#sec-2-2-2) 中会以示例程序为例较为深入的讨论 MVC；在后面的大型示例程序中会使用 MVC 的全部内容，[3.1.2 节](chapter3.html#sec-3-1-2) 将介绍控制器和视图，[6.1 节](chapter6.html#sec-6-1)将介绍模型，[7.1.2 节]中将把三个部分放在一起使用。

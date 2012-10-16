@@ -143,6 +143,71 @@ em {
   margin: 20px 20px 20px 40px;
 }
 
+/* Table */
+
+#content .tabular {
+  margin-left: auto;
+  margin-right: auto;
+  border-collapse: collapse;
+}
+
+#content .tabular th {
+  padding: 10px;
+}
+
+#content .tabular th.align_left {
+  text-align: left;
+}
+
+#content .tabular th.align_center {
+  text-align: center;
+}
+
+#content .tabular th.align_right {
+  text-align: right;
+}
+
+#content .tabular th.left_bar {
+  border-left: 1px solid black;
+}
+
+#content .tabular th.right_bar {
+  border-right: 1px solid black;
+}
+
+#content .tabular td {
+  padding: 0.5em;
+}
+
+#content .tabular td.align_left {
+  text-align: left;
+}
+
+#content .tabular td.align_center {
+  text-align: center;
+}
+
+#content .tabular td.align_right {
+  text-align: right;
+}
+
+#content .tabular td.left_bar {
+  border-left: 1px solid black;
+}
+
+#content .tabular td.right_bar {
+  border-right: 1px solid black;
+}
+
+#content .tabular tr.top_bar {
+  border-top: 1px solid black;
+}
+
+#content .tabular tr.bottom_bar {
+  border-bottom: 1px solid black;
+}
+
+
 #book .number {
   margin-right: 1em;
 }
@@ -191,10 +256,7 @@ em {
   margin-top: 2em;
 }
 
-#book .table table.tabular {
-  margin-left: auto;
-  margin-right: auto;
-}
+
 
 #book .center {
   text-align: center;
@@ -210,69 +272,8 @@ em {
   margin-bottom: 1em;
 }
 
-
 #book .equation_number {
   float: right;
-}
-
-#book table.tabular {
-  border-collapse: collapse;
-}
-
-#book .tabular th {
-  padding: 0.5em;
-}
-
-#book .tabular th.align_left {
-  text-align: left;
-}
-
-#book .tabular th.align_center {
-  text-align: center;
-}
-
-#book .tabular th.align_right {
-  text-align: right;
-}
-
-#book .tabular th.left_bar {
-  border-left: 1px solid black;
-}
-
-#book .tabular th.right_bar {
-  border-right: 1px solid black;
-}
-
-#book .tabular td {
-  padding: 0.5em;
-}
-
-#book .tabular td.align_left {
-  text-align: left;
-}
-
-#book .tabular td.align_center {
-  text-align: center;
-}
-
-#book .tabular td.align_right {
-  text-align: right;
-}
-
-#book .tabular td.left_bar {
-  border-left: 1px solid black;
-}
-
-#book .tabular td.right_bar {
-  border-right: 1px solid black;
-}
-
-#book .tabular tr.top_bar {
-  border-top: 1px solid black;
-}
-
-#book .tabular tr.bottom_bar {
-  border-bottom: 1px solid black;
 }
 
 #book .footnotes {
