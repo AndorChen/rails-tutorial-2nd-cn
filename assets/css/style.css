@@ -102,6 +102,14 @@ em {
   margin: 10px 0;
 }
 
+#content img {
+  border: 1px solid #666;
+}
+
+#content .center {
+  text-align: center;
+}
+
 /* TOC */
 
 #content #toc {
@@ -257,15 +265,6 @@ em {
 }
 
 
-
-#book .center {
-  text-align: center;
-}
-
-#book .figure img {
-  border: 1px solid #666;
-}
-
 #book .displaymath {
   text-align: center;
   margin-top: 1em;
@@ -342,39 +341,43 @@ em {
   font-weight: bold;
 }
 
-#book .highlight {
+/* Highlight */
+
+#content .highlight {
   border: 1px solid #999;
   width: 100%;
   background: #eee;
-  padding-right: 1.5em;
+  margin: 20px 0;
+  padding-right: 10px;
 }
 
-#book .highlight .go {
+#content .highlight .go {
   color: #007000;
 }
 
-
-#book pre {
+#content pre {
   line-height: 1.2em;
   font-family: monospace;
 }
 
-#book .highlight pre {
-  margin: 1em 0 1em 1em;
-  font-size: 100%;
+#content .highlight pre {
+  margin: 10px 0 10px 10px;
+  font-size: 14px;
 }
 
-
-#book .navigation {
-  font-size: 90%;
-  padding-bottom: 2em;
+/* navigation */
+#content .navigation {
+  border-bottom: 1px solid #000;
+  font-size: 12px;
+  margin: 20px 0 40px;
+  padding: 0 0 40px 0;
 }
 
-#book .navigation .prev_page {
+#content .navigation .prev_page {
   float: left;
 }
 
-#book .navigation .next_page {
+#content .navigation .next_page {
   float: right;
 }
 
