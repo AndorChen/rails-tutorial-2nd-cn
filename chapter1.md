@@ -1025,7 +1025,7 @@ $ git push
 
 过去部署 Rails 应用程序是很痛苦的事，但最近几年 Rails 开发群体不断的成熟，现在有很多好的解决方案了。这些方案包括运行 [Phusion Passenger](http://www.modrails.com/)（Apache 和 Nginx<sup>[21](#fn-21)</sup> 网络服务器的一个模块）的共享主机或私有虚拟服务器，[Engine Yard](http://engineyard.com/) 和 [Rails Machine](http://railsmachine.com/) 这种提供全方位部署服务的公司，[Engine Yard Cloud](http://cloud.engineyard.com/) 和 [Heroku](http://heroku.com/) 这种云部署服务。
 
-我最喜欢的部署方案是 Heroku，这是一个特别针对 Rails 和其他 Ruby Web 应用程序<sup>[22](#fn-22)的托管平台。Heroku 让 Rails 应用程序的部署变得异常简单，只要你的源码纳入了 Git 版本控制系统。（这也是为什么你要按照 [1.3 节](#sec-1-3) 中介绍的步骤安装 Git 的原因，如果你还没有安装就赶快安装吧。）本节下面的内容就是介绍如何将我们的第一个应用程序部署到 Heroku。
+我最喜欢的部署方案是 Heroku，这是一个特别针对 Rails 和其他 Ruby Web 应用程序<sup>[22](#fn-22)</sup>的托管平台。Heroku 让 Rails 应用程序的部署变得异常简单，只要你的源码纳入了 Git 版本控制系统。（这也是为什么你要按照 [1.3 节](#sec-1-3) 中介绍的步骤安装 Git 的原因，如果你还没有安装就赶快安装吧。）本节下面的内容就是介绍如何将我们的第一个应用程序部署到 Heroku。
 
 <h3 id="sec-1-4-1">1.4.1 搭建 Heroku 部署环境</h3>
 
