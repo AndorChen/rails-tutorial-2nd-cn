@@ -310,7 +310,7 @@ update: --no-rdoc --no-ri
 $ gem install rails -v 3.2.8
 {% endhighlight %}
 
-译者注：鉴于中国的“社会主义特色”，你可能无法正常下载 gem，这时你可以使用 [VPN](http://en.wikipedia.org/wiki/Vpn) 或者使用 [RubyGems 在国内的镜像](http://ruby.taobao.com)。
+译者注：鉴于国内的“社会主义特色”，你可能无法正常下载 gem，这时你可以使用 [VPN](http://en.wikipedia.org/wiki/Vpn) 或者使用 [RubyGems 在国内的镜像](http://ruby.taobao.com)。
 
 检查 Rails 是否安装成功，执行以下命令显示 Rails 的版本号：
 
@@ -375,7 +375,7 @@ gem is installed.
 
 如代码 1.3 所示，运行 `rails` 命令会在文件创建完之后自动执行 `bundle install`。如果这一步没有正确执行，先不要担心，按照 [1.2.4 节](#sec-1-2-4)中的步骤来做应该就可以了。
 
-留意一下 `rails` 命令创建的文件和文件夹。这些标准的文件夹和文件结构（如图 1.2）是 Rails 的很多优势之一，它让你从零开始快速的创建一个可运行的简单的程序。而且因为这样的结构对 Rails 程序都是一致的，你在阅读其他人的代码时就显得很亲切。表格 1.1 是这些文件的简介，在本书的后续内容中将介绍其中的大多数。从 [5.2.1 节](#sec-5-2-1) 开始，首先将介绍 `app/assets` 文件夹，它是 asset pipeline（Rails 3.1 新增）的一部分，这个功能让组织和部署 CSS 和 JavaScript 等资源文件变得异常简单。
+留意一下 `rails` 命令创建的文件和文件夹。这些标准的文件夹和文件结构（如图 1.2）是 Rails 的很多优势之一，它让你从零开始快速的创建一个可运行的简单的程序。而且因为这样的结构对 Rails 程序都是一致的，你在阅读其他人的代码时就显得很亲切。表格 1.1 是这些文件的简介，在本书的后续内容中将介绍其中的大多数。从 [5.2.1 节](chapter5.html#sec-5-2-1) 开始，首先将介绍 `app/assets` 文件夹，它是 asset pipeline（Rails 3.1 新增）的一部分，这个功能让组织和部署 CSS 和 JavaScript 等资源文件变得异常简单。
 
 ![directory_structure_rails_31](assets/images/figures/directory_structure_rails_31.png)
 
