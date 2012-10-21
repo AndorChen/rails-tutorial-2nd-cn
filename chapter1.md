@@ -381,7 +381,7 @@ gem is installed.
 
 图 1.2：新创建的 Rails 程序的文件结构
 
-<table class="tabular">
+<table id="table-1-1" class="tabular">
 	<tbody>
 		<tr>
 			<th class="align_left"><strong>文件/文件夹</strong></th>
