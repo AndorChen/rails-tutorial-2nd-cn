@@ -5,6 +5,8 @@ var tutorialScript = {
 		this.generateTOC();
 		this.enhanceFootnoteItem();
 		this.addIdToSup();
+		this.addCaptionClassToImage();
+		this.addCaptionClassToTable();
 	},
 
 	generateTOC: function() {
@@ -27,12 +29,26 @@ var tutorialScript = {
 	},
 
 	// add an id to the footnote element in the content
-	addIdToSup:function() {
+	addIdToSup: function() {
 		var $sup = $('sup', '#content'),
 		    id = 'fnref-'+$sup.text();
 		$sup.each(function(index){
 			$(this).attr('id', 'fnref-'+(index+1));
 		});
+	},
+
+	addCaptionClassToImage: function() {
+		$('img').each(function(index, ele){
+			var $caption = $(this).parent().next('p');
+			$caption.addClass('caption');
+		});
+	},
+
+	addCaptionClassToTable: function() {
+		$('table').each(function(index, ele){
+			var $caption = $(this).next('p');
+			$caption.addClass('caption');
+		})
 	}
 };
 

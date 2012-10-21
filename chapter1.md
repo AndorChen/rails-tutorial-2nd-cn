@@ -172,7 +172,7 @@ Rails 并不缺乏 IDE，[RadRails](http://www.aptana.com/rails/)、[RubyMine](h
 
 ![figure 1.1](assets/images/figures/editor_shell.png)
 
-<p class="caption">图 1.1 文本编辑器和命令行的开发环境（TextMate 和 iTerm）</p>
+图 1.1 文本编辑器和命令行的开发环境（TextMate 和 iTerm）
 
 <h4>浏览器</h4>
 
@@ -379,7 +379,7 @@ gem is installed.
 
 ![directory_structure_rails_31](assets/images/figures/directory_structure_rails_31.png)
 
-<p class="caption">图 1.2：新创建的 Rails 程序的文件结构</p>
+图 1.2：新创建的 Rails 程序的文件结构
 
 <table class="tabular">
 	<tbody>
@@ -470,7 +470,7 @@ gem is installed.
 	</tbody>
 </table>
 
-<p class="caption">表格 1.1：Rails 默认文件结构的简介</p>
+表格 1.1：Rails 默认文件结构的简介
 
 <h3 id="sec-1-2-4">1.2.4 Bundler</h3>
 
@@ -648,13 +648,13 @@ $ rails server
 
 ![riding_rails_31](assets/images/figures/riding_rails_31.png)
 
-<p class="caption">图 1.3：默认的 Rails 页面</p>
+图 1.3：默认的 Rails 页面
 
 点击“About your application's environment” 可以查看应用程序的信息。结果如图 1.4 所示。（图 1.4 显示的是截图时我电脑上的环境信息，你的结果可能会与我的不同。）
 
 ![riding_rails_32_environment](assets/images/figures/riding_rails_32_environment.png)
 
-<p class="caption">图 1.4：默认页面中的应用程序信息</p>
+图 1.4：默认页面中的应用程序信息
 
 当然我们不是真的想使用默认的 Rails 页面，但这个页面告诉我们 Rails 可以正常运行了。我们会在 [5.3.2 节](chapter5.html/#sec-5-3-2)中移除默认页面。
 
@@ -666,7 +666,7 @@ $ rails server
 
 ![mvc_schematic](assets/images/figures/mvc_schematic.png)
 
-<p class="caption">图 1.5：MVC 架构的图解</p>
+图 1.5：MVC 架构的图解
 
 如果这些内容对你来说有点抽象，不用担心，后续会经常讲到 MVC。在 [2.2.2 节](chapter2.html#sec-2-2-2) 中会以演示程序为例较为深入的讨论 MVC；在后面的大型示例程序中会使用 MVC 的全部内容，[3.1.2 节](chapter3.html#sec-3-1-2) 将介绍控制器和视图，[6.1 节](chapter6.html#sec-6-1)将介绍模型，[7.1.2 节](chapter7.htnml#sec-7-1-2)中将把三个部分放在一起使用。
 
@@ -869,7 +869,7 @@ application_controller.rb
 
 ![create_first_repository_new](assets/images/figures/create_first_repository_new.png)
 
-<p class="caption">图 1.6：在 GitHub 创建第一个仓库</p>
+图 1.6：在 GitHub 创建第一个仓库
 
 GitHub 有一些收费的计划，但是对开源项目的代码是免费的，如果你还没有 GitHub 的账户就赶快注册一个[免费的账户](https://github.com/signup/free)吧。（或许你先要参考 GitHub 的“[创建 SSH 密匙](https://help.github.com/articles/generating-ssh-keys)”一文）注册后，点击创建仓库的链接（[New repository](https://github.com/repositories/new)），然后填入所需的信息，如图 1.6 所示。（注意，不要选择使用 `README` 文件初始化仓库（Initialize this repository with a README），因为 `rails new` 已经自动创建了这个文件。）提交表单后，按照下面的方法将你第一个应用程序推送上去：
 
@@ -888,7 +888,7 @@ $ git remote add origin git@github.com:railstutorial/first_app.git
 
 ![github_repository_page](assets/images/figures/github_repository_page.png)
 
-<p class="caption">图 1.7：GitHub 仓库页面</p>
+图 1.7：GitHub 仓库页面
 
 GitHub 还提供了增强命令行界面的工具，如果你更喜欢使用 GUI 程序，可以到 [GitHub for Windows](http://windows.github.com/) 和 [GitHub for Mac](http://mac.github.com/) 页面下载。（GitHub 针对 Linux 的工具看样子就是 Git 本身了。）
 
@@ -898,7 +898,7 @@ GitHub 还提供了增强命令行界面的工具，如果你更喜欢使用 GUI
 
 ![rails_readme_3_2](assets/images/figures/rails_readme_3_2.png)
 
-<p class="caption">图 1.8：GitHub 中显示的项目初始生成的 <code>README</code> 文件。</p>
+图 1.8：GitHub 中显示的项目初始生成的 <code>README</code> 文件。
 
 <h4>分支</h4>
 
@@ -1024,7 +1024,7 @@ $ git push
 
 ![new_readme](assets/images/figures/new_readme.png)
 
-<p class="caption">图 1.9：使用 Markdown 排版的改进版 <code>README</code> 文件。</p>
+图 1.9：使用 Markdown 排版的改进版 <code>README</code> 文件。
 
 <h2 id="sec-1-4">1.4 部署</h2>
 
@@ -1081,13 +1081,13 @@ $ heroku open
 
 ![heroku_app_31](assets/images/figures/heroku_app_31.png)
 
-<p class="caption">图 1.10：本教程的第一个应用程序运行在 Heroku 上</p>
+图 1.10：本教程的第一个应用程序运行在 Heroku 上
 
 部署成功后，Heroku 会提供一个很精美的界面管理和设置你的应用程序（如图 1.11）。
 
 ![heroku_info](assets/images/figures/heroku_info.png)
 
-<p class="caption">图 1.11：Heroku 提供的精美界面</p>
+图 1.11：Heroku 提供的精美界面
 
 <h3 id="sec-1-4-4">1.4.4 Heroku 的其他命令</h3>
 
