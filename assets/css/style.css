@@ -104,6 +104,8 @@ em {
 
 #content img {
   border: 1px solid #666;
+  display: block;
+  margin: 0 auto;
 }
 
 #content .center {
