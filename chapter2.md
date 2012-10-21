@@ -403,6 +403,8 @@ end
 
 <div id="box-2-2" class="aside">
 	<h4>旁注 2.2：表现层状态转化（REST）</h4>
+	<p>如果你阅读过一些 Ruby on Rails Web 开发相关的资料，你会看到很多地方都提到了“REST”，它是“表现层状态转化（REpresentational State Transfer）”的简称。REST 是一种架构方式，用来开发分布式、基于网络的系统和程序，例如 WWW 和 Web 应用程序。REST 理论是很抽象的，在 Rails 程序中，REST 意味着大多数的组件（例如用户和微博）会被模型化，变成资源（resource），可以被创建（create）、读取（read）、更新（update）和删除（delete），这些操作会与<a href="http://en.wikipedia.org/wiki/Create,_read,_update_and_delete">关系型数据库中的 CRUD 操作</a>和 <a href="http://en.wikipedia.org/wiki/HTTP_request#Request_methods">HTTP 请求方法</a>（<tt>POST</tt>，<tt>GET</tt>，<tt>PUT</tt> 和 <tt>DELETE</tt>）对应起来。（<a href="chapter3.html#sec-3-2-1">3.2.1 节</a>，特别是<a href="chapter3.html#box-3-2">旁注 3.2</a>，将更详细的介绍 HTTP 请求）</p>
+	<p>作为 Rails 程序开发者，REST 开发方式会帮助你决定编写哪些控制器和动作：你只需简单的将可以创建、读取、更新和删除的资源理清就可以了。对本章的用户和微博来说，这一过程非常明确，因为它们都是很自然的资源形式。在<a href="chapter11.html">第十一章</a>中将看到 REST 原则允许我们将一个很棘手的问题（“关注”功能）通过一种自然而便捷的方法处理。</p>
 </div>
 
 为了解释 Users 控制器和 User 模型之间的关系，我们要看一下简化了的 `index` 动作的代码，如代码 2.4 所示。（脚手架生成的代码很粗糙，所以我们做了简化）
