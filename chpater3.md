@@ -141,3 +141,113 @@ $ heroku logs
 所有的准备工作都结束了，下面要开始开发这个示例程序了。
 
 <h2 id="sec-3-1">3.1 静态页面</h2>
+
+Rails 中有两种方式创建静态页面。其一，Rails 可以处理真正只包含 HTML 代码的静态页面。其二，Rails 允许我们定义包含纯 HTML 的视图，Rails 会对其进行渲染，然后 Web 服务器会将结果返回浏览器。
+
+现在回想一下 [1.2.3 节](chapter1.html#sec-1-2-3) 中讲过的 Rails 目录结构（图 1.2）会对我们有点帮助。本节主要的工作都在 `app/controllers` 和 `app/views` 文件夹中。（[3.2 节](#sec-3-2)中我们还会新建一个文件夹）
+
+在这节你会第一次发现在文本编辑器或 IDE 中打开整个 Rails 目录是多么有用。不过怎么做却取决于你的系统，大多数情况下你可以在命令行中用你选择的浏览器命令打开当前应用程序所在的目录，在 Unix 中当前目录就是一个点号（`.`）：
+
+{% highlight sh %}
+$ cd ~/rails_projects/sample_app
+$ <editor name> .
+{% endhighlight %}
+
+例如，用 Sublime Text 打开示例程序，你可以输入：
+
+{% highlight sh %}
+$ subl .
+{% endhighlight %}
+
+对于 Vim 来说，针对你使用的不同变种，你可以输入 `vim .`、`gvim .` 或 `mvim .`。
+
+<h3 id="sec-3-1-1">3.1.1 真正的静态页面</h3>
+
+我们先来看一下真正静态的页面。回想一下 [1.2.5 节](chapter1.html#sec-1-2-5)，每个 Rails 应用程序执行过 `rails` 命令后都会生成一个小型的可以运行的程序，默认的欢迎页面的地址是 <http://localhost:3000/>（图 1.3）。
+
+![public_index_rails_3](assets/images/figures/public_index_rails_3.png)
+
+图 3.2：`public/index.html` 文件
+
+如果想知道这个页面是怎么来的，请看一下 `public/index.html` 文件（如图 3.2）。因为文件中包含了一下样式信息，所以看起来有点乱，不过其效果却达到了：默认情况下 Rails 会直接将 `public` 目录下的文件发送给浏览器。<sup>[5](#fn-5)</sup> 对于特殊的 `index.html` 文件，你不用在 URI 中指定它，因为它是默认显示的文件。如果你想在 URI 中包含这个文件的名字也可以，不过 http://localhost:3000/ 和 http://localhost:3000/index.html 的效果是一样的。
+
+如你所想的，如果你需要的话也可以创建静态的 HTML 文件，并将其放在和 `index.html` 相同的目录 `public` 中。举个例子，我们要创建一个文件显示一个友好的欢迎信息（参见代码 3.3）：<sup>[6](#fn-6)</sup>
+
+{% highlight sh %}
+$ subl public/hello.html
+{% endhighlight %}
+
+**代码 3.3** 一个标准的 HTML 文件，包含一个友好的欢迎信息 <br />`public/hello.html`
+
+{% highlight html %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Greeting</title>
+  </head>
+  <body>
+    <p>Hello, world!</p>
+  </body>
+</html>
+{% endhighlight %}
+
+从代码 3.3 中我们可以看到 HTML 文件的标准结构：位于文件开头的文档类型（document type，简称 doctype）声明，告知浏览器我们所用的 HTML 版本（本例使用的是 HTML5）；<sup>[7](#fn-7)</sup> `head` 部分：本例包含一个 `title` 标签，其内容是“Greeting”；`body` 部分：本例包含一个 `p`（段落）标签，其内容是“Hello,world!”。（缩进是可选的，HTML 并不强制要求使用空格，它会忽略 Tab 和空格，但是缩进可以使文档的结构更清晰。）
+
+现在执行下述命令启动本地浏览器
+
+{% highlight sh %}
+$ rails server
+{% endhighlight %}
+
+然后访问 <http://localhost:3000/hello.html>。就像前面说过的，Rails 会直接渲染这个页面（如图 3.3）。注意图 3.3 浏览器窗口顶部显示的标题，它就是 `title` 标签的内容，“Greeting”。
+
+![hello_world](assets/images/figures/hello_world.png)
+
+图 3.3：一个新的静态 HTML 文件
+
+这个文件只是用来做演示的，我们的示例程序并不需要它，所以在体验了创建过程之后最好将其删掉：
+
+{% highlight sh %}
+$ rm public/hello.html
+{% endhighlight %}
+
+现在我们还要保留 `index.html` 文件，不过最后我们还是要将其删除的，因为我们不想把 Rails 默认的页面（如图 1.3）作为程序的首页。[5.3 节](chapter5.html#sec-5-3)会介绍如何将 <http://localhost:3000/> 指向 `public/index.html` 之外的地方。
+
+<h3 id="sec-3-1-2">3.1.2 Rails 中的静态页面</h3>
+
+能够放回静态 HTML 页面固然很好，不过对动态 Web 程序却没有什么用。本节我们要向创建动态页面迈出第一步，我们会创建一系列的 Rails 动作（action），这可比通过静态文件定义 URI  地址要强大得多。<sup>[8](#fn-8)</sup> Rails 的动作会按照一定的目的性归属在某个控制器（[1.2.6 节](chapter1.html#sec-1-2-6)介绍的 MVC 中的 C）中。在[第二章](chapter2.html)中已经简单介绍了控制器，当我们更详细的介绍 [REST 架构](http://en.wikipedia.org/wiki/Representational_State_Transfer)后（从[第六章](chapter6.html)开始）你会更深入的理解它。大体而言，控制器就是一组网页的（也许是动态的）容器。
+
+开始之前，回想一下 [1.3.5 节](chapter1.html#sec-1-3-5)中的内容，使用 Git 时，在一个有别于主分支的独立从分支中工作是一个好习惯。如果你使用 Git 做版本控制，可以执行下面的命令：
+
+{% highlight sh %}
+$ git checkout -b static-pages
+{% endhighlight %}
+
+Rails 提供了一个脚本用来创建控制器，叫做 `generate`，只要提供控制器的名字就可以运行了。如果你想让 `generate` 同时生成 RSpec 测试用例，你要执行 RSpec 生成器命令，如果在阅读本章前面内容时没有执行这个命令的话，请执行下面的命令：
+
+{% highlight sh %}
+$ rails generate rspec:install
+{% endhighlight %}
+
+因为我们要创建一个控制器来处理静态页面，所有我们就叫它 StaticPages 吧。同时我们计划创建首页（Home）、帮助（Help）和关于（About）页面的动作。`generate` 可以接受一个可选的参数列表，制定要创建的动作，我们现在只通过命令行创建两个计划的动作（参见代码 3.4）。
+
+**代码 3.4** 创建 StaticPages 控制器
+
+{% highlight sh %}
+$ rails generate controller StaticPages home help --no-test-framework
+      create  app/controllers/static_pages_controller.rb
+       route  get "static_pages/help"
+       route  get "static_pages/home"
+      invoke  erb
+      create    app/views/static_pages
+      create    app/views/static_pages/home.html.erb
+      create    app/views/static_pages/help.html.erb
+      invoke  helper
+      create    app/helpers/static_pages_helper.rb
+      invoke  assets
+      invoke    coffee
+      create      app/assets/javascripts/static_pages.js.coffee
+      invoke    scss
+      create      app/assets/stylesheets/static_pages.css.scss
+{% endhighlight %}
+
