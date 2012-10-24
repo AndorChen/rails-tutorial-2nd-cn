@@ -251,3 +251,147 @@ $ rails generate controller StaticPages home help --no-test-framework
       create      app/assets/stylesheets/static_pages.css.scss
 {% endhighlight %}
 
+注意我们使用了 `--no-test-framework` 选项禁止生成 RSpec 测试代码，因为我们不想自动生成在 [3.2 节](#sec-3-2)会手动创建测试。同时我们还故意从命令行参数中省去了 `about` 动作，稍后我们会看到如何通过 TDD 添加它（[3.2 节](#sec-3-2)）。
+
+顺便说一下，如果在生成代码时出现了错误，知道如何撤销操作就很有用了。[旁注 3.1](#box-3-1) 中介绍了一些如何在 Rails 中撤销操作的方法。
+
+<div id="box-3-1" class="aside">
+  <h4>旁注 3.1 撤销操作</h4>
+  <p>即使再小心，在开发 Rails 应用程序过程中仍然可能犯错。幸运的是，Rails 提供了一些工具能够帮助你进行复原。</p>
+  <p>举例来说，一个常见的情况是你想更改控制器的名字，这是你就要撤销生成的代码。生成控制器时，除了控制器文件本身之外，Rails 还会生成很多其他的文件（参见代码 3.4）。撤销生成的文件不仅仅要删除主要的文件，还要删除一些辅助的文件。（事实上，我们还要撤销对 <code>routes.rb</code> 文件自动做的一些改动。）在 Rails 中，我么你可以通过 <code>rails destroy</code> 命令完成这些操作。一般来说，下面的两个命令是相互抵消的：</p>
+  <pre>
+    $ rails generate controller FooBars baz quux
+    $ rails destroy  controller FooBars baz quux
+  </pre>
+  <p>同样的，在<a href="chapter6.html">第六章</a>中会使用下面的命令生成模型： </p>
+  <pre>
+    $ rails generate model Foo bar:string baz:integer
+  </pre>
+  <p>生成的模型可通过下面的命令撤销：</p>
+  <pre>
+    $ rails destroy model Foo
+  </pre>
+  <p>（对模型来说我们可以省略命令行中其余的参数。当阅读到<a href="chapter6.html">第六章</a>时，看看你能否发现为什么可以做。）</p>
+  <p>对模型来说涉及到的另一个技术是撤销迁移。<a href="chapter2.html">第二章</a>已经简要的介绍了迁移，<a href="chapter6.html">第六章</a>开始会更深入的介绍。迁移通过下面的命令改变数据库的状态：</p>
+  <pre>
+    $ rake db:migrate
+  </pre>
+  <p>我们可以使用下面的命令撤销一个迁移操作：</p>
+  <pre>
+    $ rake db:rollback
+  </pre>
+  <p>如果要回到最开始的状态，可以使用：</p>
+  <pre>
+    $ rake db:migrate VERSION=0
+  </pre>
+  <p>你可能已经猜到了，将数字 <tt>0</tt>换成其他的数字就会回到相应的版本状态，这些版本数字是按照迁移数量排序的。</p>
+  <p>有着这些技术，我们就可以得心的应对开发过程中遇到的各种<a href="http://en.wikipedia.org/wiki/SNAFU">混乱（snafu）</a>了。</p>
+</div>
+
+代码 3.4 中生成 StaticPages 控制器的命令会自动更新路由文件（route），叫做 `config/routes.rb`，Rails 会通过这个文件寻找 URI 到网页之间的对应关系。这是我们第一次讲到 `config` 目录，所以让我们看一下目录的结构吧（如图 3.4）。`config` 目录如其名字所示，是存储 Rails 应用程序中的设置文件的。
+
+![config_directory_rails_3](assets/images/figures/config_directory_rails_3.png)
+
+图 3.4：示例程序的 `config` 目录
+
+因为我们生成了 `home` 和 `help` 动作，路由文件中已经为每个动作生成了规则，如代码 3.5。
+
+**代码 3.5** StaticPages 控制器中 `home` 和 `help` 动作的路由配置 <br />`config/routes.rb`
+
+{% highlight rb %}
+SampleApp::Application.routes.draw do
+  get "static_pages/home"
+  get "static_pages/help"
+  .
+  .
+  .
+end
+{% endhighlight %}
+
+如下的规则
+
+{% highlight rb %}
+get "static_pages/home"
+{% endhighlight %}
+
+将来自 /static_pages/home 的请求映射到 StaticPages 控制器的 `home` 动作上。另外，当使用 `get` 时会将其对应到 GET 请求方法上，GET 是 HTTP（超文本传输协议，Hypertext Transfer Protocol）支持的基本方法之一（参见[旁注 3.2](#box-3-2)）。在我们这个例子中，当我们在 StaticPages 控制器中生成 `home` 动作时，我们就自动的在 /static_pages/home 地址上获得一个页面了。访问 [/static_pages/home](http://localhost:3000/static_pages/home) 查看页面（如图 3.5）。
+
+![raw_home_view_31](assets/images/figures/raw_home_view_31.png)
+
+图 3.5：简陋的首页视图（[/static_pages/home](http://localhost:3000/static_pages/home)）
+
+<div id="box-3-2" class="aside">
+  <h4>旁注 3.2 GET 等</h4>
+  <p>超文本传输协议（HTTP）定义了四个基本的操作，对应到四个动词上，分别是 get、post、put 和 delete。这四个词表现了客户端电脑（通常会运行一个浏览器，例如 Firefox 或 Safari）和服务器（通常会运行一个 Web 服务器，例如 Apache 或 Nginx）之间的操作。（有一点很重要需要你知道，当在本地电脑上开发 Rails 应用程序时，客户端和服务器是在同一个物理设备上的，但是二者是不同的概念。）受 REST 架构影响的 Web 框架（包括 Rails）都很重视对 HTTP 动词的实现，我们在<a href="chapter2.html">第二章</a>已经简要介绍了 REST，从<a href="chapter7.html">第七章</a>开始会做更详细的介绍。</p>
+  <p>GET 是最常用的 HTTP 操作，用来从网络上读取数据，它的意思是“读取一个网页”，当你访问 google.com 或 wikipedia.org 时，你的浏览器发出的就是 GET 请求。POST 是第二最常用的操作，当你提交表单时浏览器发送的就是 POST 请求。在 Rails 应用程序中，POST 请求一般被用来创建某个东西（不过 HTTP 也允许 POST 进行更新操作）。例如，你提交注册表单时发送的 POST 请求就会在网站中创建一个新用户。剩下的两个动词，PUT 和 DELETE 分别用来更新和销魂服务器上的某个东西。这两个操作比 GET 和 POST 少用一些，因为浏览器没有内建对这两种请求的支持，不过有些 Web 框架（包括 Rails）通过一些聪明的处理方式让它开起来是浏览器发出了这种类型的请求。</p>
+</div>
+
+要想弄明白这个页面是怎么来的，让我们在浏览器中看一下 StaticPages 控制器文件吧，你应该会看到类似代码 3.6 的内容。你可能已经注意到了，不像第二章中的 Users 和 Microposts 控制器，StaticPages 控制器没有使用标准的 REST 动作。这对静态页面来说是正常的，REST 架构并不能解决所有的问题。
+
+**代码 3.6** 代码 3.4 生成的 StaticPages 控制器 <br />`app/controllers/static_pages_controller.rb`
+
+{% highlight ruby %}
+class StaticPagesController < ApplicationController
+
+  def home
+  end
+
+  def help
+  end
+end
+{% endhighlight %}
+
+从上面代码中的 `class` 可以看到 `static_pages_controller.rb` 文件定义了一个类（class），叫做 `StaticPagesController`。类是一种组织函数（也叫方法）的有效方式，例如 `home` 和 `action` 动作就是方法，使用 `def` 关键字定义。尖括号 `<` 说明 `StaticPagesController` 是继承自 Rails 的 `ApplicationController` 类，这就意味着我们定义的页面拥有了 Rails 提供的大量功能。（我们会在 [4.4 节](chapter4.html#sec-4-4)中更详细的介绍类和继承。）
+
+在本例中，StaticPages 控制器的两个方法默认都是空的：
+
+{% highlight ruby %}
+def home
+end
+
+def help
+end
+{% endhighlight %}
+
+如果是普通的 Ruby 代码，这两个方法什么也做不了。不过在 Rails 中就不一样了，`StaticPagesController` 是一个 Ruby 类，因为它继承自 `ApplicationController`，它的方法对 Rails 来说就有特殊的意义了：访问 /static_pages/home 时，Rails 在 StaticPages 控制器中寻找 `home` 动作，然后执行该动作，再渲染相应的视图（[1.2.6 节](chapter1.html#sec-1-2-6)中介绍的 MVC 中的 V）。在本例中，`home` 动作是空的，所以访问 /static_pages/home 后只会渲染视图。那么，视图是什么样子，怎么才能找到它呢？
+
+如果你再看一下代码 3.4 的输出，或许你能猜到动作和视图之间的对应关系：`home` 动作对应的视图叫做 `home.html.erb`。[3.3 节](#sec-3-3)将告诉你 `.erb` 是什么意思。看到 `.html` 你或许就不会奇怪了，它基本上就是 HTML（代码 3.7）。
+
+**代码 3.7** 为首页生成的视图 <br />`app/views/static_pages/home.html.erb`
+
+{% highlight erb %}
+<h1>StaticPages#home</h1>
+<p>Find me in app/views/static_pages/home.html.erb</p>
+{% endhighlight %}
+
+`help` 动作的视图代码类似（参见代码 3.8）。
+
+**代码 3.8** 为帮助页面生成的视图 <br />`app/views/static_pages/help.html.erb`
+
+{% highlight erb %}
+<h1>StaticPages#help</h1>
+<p>Find me in app/views/static_pages/help.html.erb</p>
+{% endhighlight %}
+
+这两个视图只是站位用的，它们的内容都包含了一个一级标题（`h1` 标签）和一个显示视图文件完整的相对路径的段落（`p` 标签）。我们会在 [3.3 节](#sec-3-3)中添加一些简单的动态内容。这些静态内容的存在是为了强调一个很重要的事情：Rails 的视图可以只包含静态的 HTML。从浏览器的角度来看，[3.1.1 节](#sec-3-1-1)中的原始 HTML 文件和本节通过控制器和动作的方式渲染的页面没有什么差异，浏览器能看到的只有 HTML。
+
+在本章剩下的内容中，我们回味首页和帮助页面添加一些内容，然后补上 [3.1.2 节](#sec-3-1-2)中丢下的关于页面。然后会添加量很少的动态内容，在每个页面显示不同的标题。
+
+在继续下面的内容之前，如果你使用 Git 的话最好将 StaticPages 控制器相关的文件加入仓库：
+
+{% highlight sh %}
+$ git add .
+$ git commit -m "Add a StaticPages controller"
+{% endhighlight %}
+
+<h2 id="sec-3-2">3.2 第一个测试</h2>
+
+本书采用了一种直观的测试应用程序表现的方法，而不是具体的实现过程，这是 TDD 的一个变种，叫做 BDD（行为驱动开发，Behavior-driven Development）。我们使用的主要工具是集成测试（integration test）和单元测试(unit test)。集成测试在 RSpec 中叫做 request spec，它允许我们模拟用户在浏览器中和应用程序进行交互的操作。和 Capybara 提供的自然语言句法（natural-language syntax）一起使用，集成测试提供了一种强的大方法来测试应用程序的功能而不用在浏览器中手动去检查每个页面。（BDD 另外一个受欢迎的选择是 Cucumber，在 [8.3 节](chapter8.html#sec-8-3)中会介绍。）
+
+TDD 的质量得益于测试优先，比编写应用程序的代码还早。刚接触的话要花一段时间才能适应这种方式，不过好处很明显。我们先写一个失败测试（failing test），然后编写代码使这个测试通过，这样我们就会相信测试真的是针对我们设想的功能。这种“失败-实现-通过”的开发循环包含了一个[心流](http://en.wikipedia.org/wiki/Flow_\(psychology\))，可以提高编程的乐趣并提高效率。测试还扮演着应用程序代码客户的角色，会提高软件设计的优雅性。
+
+关于 TDD 有一点很重要需要你知道，它不是万用良药，没必要固执的认为总是要先写测试、测试要囊括程序所有的功能、所有情况都要写测试。例如，当你不确定如何处理某些编程问题时，通常推荐你跳过测试先编写代码看一下解决方法能否解决问题。（在[极限编程](http://en.wikipedia.org/wiki/Extreme_Programming)中，这个过程叫做“探针实验（spike）”。）一旦看到了解决问题的曙光，你就可以使用 TDD 实现一个更完美的版本。
+
+本节我们会使用 RSpec 提供的 `rspec` 命令运行测试。初看起来这样做是应该的，不过却不完美，如果你是个高级用户我建议你按照 [3.6 节](#sec-3-6)的内容设置一下你的系统。
+
+<h3 id="sec-3-2-1">3.2.1 测试驱动开发</h3>
