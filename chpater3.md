@@ -395,3 +395,307 @@ TDD 的质量得益于测试优先，比编写应用程序的代码还早。刚�
 本节我们会使用 RSpec 提供的 `rspec` 命令运行测试。初看起来这样做是应该的，不过却不完美，如果你是个高级用户我建议你按照 [3.6 节](#sec-3-6)的内容设置一下你的系统。
 
 <h3 id="sec-3-2-1">3.2.1 测试驱动开发</h3>
+
+在测试驱动开发中，我们先写一个会失败的测试，在很多测试工具中会将其显示为红色。然后编写代码让测试通过，显示为绿色。最后，如果需要的话，我们还会重构代码，改变实现的方式（例如消除代码重复）但不改变功能。这样的开发过程叫做“遇红，变绿，重构（Red, Green, Refactor）”。
+
+我们先来使用 TDD 为首页增加一些内容，一个内容更为 `Sample App` 的顶级标题（`<h1>`）。第一步要做的是为这些静态页面生成集成测试（request spec）：
+
+{% highlight sh %}
+$ rails generate integration_test static_pages
+      invoke  rspec
+      create    spec/requests/static_pages_spec.rb
+{% endhighlight %}
+
+上面的代码会在 `rspec/requests` 文件夹中生成 `static_pages_spec.rb` 文件。自动生成的代码不能满足我们的需求，用文本编辑器打开 `static_pages_spec.rb`，将其内容替换成代码 3.9 所示的代码。
+
+**代码 3.9** 测试首页内容的代码 <br />`spec/requests/static_pages_spec.rb`
+
+{% highlight ruby %}
+require 'spec_helper'
+
+describe "Static pages" do
+
+  describe "Home page" do
+
+    it "should have the content 'Sample App'" do
+      visit '/static_pages/home'
+      page.should have_content('Sample App')
+    end
+  end
+end
+{% endhighlight %}
+
+代码 3.9 是纯粹的 Ruby，不过即使你以前学习过 Ruby 也看不太懂，这是因为 RSpec 利用了 Ruby 语言的延展性定义了一套“领域特殊语言”（DSL=Domain-Specifi Language）用来写测试代码。重要的是，如果你向使用 RSpec 不是一定要知道 RSpec 的句法。初看起来是有些神奇，RSpec 和 Capybara 就是这样设计的，读起来很像英语，如果你多看一些 `generate` 命令生成的测试或者本书中的示例，很快你就会熟捻了。
+
+代码 3.9 包含了一个 `describe` 块以及其中的一个测试用例（sample），以 `it "..." do` 开头的代码块就是一个用例：
+
+{% highlight ruby %}
+describe "Home page" do
+
+  it "should have the content 'Sample App'" do
+    visit '/static_pages/home'
+    page.should have_content('Sample App')
+  end
+end
+{% endhighlight %}
+
+第一行代码指明我们描绘的是首页，描绘的内容就是一个字符串，如果需要你可以使用任何的字符串，RSpec 不做强制要求，不过你以及其他的人类读者或许会关心你用的字符串。然后测试说，如果你访问地址为 `/static_pages/home` 的首页时，其内容应该包含“Sample App”这两个词。和第一行一样，这个双引号中的内容 RSpec 没做要求，只要能为人类读者提供足够的信息就行了。下面这一行：
+
+{% highlight ruby %}
+visit '/static_pages/home'
+{% endhighlight %}
+
+使用了 Capybara 中的 `visit` 函数来模拟在浏览器中访问 `/static_pages/home` 的操作。下面这一行：
+
+{% highlight ruby %}
+page.should have_content('Sample App')
+{% endhighlight %}
+
+使用了 `page` 变量（同样由 Capybara 提供）来测试页面中是否包含了正确的内容。
+
+我们有很多种方式来运行测试代码，[3.6 节](#sec-3-6)中还提供了一些便利且高级的方法。目前，我们在命令行中执行 `rspec` 命令（前面会加上 `bundle exec` 来保证 RSpec 运行在 Gemfile 中指定的环境中）：<sup>[9](#fn-9)</sup>
+
+{% highlight sh %}
+$ bundle exec rspec spec/requests/static_pages_spec.rb
+{% endhighlight %}
+
+上述命令会输出一个失败测试。失败测试的具体样子取决于你的系统，在我的系统中它是红色的，如图 3.6。（截图中显示了当前所在的 Git 分支，是 master 而不是 staticpages，这个问题你先不要在意。）
+
+![red_failing_spec](assets/images/figures/red_failing_spec.png)
+
+图 3.6：一个红色（失败）的测试
+
+要想让测试通过，我们要用代码 3.10 中的 HTML 替换掉默认的首页内容。
+
+**代码 3.10** 让首页测试通过的代码 <br />`app/views/static_pages/home.html.erb`
+
+{% highlight erb %}
+<h1>Sample App</h1>
+<p>
+  This is the home page for the
+  <a href="http://railstutorial.org/">Ruby on Rails Tutorial</a>
+  sample application.
+</p>
+{% endhighlight %}
+
+这段代码中一级标题（`<h1>`）的内容是 `Sample App` 了，会让测试通过。我们还加了一个锚记标签 `<a>`，链接到一个给定的地址（在锚记标签中地址由“href”（hypertext reference）指定）：
+
+{% highlight html %}
+<a href="http://railstutorial.org/">Ruby on Rails Tutorial</a>
+{% endhighlight %}
+
+现在再运行测试看一下结果：
+
+{% highlight sh %}
+$ bundle exec rspec spec/requests/static_pages_spec.rb
+{% endhighlight %}
+
+在我的系统中，通过的测试显示如图 3.7 所示。
+
+![green_passing_spec](assets/images/figures/green_passing_spec.png)
+
+图 3.7：一个绿色（通过）的测试
+
+基于上面针对首页的例子，或许你已经猜到了帮助页面类似的测试和程序代码。我们先来测试一下相应的内容，现在我们的字符串变成“`Help`”了（参见代码 3.11）。
+
+**代码 3.11** 添加测试帮助页面内容的代码 <br />`spec/requests/static_pages_spec.rb`
+
+{% highlight ruby %}
+require 'spec_helper'
+
+describe "Static pages" do
+
+  describe "Home page" do
+
+    it "should have the content 'Sample App'" do
+      visit '/static_pages/home'
+      page.should have_content('Sample App')
+    end
+  end
+
+  describe "Help page" do
+
+    it "should have the content 'Help'" do
+      visit '/static_pages/help'
+      page.should have_content('Help')
+    end
+  end
+end
+{% endhighlight %}
+
+然后运行测试：
+
+{% highlight sh %}
+$ bundle exec rspec spec/requests/static_pages_spec.rb
+{% endhighlight %}
+
+有一个测试会失败。（因为系统的不同，而且统计每个阶段的测试数量很难，从现在开始我就不会再截图 RSpec 的输出结果了。）
+
+程序所需的代码（原始的 HTML）和代码 3.10 类似，如代码 3.12 所示。
+
+**代码 3.12** 让帮助页面的测试通过的代码 <br />`app/views/static_pages/help.html.erb`
+
+{% highlight erb %}
+<h1>Help</h1>
+<p>
+  Get help on the Ruby on Rails Tutorial at the
+  <a href="http://railstutorial.org/help">Rails Tutorial help page</a>.
+  To get help on this sample app, see the
+  <a href="http://railstutorial.org/book">Rails Tutorial book</a>.
+</p>
+{% endhighlight %}
+
+现在测试应该可以通过了：
+
+{% highlight sh %}
+$ bundle exec rspec spec/requests/static_pages_spec.rb
+{% endhighlight %}
+
+<h3 id="sec-3-2-2">3.2.2 添加页面</h3>
+
+看过了上面简单的 TDD 开发过程，下面我们要用这个技术完成一个稍微复杂一些的任务，添加一个新页面，就是 [3.1.3 节](#sec-3-1-2)中没有生成的“关于”页面。通过每一步中编写测试和运行 RSpec 的过程，我们会看到 TDD 是如何引导我们进行应用程序代码开发的。
+
+<h4>遇红</h4>
+
+先来到“遇红-变绿”过程中的“遇红”部分，为“关于”页面写一个失败测试。按照代码 3.11 的代码，或许你已经知道如何写这个测试了（参见代码 3.13）。
+
+**代码 3.13** 添加测试“关于”页面内容的代码 <br />`spec/requests/static_pages_spec.rb`
+
+{% highlight ruby %}
+require 'spec_helper'
+
+describe "Static pages" do
+
+  describe "Home page" do
+
+    it "should have the content 'Sample App'" do
+      visit '/static_pages/home'
+      page.should have_content('Sample App')
+    end
+  end
+
+  describe "Help page" do
+
+    it "should have the content 'Help'" do
+      visit '/static_pages/help'
+      page.should have_content('Help')
+    end
+  end
+
+  describe "About page" do
+
+    it "should have the content 'About Us'" do
+      visit '/static_pages/about'
+      page.should have_content('About Us')
+    end
+  end
+end
+{% endhighlight %}
+
+<h4>变绿</h4>
+
+回顾一下 [3.1.2 节](#sec-3-1-2)的内容，在 Rails 中我们可以通过创建一个动作并添加相应的视图文件来生成一个静态页面。所以首先我们要在 StaticPages 控制器中添加一个 `about` 动作。我们已经写过失败测试了，现在已经相信，如果能让它通过，我们就可以创建一个可以运行的“关于”页面。
+
+如果你运行 RSpec 测试：
+
+{% highlight sh %}
+$ bundle exec rspec spec/requests/static_pages_spec.rb
+{% endhighlight %}
+
+输出的结果会提示下面的错误：
+
+{% highlight sh %}
+No route matches [GET] "/static_pages/about"
+{% endhighlight %}
+
+这提醒我们要在路由文件中添加 `static_pages/about`，我们可以按照代码 3.5 所示的格式添加，结果如代码 3.14 所示。
+
+**代码 3.14** 添加 `about` 页面的路由 <br />`config/routes.rb`
+
+{% highlight ruby %}
+SampleApp::Application.routes.draw do
+  get "static_pages/home"
+  get "static_pages/help"
+  get "static_pages/about"
+  .
+  .
+  .
+end
+{% endhighlight %}
+
+现在运行
+
+{% highlight sh %}
+$ bundle exec rspec spec/requests/static_pages_spec.rb
+{% endhighlight %}
+
+将提示如下错误
+
+{% highlight sh %}
+The action 'about' could not be found for StaticPagesController
+{% endhighlight %}
+
+为了解决这个问题，我们按照代码 3.6 中 `home` 和 `help` 的格式在 StaticPages 控制器中添加 `about` 动作的代码（如代码 3.15 所示）。
+
+**代码 3.15** 添加了 `about` 动作的 StaticPages 控制器 <br />`app/controllers/static_pages_controller.rb`
+
+{% highlight sh %}
+class StaticPagesController < ApplicationController
+
+  def home
+  end
+
+  def help
+  end
+
+  def about
+  end
+end
+{% endhighlight %}
+
+再运行
+
+{% highlight sh %}
+$ bundle exec rspec spec/requests/static_pages_spec.rb
+{% endhighlight %}
+
+会提示缺少模板（template，例如一个视图）：
+
+{% highlight sh %}
+ActionView::MissingTemplate:
+  Missing template static_pages/about
+{% endhighlight %}
+
+要解决这个问题，我们要添加 `about` 相应的视图。我们需要在 `app/views/static_pages` 目录下创建一个名为 `about.html.erb` 的新文件，写入代码 3.16 所示的内容。
+
+**代码 3.16** “关于”页面的源码 <br />`app/views/static_pages/about.html.erb`
+
+{% highlight erb %}
+<h1>About Us</h1>
+<p>
+  The <a href="http://railstutorial.org/">Ruby on Rails Tutorial</a>
+  is a project to make a book and screencasts to teach web development
+  with <a href="http://rubyonrails.org/">Ruby on Rails</a>. This
+  is the sample application for the tutorial.
+</p>
+{% endhighlight %}
+
+再运行 RSpec 就应该“变绿”了：
+
+{% highlight sh %}
+$ bundle exec rspec spec/requests/static_pages_spec.rb
+{% endhighlight %}
+
+当然，在浏览器中查看一下这个页面来确保测试没有失效也是个不错的主意。（如图 3.8）
+
+![about_us_2nd_edition](assets/images/figures/about_us_2nd_edition.png)
+
+图 3.8：新添加的“关于”页面（[/static_pages/about](http://localhost:3000/static_pages/about)）
+
+<h4>重构</h4>
+
+现在测试已经变绿了，我们可以很自信的尽情重构了。我们的代码经常会“变味”（意思是代码会变得丑陋、啰嗦、大量的重复），电脑不会在意，但是人类会，所以经常的重构来让代码变得简洁是很重要的。这时候一个好的测试就显出其价值了，因为它可以降低重构过程中引入 bug 的风险。
+
+我们的示例程序现在还很小没什么可重构的，不过代码无时无刻不在变味，所以我们的重构也不会等很久：在 [3.3.4 节](#sec-3-3-4)中就要忙于重构了。
+
+<h2 id="sec-3-3">3.3 有点动态内容的页面</h2>
