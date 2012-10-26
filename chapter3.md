@@ -699,3 +699,433 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
 我们的示例程序现在还很小没什么可重构的，不过代码无时无刻不在变味，所以我们的重构也不会等很久：在 [3.3.4 节](#sec-3-3-4)中就要忙于重构了。
 
 <h2 id="sec-3-3">3.3 有点动态内容的页面</h2>
+
+到目前为止，我们已经为一些静态页面创建了动作和视图，我们还改变每一个页面显示的内容（标题）让它看起来是动态的。改变标题到底算不算真正动态还说不准，不过前面的内容却可以为[第七章](chapter7.html)介绍的真正动态打下基础。
+
+如果你跳过了 [3.2 节](#sec-3-2)中的 TDD 部分，在继续阅读之前先按照代码 3.14、代码 3.15 和代码 3.16 创建“关于”页面。
+
+<h3 id="sec-3-3-1">3.3.1 测试标题的变化</h3>
+
+我们计划修改“首页”、“帮助”页面和“关于”页面的标题，让它在每一页都有所变化。这个过程将使用视图中的 `<title>` 标签。大多数浏览器会在浏览器窗口的顶部显示标题的内容（Google Chrome 是个特例），标题对搜索引擎优化也是很重要的。我们会先写测试标题的代码，然后添加标题，再然后使用一个布局（layout）文件进行重构，削减重复。
+
+你可能已经注意到了，`rails new` 命令已经创建了布局文件。稍后我们会介绍这个文件的作用，现在在继续之前先将其重命名：
+
+{% highlight sh %}
+$ mv app/views/layouts/application.html.erb foobar   # 临时修改
+{% endhighlight %}
+
+（`mv` 是 Unix 命令，在 Windows 中你可以在文件浏览器中重命名或者使用 `rename` 命令。）在真正的应用程序中你不需要这么做，不过没有了这个文件之后你就能更容易理解它的作用。
+
+<table id="table-3-1" class="tabular">
+  <tbody>
+    <tr>
+      <th class="align_center"><strong>页面</strong></th>
+      <th class="align_left"><strong>URI</strong></th>
+      <th class="align_left"><strong>基本标题</strong></th>
+      <th class="align_left"><strong>变动的标题</strong></th>
+    </tr>
+    <tr class="top_bar">
+      <td class="align_center">首页</td>
+      <td class="align_left">/static_pages/home</td>
+      <td class="align_left"><code>"Ruby on Rails Tutorial Sample App"</code></td>
+      <td class="align_left"><code>"Home"</code></td>
+    </tr>
+    <tr>
+      <td class="align_center">帮助</td>
+      <td class="align_left">/static_pages/help</td>
+      <td class="align_left"><code>"Ruby on Rails Tutorial Sample App"</code></td>
+      <td class="align_left"><code>"Help"</code></td>
+    </tr>
+    <tr>
+      <td class="align_center">关于</td>
+      <td class="align_left">/static_pages/about</td>
+      <td class="align_left"><code>"Ruby on Rails Tutorial Sample App"</code></td>
+      <td class="align_left"><code>"About"</code></td>
+    </tr>
+  </tbody>
+</table>
+
+表格 3.1：示例程序中基本上是静态内容的页面
+
+本节结束后，三个静态页面的标题都会是“Ruby on Rails Tutorial Sample App | Home”这种形式，标题的后面一部分会根据所在页面有所不同（参见[表格 3.1](#table-3-1)）。我们接着代码 3.3 中的测试接着写，添加代码 3.17 所示测试标题的代码。
+
+**代码 3.17** 标题测试
+
+{% highlight ruby %}
+it "should have the right title" do
+  visit '/static_pages/home'
+  page.should have_selector('title',
+                    :text => "Ruby on Rails Tutorial Sample App | Home")
+end
+{% endhighlight %}
+
+`have_selector` 方法会测试一个 HTML 元素（“selector”的意思）是否有指定的内容。换句话说，下面的代码：
+
+{% highlight ruby %}
+page.should have_selector('title',
+                  :text => "Ruby on Rails Tutorial Sample App | Home")
+{% endhighlight %}
+
+检查 `title` 标签的内容是否为
+
+{% highlight ruby %}
+"Ruby on Rails Tutorial Sample App | Home"
+{% endhighlight %}
+
+（在 [4.3.3 节](chapter4.html#sec-4-3-3)中我们会介绍，`:text => "…"` 是一个以 Symbol 为键值的 Hash。）你要注意一下，检查的内容不一定要完全匹配，任何的子字符串都可以，所以
+
+{% highlight ruby %}
+page.should have_selector('title',
+                  :text => " | Home")
+{% endhighlight %}
+
+也会匹配完整形式的标题。
+
+注意，在代码 3.17 中，我们将 `have_selector` 方法切成两行显示，这种用法说明了 Ruby 句法中一个很重要的原则：Ruby 不介意换行。<sup>[11](#fn-11)</sup> 我之所以把代码切成两行是因为我要保证代码的每一行都少于 80 个字符，这样能提高可读性。<sup>[12](#fn-12)</sup> 即使这样，代码的结构还是很乱，在 [3.5 节](#sec-3-5)中会有个重构的练习，将代码结构变得更好一些，在 [5.3.4 节](chapter5.html#sec-5-3-4)中会使用 RSpec 最新的功能完全重写 StaticPages 测试。
+
+按照代码 3.17 的格式为三个静态页面都加上测试代码，结果参照代码 3.18。
+
+**代码 3.18** StaticPages 控制器的测试文件，包含标题测试 <br />`spec/requests/static_pages_spec.rb`
+
+{% highlight ruby %}
+require 'spec_helper'
+
+describe "Static pages" do
+
+  describe "Home page" do
+
+    it "should have the h1 'Sample App'" do
+      visit '/static_pages/home'
+      page.should have_selector('h1', :text => 'Sample App')
+    end
+
+    it "should have the title 'Home'" do
+      visit '/static_pages/home'
+      page.should have_selector('title',
+                        :text => "Ruby on Rails Tutorial Sample App | Home")
+    end
+  end
+
+  describe "Help page" do
+
+    it "should have the h1 'Help'" do
+      visit '/static_pages/help'
+      page.should have_selector('h1', :text => 'Help')
+    end
+
+    it "should have the title 'Help'" do
+      visit '/static_pages/help'
+      page.should have_selector('title',
+                        :text => "Ruby on Rails Tutorial Sample App | Help")
+    end
+  end
+
+  describe "About page" do
+
+    it "should have the h1 'About Us'" do
+      visit '/static_pages/about'
+      page.should have_selector('h1', :text => 'About Us')
+    end
+
+    it "should have the title 'About Us'" do
+      visit '/static_pages/about'
+      page.should have_selector('title',
+                    :text => "Ruby on Rails Tutorial Sample App | About Us")
+    end
+  end
+end
+{% endhighlight %}
+
+注意我们把 `have_content` 换成了更具体的 `have_selector('h1', ...)`。试试你能不能猜到原因。（提示：试想一下如果标题的内容是“Help”，但是 `h1` 标签中的内容是“Helf”会出现什么情况？）
+
+现在已经有了如代码 3.18 所示的测试，你应该运行
+
+{% highlight sh %}
+$ bundle exec rspec spec/requests/static_pages_spec.rb
+{% endhighlight %}
+
+确保得到的结果是红色的（失败的测试）。
+
+<h3 id="sec-3-3-2">3.3.2 让标题测试通过</h3>
+
+现在我们要让标题测试通过，同时我们还要完善 HTML，让它通过验证。先来看“首页”，它的 HTML 和代码 3.3 中欢迎页面的结构类似。
+
+**代码 3.19** “首页”的完整 HTML <br />`app/views/static_pages/home.html.erb`
+
+{% highlight erb %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Ruby on Rails Tutorial Sample App | Home</title>
+  </head>
+  <body>
+    <h1>Sample App</h1>
+    <p>
+      This is the home page for the
+      <a href="http://railstutorial.org/">Ruby on Rails Tutorial</a>
+      sample application.
+    </p>
+  </body>
+</html>
+{% endhighlight %}
+
+代码 3.19 使用了代码 3.18 中测试用到的标题：
+
+{% highlight html %}
+<title>Ruby on Rails Tutorial Sample App | Home</title>
+{% endhighlight %}
+
+所以，“首页”的测试现在应该可以通过了。你还会看到红色的错误提示是因为“帮助”页面和“关于”页面的测试还是失败的，我们使用代码 3.20 和代码 3.21 中的代码让它们也通过测试。
+
+**代码 3.20** “帮助”页面的完整 HTML <br />`app/views/static_pages/home.html.erb`
+
+{% highlight erb %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Ruby on Rails Tutorial Sample App | Help</title>
+  </head>
+  <body>
+    <h1>Help</h1>
+    <p>
+      Get help on the Ruby on Rails Tutorial at the
+      <a href="http://railstutorial.org/help">Rails Tutorial help page</a>.
+      To get help on this sample app, see the
+      <a href="http://railstutorial.org/book">Rails Tutorial book</a>.
+    </p>
+  </body>
+</html>
+{% endhighlight %}
+
+**代码 3.21** “关于”页面的完整 HTML <br />`app/views/static_pages/home.html.erb`
+
+{% highlight erb %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Ruby on Rails Tutorial Sample App | About Us</title>
+  </head>
+  <body>
+    <h1>About Us</h1>
+    <p>
+      The <a href="http://railstutorial.org/">Ruby on Rails Tutorial</a>
+      is a project to make a book and screencasts to teach web development
+      with <a href="http://rubyonrails.org/">Ruby on Rails</a>. This
+      is the sample application for the tutorial.
+    </p>
+  </body>
+</html>
+{% endhighlight %}
+
+<h3 id="sec-3-3-3">3.3.3 嵌入式 Ruby</h3>
+
+本节到目前位置已经做了很多事情，我们通过 Rails 控制器和动作生成了三个可以通过验证的页面，不过这些页面都是纯静态的 HTML，没有体现出 Rails 的强大所在。而且，它们的代码充斥着重复：
+
+- 页面的标签几乎（但不完全）是一模一样的
+- 每个标题中都有“Ruby on Rails Tutorial Sample App”
+- HTML 结构在每个页面都重复的出现了
+
+代码重复的问题违反了很重要的“不要自我重复”（Don't Repeat Yourself, DRY）原则，本小节和下一小节将按照 DRY 原则去掉重复的代码。
+
+不过我们去除重复的第一步却是奥增加一些代码让页面的标题看起来是一样的。这样我们就可以更容易的去掉重复的代码了。
+
+这个过程会在视图中使用嵌入式 Ruby（Embedded Ruby）。既然“首页”、“帮助”页面和“关于”页面的标题有一个变动的部分，那我们就利用一个 Rails 中特别的函数 `provide` 在每个页面设定不同的标题。通过将视图 `home.html.erb` 标题中的“Home”换成如代码 3.22 所示的代码，我们可以看一下是怎么实现的。
+
+**代码 3.22** 标题中使用了嵌入式 Ruby 代码的“首页”视图 <br />`app/views/static_pages/home.html.erb`
+
+{% highlight erb %}
+<% provide(:title, 'Home') %>
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Ruby on Rails Tutorial Sample App | <%= yield(:title) %></title>
+  </head>
+  <body>
+    <h1>Sample App</h1>
+    <p>
+      This is the home page for the
+      <a href="http://railstutorial.org/">Ruby on Rails Tutorial</a>
+      sample application.
+    </p>
+  </body>
+</html>
+{% endhighlight %}
+
+代码 3.22 使我们第一次使用嵌入式 Ruby，简称 ERb。（现在你应该知道为什么 HTML 视图文件的扩展名是 `.html.erb` 了。）ERb 是为网页添加动态动容使用的主要模板系统。<sup>[13](#fn-13)</sup> 下面的代码
+
+{% highlight erb %}
+<% provide(:title, 'Home') %>
+{% endhighlight %}
+
+通过 `<% ... %>` 调用 Rails 中的 `provide` 函数，然后将字符串 `'Home'` 赋给 `:title`。<sup>[14](#fn-14)</sup> 然后，在标题中，我们使用类似的符号 `<%= ... %>` 通过 Ruby 的 `yield` 函数将标题插入模板中：<sup>[15](#fn-15)</sup>
+
+{% highlight erb %}
+<title>Ruby on Rails Tutorial Sample App | <%= yield(:title) %></title>
+{% endhighlight %}
+
+（这两种嵌入 Ruby 代码的方式区别在于，`<% ... %>` **执行**其中的代码，`<%= ... %>` 也会执行其中的代码并将结果**插入**模板中。）最终得到的结果和以前是一样的，只不过标题中变动的部分现在是通过 ERb 动态生成的。
+
+我们可以运行 [3.3.1 节](#sec-3-3-1)中的测试来证实一下，测试还是会通过：
+
+{% highlight sh %}
+$ bundle exec rspec spec/requests/static_pages_spec.rb
+{% endhighlight %}
+
+然后我们要对“帮助”页面和“关于”页面做相应的修改了。（参见代码 3.23 和代码 3.24。）
+
+**代码 3.23** 标题中使用了嵌入式 Ruby 代码的“帮助”页面视图 <br />`app/views/static_pages/help.html.erb`
+
+{% highlight erb %}
+<% provide(:title, 'Help') %>
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Ruby on Rails Tutorial Sample App | <%= yield(:title) %></title>
+  </head>
+  <body>
+    <h1>Help</h1>
+    <p>
+      Get help on the Ruby on Rails Tutorial at the
+      <a href="http://railstutorial.org/help">Rails Tutorial help page</a>.
+      To get help on this sample app, see the
+      <a href="http://railstutorial.org/book">Rails Tutorial book</a>.
+    </p>
+  </body>
+</html>
+{% endhighlight %}
+
+**代码 3.24** 标题中使用了嵌入式 Ruby 代码的“关于”页面视图 <br />`app/views/static_pages/help.html.erb`
+
+{% highlight erb %}
+<% provide(:title, 'About Us') %>
+<% provide(:title, 'About Us') %>
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Ruby on Rails Tutorial Sample App | <%= yield(:title) %></title>
+  </head>
+  <body>
+    <h1>About Us</h1>
+    <p>
+      The <a href="http://railstutorial.org/">Ruby on Rails Tutorial</a>
+      is a project to make a book and screencasts to teach web development
+      with <a href="http://rubyonrails.org/">Ruby on Rails</a>. This
+      is the sample application for the tutorial.
+    </p>
+  </body>
+</html>
+{% endhighlight %}
+
+<h3 id="sec-3-3-4">3.3.4 使用布局文件来消除重复</h3>
+
+我们已经使用 ERb 将页面标题中变动的部分替换掉了，每一个页面的代码很类似：
+
+{% highlight erb %}
+<% provide(:title, 'Foo') %>
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Ruby on Rails Tutorial Sample App | <%= yield(:title) %></title>
+  </head>
+  <body>
+    <!--内容-->
+  </body>
+</html>
+{% endhighlight %}
+
+换句话说，所有的页面结构都是一致的，包括标题标签中的内容，只是 `body` 标签中的内容有细微的差别。
+
+为了提取出相同的结构，Rails 提供了一个特别的布局文件，叫做 `application.html.erb`，我们在 [3.3.1 节](#sec-3-3-1)中将它重命名了，现在我们再改回来：
+
+{% highlight sh %}
+$ mv foobar app/views/layouts/application.html.erb
+{% endhighlight %}
+
+为了让布局正常的运行，我们要把默认的标题改为前几例代码中使用的嵌入式 Ruby 代码：
+
+{% highlight erb %}
+<title>Ruby on Rails Tutorial Sample App | <%= yield(:title) %></title>
+{% endhighlight %}
+
+最终的布局文件如代码 3.15 所示。
+
+**代码 3.25** 示例程序的网站布局 <br />`app/views/layouts/application.html.erb`
+
+{% highlight erb %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Ruby on Rails Tutorial Sample App | <%= yield(:title) %></title>
+    <%= stylesheet_link_tag    "application", :media => "all" %>
+    <%= javascript_include_tag "application" %>
+    <%= csrf_meta_tags %>
+  </head>
+  <body>
+    <%= yield %>
+  </body>
+</html>
+{% endhighlight %}
+
+注意一下比较特殊的一行
+
+{% highlight erb %}
+<%= yield %>
+{% endhighlight %}
+
+这行代码是用来将每一页的内容插入布局中的。没必要了解它的具体实现过程，我们只需要知道，在布局中使用它在访问 /static_pages/home 时会将 `home.html.erb` 中的内容转换成 HTML 然后插入 `<%= yield %>` 所在的位置。
+
+还要注意一下，默认的 Rails 布局文件包含几行特殊的代码：
+
+{% highlight erb %}
+<%= stylesheet_link_tag    "application", :media => "all" %>
+<%= javascript_include_tag "application" %>
+<%= csrf_meta_tags %>
+{% endhighlight %}
+
+这些代码会引入应用程序的样式表和 JavaScript 文件（asset pipeline 的一部分）；Rails 中的 `csrf_meta_tags` 方法是用来避免“跨站请求伪造”（cross-site request forgery，CSRF，一种网络攻击）的。
+
+现在代码 3.22、代码 3.23 和代码 3.24 的内容还是和布局文件中类似的 HTML，所以我们要将内容删除，只保留需要的部分。清除后的视图如代码 3.26、代码 3.27 和代码 3.28 所示。
+
+**代码 3.26** 去除完整的 HTML 结构后的“首页” <br />`app/views/static_pages/home.html.erb`
+
+{% highlight erb %}
+<% provide(:title, 'Home') %>
+<h1>Sample App</h1>
+<p>
+  This is the home page for the
+  <a href="http://railstutorial.org/">Ruby on Rails Tutorial</a>
+  sample application.
+</p>
+{% endhighlight %}
+
+**代码 3.27** 去除完整的 HTML 结构后的“帮助”页面 <br />`app/views/static_pages/help.html.erb`
+
+{% highlight erb %}
+<% provide(:title, 'Help') %>
+<h1>Help</h1>
+<p>
+  Get help on the Ruby on Rails Tutorial at the
+  <a href="http://railstutorial.org/help">Rails Tutorial help page</a>.
+  To get help on this sample app, see the
+  <a href="http://railstutorial.org/book">Rails Tutorial book</a>.
+</p>
+{% endhighlight %}
+
+**代码 3.28** 去除完整的 HTML 结构后的“关于”页面 <br />`app/views/static_pages/about.html.erb`
+
+{% highlight erb %}
+<% provide(:title, 'About Us') %>
+<h1>About Us</h1>
+<p>
+  The <a href="http://railstutorial.org/">Ruby on Rails Tutorial</a>
+  is a project to make a book and screencasts to teach web development
+  with <a href="http://rubyonrails.org/">Ruby on Rails</a>. This
+  is the sample application for the tutorial.
+</p>
+{% endhighlight %}
+
+修改这几个视图后，“首页”、“帮助”页面和“关于”页面显示的内容还和之前一样，但是却没有重复的内容了。运行一下测试看是否还会通过，通过了才能证实重构是成功的：
+
+{% highlight sh %}
+$ bundle exec rspec spec/requests/static_pages_spec.rb
+{% endhighlight %}
