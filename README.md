@@ -15,3 +15,5 @@
 ## 发布协议
 
 本项目和英文原书采用相同的发布协议：[Creative Commons Attribution-ShareAlike 3.0 Unported License](http://creativecommons.org/licenses/by-sa/3.0/)
+
+Andor Chen 保留部分权力，保留最终解释权。
