@@ -1720,7 +1720,7 @@ $ git clone https://github.com/maltize/sublime-text-2-ruby-tests.git RubyTest
 
 <div class="navigation">
   <a class="prev_page" href="chapter2.html">&laquo; 第二章 演示程序</a>
-  <a class="next_page" href="chapter4.html">第四章 Rails 使用的 Ruby &raquo;</a>
+  <a class="next_page" href="chapter4.html">第四章 Rails 背后的 Ruby &raquo;</a>
 </div>
 
 1. Webrat 的继任者，Capybara 是以世界上[最大的啮齿类动物](http://en.wikipedia.org/wiki/Capybara)命名的。
