@@ -85,6 +85,13 @@ em {
 
 /*=== Content ===*/
 
+.thanks-giving {
+  background: #fff0d3 url("../images/alipay.gif") no-repeat 15px 50%;
+  border-radius: 3px;
+  border: 1px solid #ffd680;
+  padding: 15px 15px 15px 70px;
+}
+
 #menu {
   list-style-type: none;
 }

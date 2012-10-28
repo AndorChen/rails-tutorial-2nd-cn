@@ -2,6 +2,8 @@
 layout: default
 ---
 
+<p class="thanks-giving">本书正在翻译中，<a href="https://me.alipay.com/andor" title="通过支付宝直接支付" target="_blank">给译者一点鼓励吧</a>！</p>
+
 ## 目录
 
 <ol id="menu">
