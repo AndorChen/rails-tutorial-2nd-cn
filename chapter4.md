@@ -318,3 +318,302 @@ foo 一样
 {% endhighlight %}
 
 <h3 id="sec-4-2-3">4.2.3 对象及向其传递消息</h3>
+
+Ruby 中一切皆对象，包括字符串和 `nil` 都是。我们会在 [4.4.2 节](#sec-4-4-2)介绍对象技术层面的意义，不过一般很难读本书就理解对象了，你要多看一些例子才能建立对对象的感性认识。
+
+不过说出对象的作用就很简单，它可以响应消息。例如，一个字符串对象可以响应 `length` 这个消息，它返回字符串包含的字符数量：
+
+{% highlight sh %}
+>> "foobar".length        # 把 length 消息传递给字符串
+=> 6
+{% endhighlight %}
+
+这样传递给对象的消息叫做方法，它是在对象中定义的函数。<sup>[4](#fn-4)</sup> 字符串还可以响应 `empty?` 方法：
+
+{% highlight sh %}
+>> "foobar".empty?
+=> false
+>> "".empty?
+=> true
+{% endhighlight %}
+
+注意 `empty?` 方法末尾的问好，这是 Ruby 的一个约定，说明方法的返回值是布尔值：`true` 或 `false`。布尔值在流程控制中特别有用：
+
+{% highlight sh %}
+>> s = "foobar"
+>> if s.empty?
+>>   "The string is empty"
+>> else
+>>   "The string is nonempty"
+>> end
+=> "The string is nonempty"
+{% endhighlight %}
+
+因为 Ruby 中的一切都是对象，那么 `nil` 也是对象，所以它也可以响应方法。举个例子，`to_s` 方法基本上可以把任何对象转换成字符串：
+
+{% highlight sh %}
+>> nil.to_s
+=> ""
+{% endhighlight %}
+
+结果显然是个空字符串，我们可以通过下面串联的方法验证这一点：
+
+{% highlight sh %}
+>> nil.empty?
+NoMethodError: You have a nil object when you didn't expect it!
+You might have expected an instance of Array.
+The error occurred while evaluating nil.empty?
+>> nil.to_s.empty?      # 消息串联
+=> true
+{% endhighlight %}
+
+我们看到，`nil` 对象本身无法响应 `empty?` 方法，但是 `nil.to_s` 可以。
+
+有一个特殊的方法可以测试对象是否为空，你应该能猜到这个方法：
+
+{% highlight sh %}
+>> "foo".nil?
+=> false
+>> "".nil?
+=> false
+>> nil.nil?
+=> true
+{% endhighlight %}
+
+下面的代码
+
+{% highlight sh %}
+puts "x is not empty" if !x.empty?
+{% endhighlight %}
+
+显示了关键词 `if` 的另一种用法：你可以编写一个当且只当 `if` 后面的表达式为真时才执行的语句。对应的，关键词 `unless` 也可以这么用：
+
+{% highlight sh %}
+>> string = "foobar"
+>> puts "The string '#{string}' is nonempty." unless string.empty?
+The string 'foobar' is nonempty.
+=> nil
+{% endhighlight %}
+
+我们需要注意一下 `nil` 的特殊性，除了 `false` 本身之外，所有的 Ruby 对象中它是唯一一个布尔值为“假”的：
+
+{% highlight sh %}
+>> if nil
+>>   true
+>> else
+>>   false        # nil 是假值
+>> end
+=> false
+{% endhighlight %}
+
+基本上所有其他的 Ruby 对象都是“真”的，包括 0：
+
+{% highlight sh %}
+>> if 0
+>>   true        # 0（除了 nil 和 false 之外的一切对象）是真值
+>> else
+>>   false
+>> end
+=> true
+{% endhighlight %}
+
+<h3 id="sec-4-2-4">4.2.4 定义方法</h3>
+
+在控制台中，我们可以像定义 `home` 动作（代码 3.6）和 `full_title` 帮助方法（代码 4.2）一样进行方法定义。（在控制台中定义方法有点麻烦，我们一般会在文件中定义，不过用来演示还行。）例如，我们要定义一个名为 `string_message` 的方法，可以接受一个参数，返回值取决于参数是否为空：
+
+{% highlight sh %}
+>> def string_message(string)
+>>   if string.empty?
+>>     "It's an empty string!"
+>>   else
+>>     "The string is nonempty."
+>>   end
+>> end
+=> nil
+>> puts string_message("")
+It's an empty string!
+>> puts string_message("foobar")
+The string is nonempty.
+{% endhighlight %}
+
+注意 Ruby 方法会非显式的返回值，返回最后一个语句的值。在上面的这个例子中，返回的值会根据参数是否为空而返回两个字符串中的一个。Ruby 也支持显式的指定返回值，下面的代码和上面的效果一样：
+
+{% highlight sh %}
+>> def string_message(string)
+>>   return "It's an empty string!" if string.empty?
+>>   return "The string is nonempty."
+>> end
+{% endhighlight %}
+
+细心的读者可能会发现其实这里第二个 `return` 不是必须的，作为方法的最后一个表达式，不管有没有 `return` 字符串 `"The string is nonempty."` 都会作为返回值。不过两处都加上 `return` 看起来更好看。
+
+<h3 id="sec-4-2-5">4.2.5 回顾标题的帮助方法</h3>
+
+下载我们来理解一下代码 4.2 中的 `full_title` 帮助方法：<sup>[5](#fn-5)</sup>
+
+{% highlight ruby %}
+module ApplicationHelper
+
+  # 根据所在页面返回完整的标题                           # 在文档中显示的注释
+  def full_title(page_title)                          # 方法定义
+    base_title = "Ruby on Rails Tutorial Sample App"  # 变量赋值
+    if page_title.empty?                              # 布尔测试
+      base_title                                      # 非显式返回值
+    else
+      "#{base_title} | #{page_title}"                 # 字符串插值
+    end
+  end
+end
+{% endhighlight %}
+
+方法定义、变量赋值、布尔测试、流程控制和字符串插值——组合在一起定义了一个可以在网站布局中使用的帮助方法。还用到了 `module ApplicationHelper`：module 为我们提供了一种方式把相关的方法组织在一起，稍后我们可以使用 `include` 把它插入其他的类中。编写一般的 Ruby 程序时，你要自己定义一个 module 然后再显式的将其引入类中，但是对于帮助方法所在的 module 就交由 Rails 来处理引入了，最终的结果是 `full_title` 方法[自动的](http://catb.org/jargon/html/A/automagically.html)就可以在所有的视图中使用了。
+
+<h2 id="sec-4-3">4.3 其他的数据类型</h2>
+
+虽然 Web 程序一般都是处理字符串，但也需要其他的数据类型来生成字符串。本节我们就来介绍一些对开发 Rails 应用程序很重要的 Ruby 中的其他数据类型。
+
+<h3 id="sec-4-3-1">4.3.1 数组和 Range</h3>
+
+数组就是一组顺序特定的元素。本书尚且没有用过数组，不过理解了数组就能很好的理解 Hash （[4.3.3 节](#sec-4-3-3)），也有助于理解 Rails 中的数据模型（例如 [2.3.3 节](chapter2.html#sec-2-3-3)中用到的 `has_many` 关联，[10.1.3 节](chapter10.html#sec-10-1-3)会做详细介绍）。
+
+目前我们已经花了很多的时间理解字符串，从字符串过度到数组可以从 `split` 方法开始：
+
+{% highlight sh %}
+>>  "foo bar     baz".split     # 把字符串分离成有三个元素的数组
+=> ["foo", "bar", "baz"]
+{% endhighlight %}
+
+上述代码的返回结果是一个有三个元素的数组。默认情况下，`split` 在空格处把字符串分割成数组，当然你几乎可以在任何地方进行分割：
+
+{% highlight sh %}
+>> "fooxbarxbazx".split('x')
+=> ["foo", "bar", "baz"]
+{% endhighlight %}
+
+和其他编程语言的习惯一样，Ruby 中数组的索引也是从零开始的，数组中第一个元素的索引是 0，第二个元素的索引是 1，以此类推：
+
+{% highlight sh %}
+>> a = [42, 8, 17]
+=> [42, 8, 17]
+>> a[0]               # Ruby 使用方括号获取数组元素
+=> 42
+>> a[1]
+=> 8
+>> a[2]
+=> 17
+>> a[-1]              # 索引还可以是负数
+=> 17
+{% endhighlight %}
+
+我们看到，在 Ruby 中是使用方括号来获取数组元素的。除了这种方法，Ruby 还为一些常用的元素获取操作提供了别名（synonym）：<sup>[6](#fn-6)</sup>
+
+{% highlight sh %}
+>> a                  # 只是为了看一下 a 的值是什么
+=> [42, 8, 17]
+>> a.first
+=> 42
+>> a.second
+=> 8
+>> a.last
+=> 17
+>> a.last == a[-1]    # 用 == 进行对比
+=> true
+{% endhighlight %}
+
+最后一行介绍了相等比较操作符 `==`，Ruby 和其他语言一样还提供了对应的 `!=`（不等）等操作符：
+
+{% highlight sh %}
+>> x = a.length       # 和字符串一样，数组也可以响应 length 方法
+=> 3
+>> x == 3
+=> true
+>> x == 1
+=> false
+>> x != 1
+=> true
+>> x >= 1
+=> true
+>> x < 1
+=> false
+{% endhighlight %}
+
+除了 `length`（上述代码的第一行）之外，数组还可以响应一堆其他的方法：
+
+{% highlight sh %}
+>> a
+=> [42, 8, 17]
+>> a.sort
+=> [8, 17, 42]
+>> a.reverse
+=> [17, 8, 42]
+>> a.shuffle
+=> [17, 42, 8]
+>> a
+=> [42, 8, 17]
+{% endhighlight %}
+
+注意，上面的方法都没有修改 `a` 的值。如果你想修改数组的值要使用对应的“炸弹（bang）”方法（之所以这么叫是因为这种语境中感叹号经常都读作“bang”）：
+
+{% highlight sh %}
+>> a
+=> [42, 8, 17]
+>> a.sort!
+=> [8, 17, 42]
+>> a
+=> [8, 17, 42]
+{% endhighlight %}
+
+你还可以使用 `push` 方法向数组中添加元素，或者使用等价的 `<<` 操作符：
+
+{% highlight sh %}
+>> a.push(6)                  # 把 6 加到数组结尾
+=> [42, 8, 17, 6]
+>> a << 7                     # 把 7 加到数组结尾
+=> [42, 8, 17, 6, 7]
+>> a << "foo" << "bar"        # 串联操作
+=> [42, 8, 17, 6, 7, "foo", "bar"]
+{% endhighlight %}
+
+最后一个例子说明你可以把添加操作串在一起操作，同时也说明，Ruby 不像很多其他的语言，数组可以包含不同类型的数据（本例中是数字和字符串混合）。
+
+前面我们用 `split` 把字符串分割成字符串，我们还可以使用 `join` 方法进行相反的操作：
+
+{% highlight sh %}
+>> a
+=> [42, 8, 17, 7, "foo", "bar"]
+>> a.join                       # 没有连接符
+=> "428177foobar"
+>> a.join(', ')                 # 连接符是一个逗号和空格
+=> "42, 8, 17, 7, foo, bar"
+{% endhighlight %}
+
+和数组有点类似的是 Range，使用 `to_a` 方法把它转换成数据或许更好理解：
+
+{% highlight sh %}
+>> 0..9
+=> 0..9
+>> 0..9.to_a              # 错了，to_a 在 9 上调用了
+NoMethodError: undefined method `to_a' for 9:Fixnum
+>> (0..9).to_a            # 调用 to_a 要用括号包住 Range
+=> [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+{% endhighlight %}
+
+虽然 `0..9` 是一个合法的 Range，不过上面第二个表达式告诉我们调用方法时要加上括号。
+
+Range 经常被用来去除一系列的数组元素：
+
+{% highlight sh %}
+>> a = %w[foo bar baz quux]         # %w 创建一个元素为字符串的数组
+=> ["foo", "bar", "baz", "quux"]
+>> a[0..2]
+=> ["foo", "bar", "baz"]
+{% endhighlight %}
+
+Range 也可使用字母：
+
+{% highlight sh %}
+>> ('a'..'e').to_a
+=> ["a", "b", "c", "d", "e"]
+{% endhighlight %}
+
+<h3 id="sec-4-3-2">4.3.2 块</h3>
