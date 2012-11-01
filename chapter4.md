@@ -1,6 +1,6 @@
 ---
 layout: chapter
-title: 第三章 Rails 背后的 Ruby
+title: 第四章 Rails 背后的 Ruby
 ---
 
 有了[第三章](chapter3.html)中的例子做铺垫，本章将为你介绍一些对 Rails 来说很重要的 Ruby 知识。Ruby 语言的知识点很多，不过对一个 Rails 开发者而言需要掌握的很少。我们采用的是有别于常规的 Ruby 学习过程，我们的目标是开发动态的 Web 应用程序，所以我建议你先学习 Rails，在这个过程中学习一些 Ruby 知识。如果要成为一个 Rails 专家，你就要更深入的掌握 Ruby 了。本书会为你成为专家的路途上奠定一个坚实的基础。如 [1.1.1 节](chapter1.html#sec-1-1-1)中说过的，读完本书后我建议你阅读一本专门针对 Ruby 的书，例如《[Ruby 入门](http://www.amazon.com/gp/product/1430223634)》、《[The Well-Frounded Rubyist](http://www.amazon.com/gp/product/1933988657)》或《[Ruby 之道](http://www.amazon.com/gp/product/0672328844)》。
@@ -1286,7 +1286,7 @@ $ git commit -m "Add a full_title helper"
 
 <div class="navigation">
   <a class="prev_page" href="chapter3.html">&laquo; 第三章 基本静态的页面</a>
-  <a class="next_page" href="chapter5.html">第五章 Filling in the layout &raquo;</a>
+  <a class="next_page" href="chapter5.html">第五章 完善布局 &raquo;</a>
 </div>
 
 1. 如果帮助函数是针对某个特定控制器的，你应该把它放进该控制器相应的帮助文件中。例如，为 StaticPages 控制器创建的帮助函数一般放在 `app/helper/static_pages_helper.rb` 中。在这个例子中，我们会把 `full_title` 这个帮助函数用在网站内所有的网页中，针对这种情况 Rails 提供了一个特别的文件：`app/helper/application_helper.rb`。
