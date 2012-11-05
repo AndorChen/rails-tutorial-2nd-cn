@@ -3,19 +3,19 @@ layout: chapter
 title: 第五章 完善布局
 ---
 
-[第四章](chapter4.html)对 Ruby 做了简单的介绍，我们讲解了如何在应用程序中引入样式表，不过，就像在 [4.3.4 节](chapter4.html#sec-4-3-4)中说过的，这个样式表现在还是空的。本章我们会做些修改，把 Bootstrap 框架引入应用程序中，然后再添加一些自定义的样式。<sup>[1](#fn-1)</sup> 我们还会把已经创建的页面（例如“首页”和“关于”页面）添加到布局中（[5.1 节](#sec-5-1)）。在这个过程中，我们会介绍局部视图（partial）、Rails 路由和 asset pipeline，还会介绍 Sass（[5.2 节](#sec-5-2)）。我们还会用最新的 RSpec 技术重构[第三章](chapter3.html)中的测试。最后，我们还会向前迈出很重要的一步：允许用户在我们的网站中注册。
+学习了[第四章](chapter4.html)，我们对 Ruby 也大概了解了，也晓得怎么把样式表引入程序里了，不过，在[4.3.4 节](chapter4.html#sec-4-3-4)里就说过了，这个样式表里还什么都没有呢，不过不用怕，这一切都将在这一章改变。在这一章我们会引入一个叫 Bootstrap 的框架，然后再添加一些自定义的样式。[^1]当然了，之前做的那些页面（“Home”、”Help“ 和 ”About“），肯定也会被添加进来的[5.1 节](#sec-5-1)。顺便我们还要学习 partials、Rails 路由和 asset pipeline，甚至还会包括一点点 Sass 的内容[5.2 节](#sec-5-2)，[第三章](chapter3.html)的那些测试也需要重构，最后我们还要实现一个注册的功能。
 
 <h2 id="sec-5-1">5.1 添加一些结构</h2>
 
-本书是关于 Web 开发而不是 Web 设计的，不过在一个看起来很垃圾的应用程序中开发会让人提不起劲，所以本书我们要向布局中添加一些结构，再加入一些 CSS 构建一个基本的样式。除了使用自定义的 CSS 之外，还会使用 Bootstrap，这是一个来自 Twitter 的开源 Web 设计框架。我们还要按照一定的方式组织代码，即使用局部视图来保持布局文件的结构清晰，避免大量的代码混杂在布局文件中。
+虽然说，这是一本关于 Web 开发而不是 Web 设计的书，但是如果知道自己开发的只能是个12306一样的东西，那这绝对不是什么振奋人心的消息。所以，在这一部分我们要添加一些必要的部分，然后用 CSS 来让样式更漂亮一点。不过我们并不只是手写 CSS，还会使用一个由 Twitter 开发的开源 Web 设计框架 [Bootstrap](http://twitter.github.com/bootstrap/)。另外，会用到 partials 技术来让代码更整洁。
 
-开发 Web 应用程序时，尽早的对用户界面有个统筹安排往往会对你有所帮助。在本书后续内容中，我会经常插入网页的构思图（mockup）（在 Web 领域经常称之为“线框图（wireframe）”），这是对应用程序最终效果的草图设计。<sup>[2](#fn-2)</sup> 本章大部分内容都是在开发 [3.1 节](chapter3.html#sec-3-1)中介绍的静态页面，页面中包含一个网站 LOGO、导航条头部和网站底部。这些网页中最重要的一个是“首页”，它的构思图如图 5.1 所示。图 5.7 是最终实现的效果。你会发现二者之间的某些细节有所不同，例如，在最终实现的页面中我们加入了一个 Rails LOGO——这没什么关系，因为构思图没必要画出每个细节。
+在Web 开发中，对用户界面尽早做出规划，对于开发是很有帮助的。后面我会经常插入构思图（在网页领域一般叫做“线框图”），其实也就是设想的应用最后大概会长成什么样的草图。[^2]这节我们主要是开发[3.1 节](chapter3.html#sec-3.1)中的静态页面，里面会包含一个网站LOGO、头部导航条和网页底部。[图 5.1](#figure-5-1)是 Home 页面的构思图，很明显这是最重要的页面。[图 5.7](#figure-5-7)是最终完成后的样子，虽然和构思的不太一样，比如，页面里有一个 Rails 的 LOGO，不过这也没什么大不了的，构思图嘛，没必要太准确。
 
-![home_page_mockup_bootstrap](assets/images/figures/home_page_mockup_bootstrap.png)
+<p id="figure-5-1">![home_page_mockup_bootstrap](assets/images/figures/home_page_mockup_bootstrap.png)
 
 图 5.1：示例程序“首页”的构思图
 
-和之前一样，如果你使用 Git 做版本控制的花，现在最好创建一个新分支：
+照旧，如果你是用 Git 做版本控制的话，是时候创建一个新的分支了：
 
 {% highlight sh %}
 $ git checkout -b filling-in-layout
@@ -24,8 +24,9 @@ $ git checkout -b filling-in-layout
 <h3 id="sec-5-1-1">5.1.1 网站导航</h3>
 
 在示例程序中加入连接和样式的第一步，我们要修改布局文件 `application.html.erb`（上次使用是在代码 4.3 中），添加一些 HTML 结构。我们要添加一些区域，一些 CSS class，以及网站导航。布局文件的内容参见代码 5.1，对各部分代码的说明紧跟其后。如果你迫不及待的想看到结果，请查看图 5.2。（注意：结果（还）不是很让人满意。）
+要在示例程序中添加链接和样式，首先我们要给 `application.html.erb` 这个文件（上次见到它是在[代码 4.3]里）增加一些 HTML 结构。添加一些区域、一些 CSS 类、以及网站导航条。这个文件的全部内容在[代码 5.1](#list-5-1)中，下面我们会对各部分代码进行解释，如果你实在等不及，[图 5.2](#figure-5.2)是最终结果。（注：虽然是最终结果，但其实不是那么让人满意）
 
-**代码 5.1** 添加一些结构后的网站布局文件 <br />`app/views/layouts/application.html.erb`
+<p id="list-5-1">**代码 5.1**<p> 添加一些结构后的网站布局文件 <br />`app/views/layouts/application.html.erb`
 
 {% highlight erb %}
 <!DOCTYPE html>
@@ -61,21 +62,23 @@ $ git checkout -b filling-in-layout
 </html>
 {% endhighlight %}
 
-需要特别注意一下 Hash 风格从 Ruby 1.8 到 Ruby 1.9 的转变（参见 [4.3.3 节](chapter4.html#sec-4-3-3)）。即把
+
+有一点要注意，哈希在 Ruby 1.8 与 Ruby 1.9 中长的不太一样（参见[4.3.3 节](chapter4.html#sec-4-3-3)）。把下面的
 
 {% highlight erb %}
 <%= stylesheet_link_tag "application", :media => "all" %>
 {% endhighlight %}
 
-换成
+换成下面这样
 
 {% highlight erb %}
 <%= stylesheet_link_tag "application", media: "all" %>
 {% endhighlight %}
 
-有一点很重要需要注意一下，因为旧的 Hash 风格使用范围还很广，所以两种用法你都要能够识别。
+因为旧的哈希写法流传很广，所以这两种写法你必须都能识别出来。
 
 我们从上往下看一下代码 5.1 中新添加的元素。[3.1 节](chapter3.html#sec-3-1)简单的介绍过，Rails 3 默认会使用 HTML5（如 `<!DOCTYPE html>` 所示），因为 HTML5 标准还很新，有些浏览器（特别是较旧版本的 IE 浏览器）还没有完全支持，所以我们加载了一些 JavaScript 代码（称作“[HTML5 shim](http://code.google.com/p/html5shim/)”）来解决这个问题：
+我们从头到尾看一下[代码 5.1](#list-5-1)中新添加的元素。在[3.1 节]里我曾经提过，Rails 3 默认会使用 HTML5（这一点从 `<!DOCYTYPE html>` 就能看出来）；因为相对来说，HTML5 标准还很新，有些浏览器（尤其是旧版本 IE）还不能完全支持，所以我们添加了一些 JavaScript 代码（[HTML5 shim](http://code.google.com/p/html5shim/)）来解决这个问题。
 
 {% highlight html %}
 <!--[if lt IE 9]>
@@ -83,15 +86,15 @@ $ git checkout -b filling-in-layout
 <![endif]-->
 {% endhighlight %}
 
-如下有点古怪的句法
+比如下面这段比较奇怪的代码
 
 {% highlight html %}
 &lt;!--[if lt IE 9]&gt;
 {% endhighlight %}
 
-只有当 IE 浏览器的版本小于 9 时（`if lt IE 9`）才会加载集中的代码。这个奇怪的 `[if lt IE 9]` 句法不是 Rails 提供的，其实它是 IE 浏览器为了解决兼容性问题而特别支持的[条件注释](http://en.wikipedia.org/wiki/Conditional_comment)（conditional comment）。这就带来了一个好处，因为这说明我们只会在 IE9 以前的版本中加载 HTML5 shim，而其他的 Firefox、Chrome 和 Safari 等浏览器则不会受到影响。
+意思就是，当浏览器是版本号低于 9 的 IE 时（`if lt IE 9`），才会加载这段代码。这种奇怪的句法`[if lt IE 9]`并不是 Rails 提供的；其实这是 IE 为了解决上面的兼容问题而专门提供的[条件注释](http://en.wikipedia.org/wiki/Conditional_comment)。这样的好处是，既解决了低版本 IE 的兼容问题，又不会影响其他的 Firefox、Chrome、Safari等浏览器。
 
-后面的区域是一个 `header`，包含网扎的 LOGO（纯文本）、一些小区域（使用 `div` 标签）和一个导航列表元素：
+接下来是一个 `header` 区，其中包含了网站的纯文本LOGO、一些用 `div` 标签分隔的区块以及一个列表形式的导航链接：
 
 {% highlight erb %}
 <header class="navbar navbar-fixed-top">
@@ -110,20 +113,22 @@ $ git checkout -b filling-in-layout
 </header>
 {% endhighlight %}
 
-`header` 标签的意思是放在网页顶部的内容。我们为 `header` 标签指定了两个 CSS class<sup>[3](#fn-3)</sup>，`navbar` 和 `navbar-fixed-top`，用空格分开：
+`header` 标签是用来表明这些内容应该放在页面的顶部。我们给 `header` 标签添加了两个 CSS class[^3]，分别叫做 `navbar` 和 `navbar-fixed-top`，两者之间用一个空格分开。
 
 {% highlight html %}
 <header class="navbar navbar-fixed-top">
 {% endhighlight %}
 
-所有的 HTML 元素都可以指定 class 和 id，它们不仅是个标注，在 CSS 样式中也有用（[5.1.2 节](#sec-5-1-2)）。class 和 id 之间主要的区别是，class 可以在同一个网页中多次使用，而 id 只能使用一次。这里的 `navbar` 和 `navbar-fixed-top` 在 Bootstrap 框架中有特殊的意义，我们会在 [5.1.2 节](#sec-5-1-2)中安装并使用 Bootstrap。`header` 标签内是一些 `div` 标签：
+所有的 HTML 元素都可以分配 class 和 id；它们可不仅仅只是标识，在 CSS 中是要派大用场的（[5.1.2 节](#sec-5-1-2)）。class 和 id 的主要区别在，在同一个页面中，class 可以用很多次，而 id 只能用一次。上面的 `navbar` 和 `navbar-fixed-top` 在 Bootstrap 框架（我们会在[5.1.2 节](#sec-5-1-2)安装使用）中都有特殊的意义。
+
+可以看到 `header` 标签里，还有两个 `div` 标签：
 
 {% highlight html %}
 <div class="navbar-inner">
     <div class="container">
 {% endhighlight %}
 
-`div` 标签是常规的区域，除了把文档分成不同的部分之外，没有特殊的意义。在以前的 HTML 中，`div` 标签被用来划分网站中几乎所有的区域，但是 HTML5 增加了 `header`、`nav` 和 `section` 元素，用来划分大多数网站中都有用到的区域。本例中。每个 `div` 也都指定了一个 CSS class。和 `header` 标签的 class 一样，这些 class 在 Bootstrap 中也有特殊的意义。
+`div` 标签是常规区域，除了把文档分成不同的部分之外，没有特殊的意义。在以前的 HTML 中，几乎所有的区域都用 `div` 标签来划分，不过 HTML5 增加了 `header`、`nav` 和 `section` 元素，专门用来划分大多数网站中都会用到的区域。上面每个 `div` 也都指定了一个 CSS class。和 `header` 标签的 class 一样，这些 class 在 Bootstrap 中也有特殊的意义。
 
 在这些 `div` 之后，有一些 ERb 代码：
 
@@ -138,7 +143,9 @@ $ git checkout -b filling-in-layout
 </nav>
 {% endhighlight %}
 
+##############明天继续
 这里使用了 Rails 中的 `link_to` 帮助方法来创建链接（在 [3.3.2 节](chapter3.html#sec-3-3-2)中我们是直接创建 `a` 标签来实现的）。`link_to` 的第一个参数是链接文本，第二个参数是链接地址。在 [5.3.3 节](#sec-5-3-3)中我们会指定链接地址为已经设置了的路由，这里我们用的是 Web 设计中经常使用的占位符 `#`。第三个参数是可选的，为一个 Hash，本例使用这个参数为 LOGO 添加了一个 `logo` id。（其他三个链接没有使用这个 Hash 参数，这没关系，因为这个参数是可选的。）Rails 帮助方法经常这样使用 Hash 参数，可以让我们仅使用 Rails 的帮助方法就能灵活的添加 HTML 属性。
+
 
 这些 `div` 中的第二个帮喊了一个导航链接列表，使用无序列表标签 `ul`，以及列表项目标签 `li`：
 
@@ -956,3 +963,8 @@ footer {
 {% endhighlight %}
 
 Sass 为我们提供了很多功能可以用来简化样式表，不过代码 5.15 只用到了最主要的功能，这是一个很好的开始。更多功能请查看 [Sass 网站](http://sass-lang.com/)。
+
+
+------------------------------------
+[^1]:
+[^2]:
