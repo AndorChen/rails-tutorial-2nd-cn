@@ -143,11 +143,9 @@ $ git checkout -b filling-in-layout
 </nav>
 {% endhighlight %}
 
-##############明天继续
-这里使用了 Rails 中的 `link_to` 帮助方法来创建链接（在 [3.3.2 节](chapter3.html#sec-3-3-2)中我们是直接创建 `a` 标签来实现的）。`link_to` 的第一个参数是链接文本，第二个参数是链接地址。在 [5.3.3 节](#sec-5-3-3)中我们会指定链接地址为已经设置了的路由，这里我们用的是 Web 设计中经常使用的占位符 `#`。第三个参数是可选的，为一个 Hash，本例使用这个参数为 LOGO 添加了一个 `logo` id。（其他三个链接没有使用这个 Hash 参数，这没关系，因为这个参数是可选的。）Rails 帮助方法经常这样使用 Hash 参数，可以让我们仅使用 Rails 的帮助方法就能灵活的添加 HTML 属性。
+这里用到了 Rails 的 `link_to` 帮助方法来创建链接（之前在 [3.3.2 节](chapter3.html#sec-3-3-2)中我们都是直接用 `a` 标签来实现的）；`link_to` 方法可以有三个参数，第一个参数是链接文本，第二个是链接地址。到[5.3.3 节]的时候我们会通过设置路由来为链接制定地址，现在先拿占位符 `#` 将就一下。第三个参数则是可选的，是一个哈希数组，上面我们用它来为这个链接添加了一个 CSS id `logo`。（另外三个链接没有第三个参数，因为这个参数并不是必须的。）可选的哈希参数在 Rails 的帮助方法中经常会用到，通过它我们可以为 HTML 标签灵活的添加各种属性。
 
-
-这些 `div` 中的第二个帮喊了一个导航链接列表，使用无序列表标签 `ul`，以及列表项目标签 `li`：
+`div` 中的第二个元素是一个列表形式的导航链接，使用了无需列表的标签 `ul`，以及列表项目标签 `li`：
 
 {% highlight erb %}
 <nav>
@@ -159,7 +157,7 @@ $ git checkout -b filling-in-layout
 </nav>
 {% endhighlight %}
 
-上面代码中的 `nav` 标签以前是不需要的，它的目的是显示导航链接。`ul` 标签指定的 `nav` 和 `pull-right` class 在 Bootstrap 中有特殊的意义。 Rails 处理这个布局文件并执行其中的 ERb 代码后，生成的列表如下面的代码所示：
+这里的 `nav` 标签其实并不是必须的，他的作用只在于区分出导航链接的区域。而 `ul` 标签的 `nav` 和 `pull-right` class 则依然是因为在 Bootstrap 中有特殊意义而存在的。上面的代码运行之后生成的 HTML 代码是下面这样的：
 
 {% highlight erb %}
 <nav>
@@ -171,7 +169,7 @@ $ git checkout -b filling-in-layout
 </nav>
 {% endhighlight %}
 
-布局文件的最后一个 `div` 是主内容区域：
+布局文件中的最后一个 `div` 部分，是主内容区域：
 
 {% highlight erb %}
 <div class="container">
@@ -179,11 +177,11 @@ $ git checkout -b filling-in-layout
 </div>
 {% endhighlight %}
 
-和之前一样，`container` class 在 Bootstrap 中有特殊的意义。[3.3.4 节](chapter3.html#sec-3-3-4)已经介绍过，`yield` 会把各页面中的内容插入网站的布局中。
+同上，这个 `container` class 还是在Bootstrap 中有专门意思。`yield` 方法会把每个页面的内容插入到网站的布局当中，这个在[3.3.4 节](chapter3.html#sec-3-3-4)介绍过。
 
-除了网站的底部（在 [5.1.3 节](#sec-5-1-3)添加）之外，布局现在就完成了，访问一下“首页”就能看到结果了。为了利用后面添加的样式，我们要向 `home.html.erb` 视图中加入一些元素。（参见代码 5.2。）
+整个布局基本完成了（剩下的网站底部，我们会在[5.1.3 节](#sec-5-1-3)添加），访问 Home 页面就可以看到结果。为了用到上面添加的内容，我们还得往 `home.html.erb` 里面加些额外的东西。（[代码 5.2](#list-5-2)）
 
-**代码 5.2** “首页”的代码，包含一个到注册页面的链接 <br />`app/views/static_pages/home.html.erb`
+<p id="list-5-2">**代码 5.2**</p> “首页”的代码，包含一个到注册页面的链接 <br />`app/views/static_pages/home.html.erb`
 
 {% highlight erb %}
 <div class="center hero-unit">
@@ -201,27 +199,27 @@ $ git checkout -b filling-in-layout
 <%= link_to image_tag("rails.png", alt: "Rails"), 'http://rubyonrails.org/' %>
 {% endhighlight %}
 
-上面代码中第一个 `link_to` 创建了一个站位链接，指向[第七章](chapter7.html)中会加入的用户注册页面
+上面代码中的第一个 `link_to` 方法，创建了一个链接，在[第七章](chapter7.html)我们会将它只想用户注册页面，这段代码生成的 HTML 是下面这样：
 
 {% highlight erb %}
 <a href="#" class="btn btn-large btn-primary">Sign up now!</a>
 {% endhighlight %}
 
-`div` 标签中的 `hero-unit` CSS class 在 Bootstrap 中有特殊的意义，注册按钮的 `btn`、`btn-large` 和 `btn-primary` 也是一样。
+我都不愿意说了，`div` 标签里的 `hero-unit` class 在 Bootstrap 里有用，`btn`、 `btn-large`、`btn-primary`也是。
 
-第二个 `link_to` 用到了 `image_tag` 帮助方法，它的第一个参数是图片的路径；第二个参数是可选的，为一个 Hash，本例中这个 Hash 参数使用一个 Symbol 键设置了图片的 `alt` 属性。为了更好的理解，我们来看一下生成的 HTML：<sup>[4](#fn-4)</sup>
+第二个 `link_to` 里用到了 `image_tag` 帮助方法，`image_tag` 的第一个参数是图片的路径，第二个则是可选的哈希数组，这里我们用了一个 symbol 作为键来设置图片的 `alt` 属性。为了看得更清楚一点，下面是生成的 HTML：[^4]
 
 {% highlight html %}
 <img alt="Rails" src="/assets/rails.png" />
 {% endhighlight %}
 
-`alt` 属性的内容会在图片无法加载时显示，也会在针对视觉障碍人士的屏幕阅读器中显示。人们有时懒得加上 `alt` 属性，可是在 HTML 标准中却是必须的。幸运的是，Rails 默认会加上 `alt` 标签，如果你没有在调用 `image_tag` 时指定的话，Rails 就会使用图片的文件名（不包括扩展名）。本例中，我们自己设定了 `alt` 文本，为的是显示一个首字母大写的“Rails”。
+如果图片无法加载，那么浏览器就会显示 `alt` 属性的内容，而为视障人士设计的屏幕阅读器中也会显示这个属性的内容。虽然 HTML 标准要求图片中必须包含 `alt` 属性，不过大家还是都懒得写。幸好 Rails 准备了一个默认的 `alt` 属性；如果在 `image_tag` 里没有指定的话，Rails 会直接使用这个图片的文件名。上面我们自己设定了 `alt` 属性为首字母大写的 “Rails”。
 
-现在我们终于可以看到劳动的果实了（如图 5.2）。你可能会说，这不是很美观啊。或许吧。不过也可以小小的高兴一下，我们已经为 HTML 结构指定了合适的 class，可以用来添加 CSS。
+终于到检查成果的时候了（[图 5.2](#figure-5-2)）。其实不怎么样，对吧。不过好在我们已经给我们的 HTML 元素指定了合适的 class，下面我们可以很容易的添加 CSS 了。
 
-顺便说一下，你可能会奇怪 `rails.png` 这个图片可以显示出来，它是怎么来的呢？其实每个 Rails 应用程序都有这个图片，存放在 ` app/assets/images/rails.png`。因为我们使用的是 `image_tag` 帮助方法，Rails 会通过 asset pipeline 找到这个图片。（[5.2 节](#sec-5-2)）
+你可能会奇怪，为什么 `rails.png` 这个不存在的图片居然显示出来了？这不科学啊！其实每个 Rails 程序里都包含了这个图片，存在路径是 `app/assets/images/rails.png`。因为我们使用了 `image_tag` 帮助方法，所以 Rails 会自动通过 asset pipeline 找到图片（[5.2 节](#section-5-2)）。
 
-![layout_no_logo_or_custom_css_bootstrap](assets/images/figures/layout_no_logo_or_custom_css_bootstrap.png)
+<p id="figure-5-2></p>"![layout_no_logo_or_custom_css_bootstrap](assets/images/figures/layout_no_logo_or_custom_css_bootstrap.png)
 
 图 5.2：没有定义 CSS 的“首页”（[/static_pages/home](http://localhost:3000/static_pages/home)）
 
