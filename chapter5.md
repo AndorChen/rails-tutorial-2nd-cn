@@ -26,7 +26,7 @@ $ git checkout -b filling-in-layout
 在示例程序中加入连接和样式的第一步，我们要修改布局文件 `application.html.erb`（上次使用是在代码 4.3 中），添加一些 HTML 结构。我们要添加一些区域，一些 CSS class，以及网站导航。布局文件的内容参见代码 5.1，对各部分代码的说明紧跟其后。如果你迫不及待的想看到结果，请查看图 5.2。（注意：结果（还）不是很让人满意。）
 要在示例程序中添加链接和样式，首先我们要给 `application.html.erb` 这个文件（上次见到它是在[代码 4.3]里）增加一些 HTML 结构。添加一些区域、一些 CSS 类、以及网站导航条。这个文件的全部内容在[代码 5.1](#list-5-1)中，下面我们会对各部分代码进行解释，如果你实在等不及，[图 5.2](#figure-5.2)是最终结果。（注：虽然是最终结果，但其实不是那么让人满意）
 
-<p id="list-5-1">**代码 5.1**<p> 添加一些结构后的网站布局文件 <br />`app/views/layouts/application.html.erb`
+<p id="list-5-1"><p>**代码 5.1** 添加一些结构后的网站布局文件 <br />`app/views/layouts/application.html.erb`
 
 {% highlight erb %}
 <!DOCTYPE html>
@@ -145,7 +145,7 @@ $ git checkout -b filling-in-layout
 
 这里用到了 Rails 的 `link_to` 帮助方法来创建链接（之前在 [3.3.2 节](chapter3.html#sec-3-3-2)中我们都是直接用 `a` 标签来实现的）；`link_to` 方法可以有三个参数，第一个参数是链接文本，第二个是链接地址。到[5.3.3 节]的时候我们会通过设置路由来为链接制定地址，现在先拿占位符 `#` 将就一下。第三个参数则是可选的，是一个哈希数组，上面我们用它来为这个链接添加了一个 CSS id `logo`。（另外三个链接没有第三个参数，因为这个参数并不是必须的。）可选的哈希参数在 Rails 的帮助方法中经常会用到，通过它我们可以为 HTML 标签灵活的添加各种属性。
 
-`div` 中的第二个元素是一个列表形式的导航链接，使用了无需列表的标签 `ul`，以及列表项目标签 `li`：
+`div` 中的第二个元素是一个列表形式的导航链接，使用了无序列表的标签 `ul`，以及列表项目标签 `li`：
 
 {% highlight erb %}
 <nav>
@@ -181,7 +181,7 @@ $ git checkout -b filling-in-layout
 
 整个布局基本完成了（剩下的网站底部，我们会在[5.1.3 节](#sec-5-1-3)添加），访问 Home 页面就可以看到结果。为了用到上面添加的内容，我们还得往 `home.html.erb` 里面加些额外的东西。（[代码 5.2](#list-5-2)）
 
-<p id="list-5-2">**代码 5.2**</p> “首页”的代码，包含一个到注册页面的链接 <br />`app/views/static_pages/home.html.erb`
+<p id="list-5-2"></p>**代码 5.2** “首页”的代码，包含一个到注册页面的链接 <br />`app/views/static_pages/home.html.erb`
 
 {% highlight erb %}
 <div class="center hero-unit">
@@ -223,13 +223,14 @@ $ git checkout -b filling-in-layout
 
 图 5.2：没有定义 CSS 的“首页”（[/static_pages/home](http://localhost:3000/static_pages/home)）
 
-<h3 id="sec-5-1-2">5.1.2 Bootstrap 和自定义的 CSS</h3>
+<h3 id="sec-5-1-2">5.1.2 Bootstrap 和自定义 CSS</h3>
 
-在 [5.1.2 节](#sec-5-1-2)我们为很多 HTML 元素指定了 CSS class，这样我们就可以使用 CSS 灵活的构建布局了。[5.1.1 节](#sec-5-1-1)中已经说过，很多 class 在 Bootstrap 中都有特殊的意义。Bootstrap 是 Twitter 开发的框架，可以方便的把精美的 Web 设计和用户界面元素添加到使用 HTML5 开发的应用程序中。本节，我们会结合 Bootstrap 和一些自定义的 CSS 为示例成成添加样式。
+在[5.1.1节](#sec-5-1-1)我们给很多 HTML 元素都指定了 CSS class，这样就可以很方便的利用 CSS 来构建布局了。 [5.1.1 节](#sec-5-1-1)里就说过， Twitter 提供的 [Bootstrap](http://twitter.github.com/bootstrap/) 框架，可以方便的把精美的 Web 设计和用户界面元素加入到一个使用 HTML5的 应用中，而我们指定的这些 CSS class 在这个框架里也都有专门的用途。这一节里，我们就会用到 Bootstrap，并且自定义一些 CSS 来改变现在的这个应用。
 
-首先要安装 Bootstrap，在 Rails 程序中可以使用 bootstrap-sass 这个 gem，参见代码 5.3。Bootstrap 框架本身使用 LESS 来动态的生成样式表，而 Rails 的 asset pipeline 默认支持的是（非常类似的）Sass，bootstrap-sass 会将 LESS 转换成 Sass 格式，而且 Bootstrap 中必要的文件都可以在当前的应用程序中使用。<sup>[5](#fn-5)</sup>
+第一步自然是安装 Bootstrap，在 Rails 程序里可以直接使用 bootstrap-sass 这个 gem，参见[代码 5.3](#list-5-3)。Bootstrap 框架本身使用的是 [LESS CSS](http://lesscss.org/)语言来生成动态的样式表，不过，Rails 默认支持的是和它很像的 Sass 语言（[5.2 节](#sec-5-2)），所以需要让 bootstrap-sass 把 LESS 转换成 Sass，而且让 Bootstrap 中所有必须用到的文件都可以在当前的这个程序里使用。[^5]
 
-**代码 5.3** 把 bootstrap-sass 加入 `Gemfile`
+
+<p id="list-5-3">**代码 5.3**</p>把 bootstrap-sass 加入 `Gemfile`
 
 {% highlight ruby %}
 source 'https://rubygems.org'
@@ -241,43 +242,45 @@ gem 'bootstrap-sass', '2.0.4'
 .
 {% endhighlight %}
 
-像往常一样，运行 `bundle install` 安装 Bootstrap：
+运行 `bundle install` 来安装：
 
 {% highlight sh %}
 $ bundle install
 {% endhighlight %}
 
-然后重启 Web 服务器，改动才能在应用程序中生效。（在大多数系统中可以使用 Ctrl-C 结束服务器，然后再执行 `rails server` 命令。）
+因为修改了 Gemfile，所以必须重启 Web 服务器之后，改动才能生效。（一般是按 Ctrl-C 然后运行 `rails server`）
 
-要向应用程序中添加自定义的 CSS，首先要创建一个 CSS 文件：
+想要给应用添加自定义的 CSS，就得先创建一个 CSS 文件：
 
 {% highlight text %}
 app/assets/stylesheets/custom.css.scss
 {% endhighlight %}
 
-（使用你喜欢的文本编辑器或者 IDE 创建这个文件。）文件存放的目录和文件名都很重要。其中目录
+（用文本编辑器还是 IDE 创建这个文件，随你）文件存放的目录和文件名都很重要。下面是目录
 
 {% highlight text %}
 app/assets/stylesheets
 {% endhighlight %}
 
-是 asset pipeline 的一部分（[5.2 节](#sec-5-2)），这个目录中的所有样式表都会自动的包含在网站的 `application.css` 中。`custom.css.scss` 文件的第一个扩展名是 `.css`，说明这是个 CSS 文件；第二个扩展名是 `.scss`，说明这是个“Sassy CSS”文件。asset pipeline 会使用 Sass 处理这个文件。（在 [5.2.2 节](#sec-5-2-2)中才会使用 Sass，bootstrap-sass 有了它才能运作。）创建了自定义 CSS 所需的文件后，我们可以使用 `@import` 引入 Bootstrap，如代码 5.4 所示。
+这个目录是 asset pipeline 的一部分，目录中的所有样式表都会自动被引入到网站布局的 `application.css` 中。此外，`custom.css.scss` 的文件扩展名中的 `.css` 表明这是个 CSS 文件，而 `.scss` 部分则表明这同时也是一个“Sassy CSS”文件，并且通知了 asset pipeline 使用 Sass 来处理这个文件。（到[5.2.2 节](#sec-5-2-2)我们才会用到 Sass，不过现在需要它才能让 bootstrap-sass 运行起来。）
 
-**代码 5.4** 引入 Bootstrap <br />`app/assets/stylesheets/custom.css.scss`
+新建完文件之后，我们就可以使用 `@import` 来引入 Bootstrap，参见[代码 5.4](#list-5-4)
+
+<p id="list-5-4"></p>**代码 5.4** 引入 Bootstrap <br />`app/assets/stylesheets/custom.css.scss`
 
 {% highlight css %}
 @import "bootstrap";
 {% endhighlight %}
 
-这行代码会引入整个 Bootstrap CSS 框架，结果如图 5.3 所示。（或许你要通过 Ctrl-C 来重启服务器。）文本的位置还不是很合适，LOGO 也没有任何样式，不过颜色搭配和注册按钮看起来不错。
+这样就引入了整个 Bootstrap CSS 框架，[图 5.4](#figure-5-4)是效果。（你可能还得重启一次服务器。）虽然，文本的位置不太对，LOGO 也一点形都没有，不过整体色调还有那个注册按钮看起来还蛮酷的。
 
-![sample_app_only_bootstrap](assets/images/figures/sample_app_only_bootstrap.png)
+<p id="figure-5-4"></p>![sample_app_only_bootstrap](assets/images/figures/sample_app_only_bootstrap.png)
 
 图 5.3：使用 Bootstrap CSS 后的示例程序
 
-下面我们要加入一些整站都会用到的 CSS，用来样式化网站布局和各单独页面，如代码 5.5 所示。代码 5.5 中定义了很多样式规则。为了说明 CSS 规则的作用，我们经常会加入一些 CSS 注释，注释放在 `/*...*/` 中。代码 5.5 的 CSS 加载后的效果如图 5.4。
+下面我们要添加一些 CSS，给整个网站布局和各个单独的页面增加一些样式。[代码 5.5](#list-5-5)里规则挺多的，为了便于理解，我们会加入一些注释，注释要放在 `/* ... */` 里面。加载了这部分代码之后的效果在[图 5.4](#figure-5-4)。
 
-**代码 5.5** 添加全站使用的 CSS <br />`app/assets/stylesheets/custom.css.scss`
+<p id="list-5-5"></p>**代码 5.5** 添加全站使用的 CSS <br />`app/assets/stylesheets/custom.css.scss`
 
 {% highlight css %}
 @import "bootstrap";
@@ -309,11 +312,11 @@ textarea {
 }
 {% endhighlight %}
 
-![sample_app_universal](assets/images/figures/sample_app_universal.png)
+<p id="figure-5-4"></p>"![sample_app_universal](assets/images/figures/sample_app_universal.png)
 
-图 5.4：添加一些空白和其他的全局性样式
+图 5.4：添加一些空白和其他的全局样式
 
-注意代码 5.5 中的 CSS 格式是很统一的。一般来说，CSS 规则是通过 class、id、HTML 标签或者三者结合在一起来定义的，后面会跟着一些样式声明。例如：
+[代码 5.5](#list-5-5)中的 CSS 格式是很统一的。一般来说，CSS 分别通过 class、 id、 HTML 标签、或者三者结合来绑定后面的样式声明。举个栗子：
 
 {% highlight css %}
 body {
@@ -321,7 +324,7 @@ body {
 }
 {% endhighlight %}
 
-把页面的上内边距设为 60 像素。我们在 `header` 标签上指定了 `navbar-fixed-top` class，Bootstrap 就把这个导航条固定在页面的顶部。所以页面的上内边距会把主内容区和导航条隔开一段距离。下面的 CSS 规则：
+上面这段是用来指定页面的上边距为 60 像素。虽然，`header` 标签也在 `body` 中，不过我们为它指定了 `navbar-fixed-top` class，所以 Bootstrap 就把导航条放到了页面的最上端，于是这个上边距就正好把主内容区和导航条分开了。下面这段：
 
 {% highlight css %}
 .center {
@@ -329,11 +332,11 @@ body {
 }
 {% endhighlight %}
 
-把 `.center` class 的样式定义为 `text-align: center;`。`.center` 中的点说明这个规则是样式化一个 class。（我们会在代码 5.7 中看到，`#` 是样式化一个 id。）这个规则的意思是任何 class 为 `.center` 的标签（例如 `div`），其中包含的内容都会在页面中居中显示。（代码 5.2 中有用到这个 class。）
+把 `.center` class 的样式定义为 `text-align: center`。`.center` 中的那个点说明这是绑定在一个 class 上的。（在[代码 5.7](#list-5-7)里我们会看到 `#`，这个符号说明样式是绑定在一个 id 上。）所以，任何一个含有 `.center` class 的元素的内容都会在页面中居中显示。（[代码 5.2](#list-5-2) 中有用到这个 class。）
 
-虽然 Bootstrap 中包含了很精美的文字排版样式，我们还是要为网站添加一些自定义的规则，如代码 5.6 所示。（并不是所有的样式都会应用于“首页”，所有规则都会在网站中的某个地方用到。）代码 5.6 的效果如图 5.5 所示。
+虽然 Bootstrap 本身的排版样式就很漂亮，我们还是得给网站的文字显示自定义一些样式，具体见[代码 5.6](#list-5-6)。（有些规则并不会应用在 Home 页面，不过这里的规则都绝对会在这个应用中用到。）效果看[图 5.5](#figure-5-5)
 
-**代码 5.6** 添加一些精美的文字排版样式 <br />`app/assets/stylesheets/custom.css.scss`
+<p id="list-5-6"></p>**代码 5.6** 添加一些文字排版样式 <br />`app/assets/stylesheets/custom.css.scss`
 
 {% highlight css %}
 @import "bootstrap";
@@ -369,13 +372,14 @@ p {
 }
 {% endhighlight %}
 
-![sample_app_typography](assets/images/figures/sample_app_typography.png)
+<p id="figure-5-5"></p>![sample_app_typography](assets/images/figures/sample_app_typography.png)
 
 图 5.5：添加了一些文字排版样式
 
-最后，我们还要为只包含文本“sample app”的网站 LOGO 添加一些样式。代码 5.7 中的 CSS 样式会把文字变成全大写字母，还修改了文字大小、颜色和位置。（我们使用的是 id，因为我们希望 LOGO 在页面中只出现一次，不过你也可以使用 class。）
+最后，我们就要给网站LOGO添加样式了，这个LOGO现在还是可怜的纯文本 “sample app”。[代码 5.7](#list-5-7)中的 CSS 把文字变成了大写字母，还改变了文字的字号、颜色和文职。（我这里是用的 id 来指定样式，因为网站LOGO只会在页面中出现一次，不过其实你也可以用 class 来代替）
 
-**代码 5.7** 添加网站 LOGO 的样式 <br />`app/assets/stylesheets/custom.css.scss`
+
+<p id="list-5-7"></p>**代码 5.7** 添加网站 LOGO 的样式 <br />`app/assets/stylesheets/custom.css.scss`
 
 {% highlight css %}
 @import "bootstrap";
@@ -399,21 +403,22 @@ p {
 
 #logo:hover {
   color: #fff;
-  text-decoration: none;
+  text-decoration: none;     
 }
 {% endhighlight %}
 
-其中 `color: #fff;` 会把 LOGO 文字的颜色变成白色。HTML 中的颜色代码是由 3 个 16 进制数组成的，分别代表了三原色中的红、绿、蓝。`#ffffff` 是 3 中颜色都为最大值的情况，代表了纯白色。`#fff` 是 `#ffffff` 的简写形式。CSS 标准中为很多常用的 HTML 颜色定义了别名，例如代表 `#fff` 的 `white`。代码 5.7 中的样式效果如图 5.6 所示。
+这里的 `color: #fff` 会把LOGO的文字颜色变成白色。HTML 中的颜色可以由 3 个 16 进制数组成，分别表示红绿蓝这三种颜色的值。`#ffffff` 表示三种颜色都是最大值，效果就是白色，可以简写成 `#fff`。CSS 标准里给很多常用的 [HTML 颜色](http://www.w3schools.com/html/html_colornames.asp)都定义了别名，比如 `white` 就是 `#fff` 的别名。效果见[图 5.6](#figure-5-6)
 
-![sample_app_logo](assets/images/figures/sample_app_logo.png)
+<p id="figure-5-6"></p>![sample_app_logo](assets/images/figures/sample_app_logo.png)
 
 图 5.6：样式化 LOGO 后的示例程序
 
 <h3 id="sec-5-1-3">5.1.3 局部视图</h3>
 
 虽然代码 5.1 中的布局达到了目的，但它的内容看起来有点混乱。HTML shim 就占用了三行，而且使用了只针对 IE 的奇怪句法，所以如果能把它打包放在一个单独的地方就好了。头部的 HTML 自成了一个逻辑单元，所以可以把这部分也打包放在某个地方。我们在 Rails 中可以使用局部视图来实现这种想法。先来看一下定义了局部视图之后的布局文件（参见代码 5.8）。
+虽然[代码 5.1](#list-5-1)中的布局达到了目标，不过代码看起来还是有点混乱。其中， HTML shim 就占用了三行，而且还使用了只针对 IE 的奇怪句法，所以如果能把这些打包起来放在一个地方就好了。头部的 HTML 本身组成了一个逻辑但元，所以，这部分也应该打包出来。上面说的这些，在 Rails 中我们都是用一种叫 partial 的技术来实现的。先看一下，使用了 partial 之后的布局文件（见[代码 5.8](#list-5-8)）
 
-**代码 5.8** 定义了 HTML shim 和头部局部视图之后的网站布局 <br />`app/views/layouts/application.html.erb`
+<p id="list-5-8"></p>**代码 5.8** 定义了 HTML shim 和头部局部视图之后的网站布局 <br />`app/views/layouts/application.html.erb`
 
 {% highlight erb %}
 <!DOCTYPE html>
@@ -434,17 +439,18 @@ p {
 </html>
 {% endhighlight %}
 
-代码 5.8 中，我们把加载 HTML shim 的那几行代码换成了对 Rails 帮助函数 `render` 的调用：
+[代码 5.8](#list-5-8)中，我们通过调用一个 Rails 帮助方法 `render` ，替换掉了那三行 HTML shim。
 
 {% highlight erb %}
 <%= render 'layouts/shim' %>
 {% endhighlight %}
 
-这行代码会寻找一个名为 `app/views/layouts/_shim.html.erb` 的文件，执行文件中的代码，然后把结果插入视图。<sup>[6](#fn-6)</sup>（回顾一下，执行 Ruby 表达式并将结果插入到模板中要使用 `<%=...%>`。）注意文件名 `_shim.html.erb` 的开头是个下划线，这个下划线是局部视图的命名约定，可以在目录中快速定位所有的局部视图。
+这行的作用就是找到并处理一个叫 `app/views/layouts/_shim.html.erb` 的文件，然后把里面的内容插入到视图中去。[^6]（回忆一下，这个 <%= ... %> 是用来插入 Ruby 表达式，然后再把运算之后的内容插入到模板中去的）注意文件名前面的那个下划线；这是 paritial 中的命名约定，这样就可以在目录中快速定位到 partial 文件。
 
 当然，若要局部视图起作用，我们要写入相应的内容。本例中的 HTML shim 局部视图只包含三行代码，如代码 5.9 所示。
+想要 partial 起作用，就得写入相应的内容。这个 partial 只需要 [代码 5.1](list-5-1)中的那三行就够了。见[代码5.9](#list-5-9)
 
-**代码 5.9** HTML shim 局部视图 <br />`app/views/layouts/_shim.html.erb`
+<p id="list-5-9"></p>**代码 5.9** HTML shim partial <br />`app/views/layouts/_shim.html.erb`
 
 {% highlight erb %}
 <!--[if lt IE 9]>
@@ -452,9 +458,9 @@ p {
 <![endif]-->
 {% endhighlight %}
 
-类似的，我们可以把头部的内容移入局部视图，如代码 5.10 所示，然后再次调用 `render` 把这个局部视图插入布局中。
+我们也需要头部的内容移到 partial 中，见[代码 5.10](#list-5-10)，然后用 `render` 再把这部分插入到布局中去。
 
-**代码 5.10** 网站头部的局部视图 <br />`app/views/layouts/_header.html.erb`
+**代码 5.10** 网站头部的 partial <br />`app/views/layouts/_header.html.erb`
 
 {% highlight erb %}
 <header class="navbar navbar-fixed-top">
@@ -473,9 +479,10 @@ p {
 </header>
 {% endhighlight %}
 
-现在我们已经知道怎么创建局部视图了，让我们来加入和头部对应的网站底部吧。你或许已经猜到了，我们会将这个局部视图命名为 `_footer.html.erb`，放在布局目录中（参见代码 5.11）。<sup>[7](#fn-7)</sup>
 
-**代码 5.11** 网站底部的局部视图 <br />`app/views/layouts/_footer.html.erb`
+知道怎么创建 partial 了，我们就来给网站加入底部吧。照规矩，这个底部 partial 就叫做 `_footer.html.erb`，也放在 layouts 目录中（[代码5.11](#list-5-11)）。[^7]
+
+<p id="list-5-11"></p>**代码 5.11** 网站底部的 parial <br />`app/views/layouts/_footer.html.erb`
 
 {% highlight erb %}
 <footer class="footer">
@@ -493,11 +500,12 @@ p {
 </footer>
 {% endhighlight %}
 
-和头部类似，在底部我们使用 `link_to` 创建到“关于”页面和“联系”页面的链接，地址暂时使用占位符 `#`。（和 `header` 一样，`footer` 标签也是 HTML5 新增加的。）
+和头部一样，在底部我们也用了 `link_to` 创建了指向 “About”页面和 “Contact”页面的链接，地址还是用占位符代替。（`header` 和 `footer` 都是 HTML5 中新加入的标签）
 
 按照 HTML shim 和头部局部视图采用的方式，我们也可以在布局视图中渲染底部局部视图。（参见代码 5.12。）
+渲染底部 partial 的方法和其他也是一样的（见[代码 5.12](#list-5-12)）
 
-**代码 5.12** 网站的布局，包含底部局部视图 <br />`app/views/layouts/application.html.erb`
+<p id="list-5-12"></p>**代码 5.12** 网站的布局，包含底部 partial <br />`app/views/layouts/application.html.erb`
 
 {% highlight erb %}
 <!DOCTYPE html>
@@ -519,9 +527,10 @@ p {
 </html>
 {% endhighlight %}
 
-当然，如果没有样式的话，底部还是很丑的（样式参见代码 5.13）。效果如图 5.7。
+当然，如果没有样式的话，底部还是很丑的（样式参见[代码 5.13](#list-5-13)）。效果见[图 5.7](#figure-5-7)。
 
-**代码 5.13** 添加底部所需的 CSS <br />`app/assets/stylesheets/custom.css.scss`
+
+<p id="list-5-13"></p>**代码 5.13** 添加底部所需的 CSS <br />`app/assets/stylesheets/custom.css.scss`
 
 {% highlight scss %}
 .
@@ -560,7 +569,7 @@ footer ul li {
 }
 {% endhighlight %}
 
-![site_with_footer_bootstrap](assets/images/figures/site_with_footer_bootstrap.png)
+<p id="figure-5-7"></p>![site_with_footer_bootstrap](assets/images/figures/site_with_footer_bootstrap.png)
 
 图 5.7：添加底部后的“首页”（[/static_pages/home](http://localhost:3000/static_pages/home)）
 
