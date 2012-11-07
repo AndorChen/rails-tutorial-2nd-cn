@@ -680,13 +680,14 @@ Asset pipeline 带来的好处之一是它会自动在生产环境中优化资�
 
 <h3 id="sec-5-2-2">5.2.2 句法强大的样式表</h3>
 
-Sass 是一种编写样式表的语言，它从多方面增强了 CSS 的功能。本节我们会介绍其中两个最主要的，嵌套和变量。（还有一个是 mixin，会在 [7.1.1 节](chapter7.html#7-1-1)中介绍。）
+Sass 是一种在很多方面都超越了 CSS 的样式表编写语言。这节我们会介绍其中最重要的两个特点，嵌套和变量。（另一个是 mixin，会在 [7.1.1 节](chapter7.html#7-1-1)中介绍。）
 
-如 [5.1.2 节](#sec-5-1-2)中的简单介绍，Sass 支持一种名为 SCSS 的格式（扩展名为 `.scss`），这是 CSS 句法的一个扩展集。SCSS 只是为 CSS 添加了一些功能，而没有定义全新的句法。<sup>[9](#fn-9)</sup> 也就是说，所有合法的 CSS 文件都是合法的 SCSS 文件，这对已经定义了样式的项目来说是件好事。在我们的程序中，从一开始就使用了 SCSS，因为我们要使用 Bootstrap。Rails 的 asset pipeline 会自动使用 Sass 处理器处理扩展名为 `.scss` 的文件，所以 `custom.css.scss` 文件会首先经由 Sass 预处理器处理，然后引入程序的样式表中，再发送给浏览器。
+[5.1.2 节](#sec-5-1-2)中介绍过，Sass 支持一种叫 SCSS 的格式（扩展名为 `.scss`），这是 CSS 的一个超集，也就是说， 任何 CSS 的语法在 SCSS 中都是有效的，SCSS 只是又添加了一部分特性而已。[^9] 在这个例子里，我们为了使用 Bootstrap，从一开始就用到了 SCSS。因为 Rails 的 asset pipeline 会自动对扩展名为 `.scss` 的文件使用 Sass 来处理，所以 `custom.css.scss` 会先被 Sass 预处理器处理，然后打包发送给浏览器。
+
 
 #### 嵌套
 
-样式表中经常会定义嵌套元素的样式，例如，在代码 5.1 中，定义了 `.center` 和 `.centr h1` 两个样式：
+样式表中经常会定义嵌套元素，比如在[代码 5.1](#list-5-1)中，定义了 `.center` 和  `.center h1` 两个样式：
 
 {% highlight css %}
 .center {
@@ -698,7 +699,7 @@ Sass 是一种编写样式表的语言，它从多方面增强了 CSS 的功能�
 }
 {% endhighlight %}
 
-使用 Sass 可将其改写成
+用 Sass 来改写之后
 
 {% highlight scss %}
 .center {
@@ -709,9 +710,9 @@ Sass 是一种编写样式表的语言，它从多方面增强了 CSS 的功能�
 }
 {% endhighlight %}
 
-上面代码中的 `h1` 会自动潜入 `.center` 中。
+嵌套的 `h1` 会自动继承 `.center` 中的定义。
 
-嵌套还有另一种形式，句法稍有不同。在代码 5.7 中，有如下的代码
+嵌套还有一种写法，语法稍有不同。在[代码 5.1](#list-5-7)中有这段
 
 {% highlight css %}
 #logo {
@@ -732,7 +733,7 @@ Sass 是一种编写样式表的语言，它从多方面增强了 CSS 的功能�
 }
 {% endhighlight %}
 
-其中 LOGO 的 id `#logo` 出现了两次，一次是单独出现的，另一次是和 `hover` 伪类一起出现的（鼠标悬停其上时的样式）。如要嵌套第二个样式，我们需要在引用父级元素 `#logo`，在 SCSS 中，使用 `&` 符号实现：
+其中 `#logo` 出现了了两次，一次是单独出现，另一次是标识 `hover` 属性时出现的（`hover` 是用来控制鼠标悬停于元素上时的样式）。要把第二个样式嵌套进第一个的话，就需要引用父级元素 `#logo`；在 SCSS 中，是用 `&` 符号来实现的：
 
 {% highlight scss %}
 #logo {
@@ -752,9 +753,9 @@ Sass 是一种编写样式表的语言，它从多方面增强了 CSS 的功能�
 }
 {% endhighlight %}
 
-把 SCSS 转换成 CSS 时，Sass 会把 `&:hover` 编译成 `#logo:hover`。
+Sass 在把 SCSS 转换成 CSS 的时候，会把 `&:hover` 编译成`#logo:hover`。
 
-这两种嵌套方式都可以用于代码 5.13 中的底部样式上，转换后的样式如下：
+应用这两种方法来改写[代码 5.13](#list-5-13) 中关于底部的 CSS，结果如下：
 
 {% highlight scss %}
 footer {
@@ -782,11 +783,11 @@ footer {
 }
 {% endhighlight %}
 
-自己动手转换一下代码 5.13 是个不错的练习，转换之后你应该验证一下 CSS 是否还能正常使用。
+自己动手转换一下这段代码是个不错的练习，不过之后你最好验证一下这些 CSS 是不是还能正常运作。
 
 #### 变量
 
-Sass 允许我们自定义变量来避免重复，这样也可以写出更具表现力的代码。例如，代码 5.6 和代码 5.13 中都重复使用了同一个颜色代码：
+在 Sass 中使用变量可以避免重复代码，也可以让代码更具表现力。比如在[代码 5.6](#list-5-6)和 [代码 5.13](#list-5-13) 中就有两段使用相同的颜色代码：
 
 {% highlight scss %}
 h2 {
@@ -806,13 +807,14 @@ footer {
 }
 {% endhighlight %}
 
-上面代码中的 `#999` 是淡灰色（ligh gray），我们可以为它定义一个变量：
+
+`#999` 代表浅灰色，我们可以为它定义一个变量：
 
 {% highlight scss %}
 $lightGray: #999;
 {% endhighlight %}
 
-然后我们就可以这样写 SCSS：
+改完之后就是这样：
 
 {% highlight scss %}
 $lightGray: #999;
@@ -836,13 +838,14 @@ footer {
 }
 {% endhighlight %}
 
-因为像 `$lightGray` 这样的变量名比 `#999` 更具说明性，所以为没有重复使用的值定义变量往往也是很有用的。Bootstrap 框架定义了很多颜色变量，[Bootstrap 页面中有这些变量的 LESS 形式](http://bootstrapdocs.com/v2.0.4/docs/less.html)。这个页面中的变量使用的是 LESS 句法，而不是 Sass 句法，不过 bootstrap-sass gem 为我们提供了对应的 Sass 形式。二者之间的对应关系不难猜出，LESS 使用 `@` 符号定义变量，而 Sass 使用 `$` 符号。在 Bootstrap 的变量页面我们可以看到为淡灰色定义的变量：
+因为像 `$lightGray` 这样的变量名明显要比 `#999` 这样的更具说明性，所以即使是为没有被重复使用的值定义变量也会很有帮助。Bootstrap 框架本身就定义了很多颜色变量，[这里能看到](http://bootstrapdocs.com/v2.0.4/docs/less.html)，这个页面里的变量定义是用的 LESS 语法，而不是 Sass， 不过没关系，bootstrap-sass 这个 gem为我们提供了相应的 Sass 形式的定义。LESS 用了 “at”符号 `@`，对应的 Sass 使用了美元符 `$`。在 Bootstrap 的变量页面我们可以看到为淡灰色定义的变量：
 
 {% highlight less %}
 @grayLight: #999;
 {% endhighlight %}
 
-也就是说，在 bootstrap-sass gem 中会有一个对应的 SCSS 变量 `$grayLight`。我们可以用它换掉自己定义的 `$lightGray` 变量：
+也就是说，在 bootstrap-sass gem 中会有一个对应的 SCSS 变量 `$grayLight`。我们可以用它换掉我们自己定义的 `$lightGray` 变量：
+
 
 {% highlight scss %}
 h2 {
@@ -862,9 +865,10 @@ footer {
 }
 {% endhighlight %}
 
-使用 Sass 提供的嵌套和定义变量功能后得到的完整 SCSS 文件如代码 5.15 所示。这段代码中使用了 Sass 形式的颜色变量（参照 Bootstrap 变量页面中定义的 LESS 形式的颜色变量）和内置的颜色名称（例如，`white` 代表 `#fff`）。特别注意一下对 `footer` 标签样式明显的改进。
 
-**代码 5.15** 使用嵌套和变量转后后的 SCSS 文件 <br />`app/assets/stylesheets/custom.css.scss`
+[代码5.15](#list-5-15)是使用嵌套和变量改写之后的完整 SCSS 文件。里面不光用到了 Sass 形式的颜色变量（就是参照 Bootstrap 中 LESS 形式转换的），也用到了内建的颜色代码（比如，`white` 代表 `#fff`）。特别要注意一下对 `footer` 标签样式的改进。
+
+<strong id="list-5-15">代码 5.15</strong> 使用嵌套和变量改写后的 SCSS 文件 <br />`app/assets/stylesheets/custom.css.scss`
 
 {% highlight scss %}
 @import "bootstrap";
@@ -971,9 +975,15 @@ footer {
 }
 {% endhighlight %}
 
-Sass 为我们提供了很多功能可以用来简化样式表，不过代码 5.15 只用到了最主要的功能，这是一个很好的开始。更多功能请查看 [Sass 网站](http://sass-lang.com/)。
-
+Sass 为我们提供了很多方式来简化样式表，[代码 5.15](#sec-5-15)中只用到了最主要的一部分，不过也算是开了个好头。更多功能请移步 [Sass 官网](http://sass-lang.com/)
 
 ------------------------------------
 [^1]:
 [^2]:
+[^3]:
+[^4]:
+[^5]:
+[^6]:
+[^7]:
+[^8]:
+[^9]:
