@@ -977,6 +977,236 @@ footer {
 
 Sass 为我们提供了很多方式来简化样式表，[代码 5.15](#sec-5-15)中只用到了最主要的一部分，不过也算是开了个好头。更多功能请移步 [Sass 官网](http://sass-lang.com/)
 
+<h2 id="sec-5-2"> 5.2 链接 </h1>
+
+既然完成了网站的布局样式，也就该把之前用 `#` 占位符将就一下的链接设置好了。我们当然可以直接手写 HTML 代码：
+
+{% highlight html %}
+<a href="/static_pages/about">About</a>
+{% endhighlight%}
+
+不过这很明显不合 Rails 的路子。首先，地址改成 /about 肯定要比 /static_pages/about 要好；再者说，Rails 的惯例是使用命名路由，就像下面这样：
+
+{% highlight erb %}
+<%= link_to "About", about_path %>
+{% endhighlight %}
+
+这样的代码意思更明显，而且以后修改 about_path 的时候也可以更灵活。
+
+我们之前计划的链接以及相应的地址和命名路由都在[表格 5.1](#table-5-1)里。除了最后那个，其他的在这章结束前我们都会实现。（最后那个会在[第 8 章](chapter8.html)实现）
+
+<figure id="table-5-1">
+ 页面     |URI       |命名路由
+:----------|:----------|:----------
+Home   |/            |root_path
+About   |/about  |about_path
+Help     |/help     |help_path
+Contact|/contact|contact_path
+Sign up |/signup |signup_path
+Sign in  |/signin  |signin_path
+<figcaption>表格 5.1: 链接以及相对应的 URI 和路由</figcaption>
+</figure>
+
+继续下一步之前，我们先添加一个 Contact 页面（[第 3 章](chapter3.html)里作为联系留下的）。相对的测试代码见[代码 5.16](#list-5-16)，也是按照[代码 3.18](chapter3.html#list-3-18)的模式写的。注意一点，我们已经开始使用 Ruby 1.9 的哈希风格。
+
+<strong id="list-5-16">代码 5.16</strong> Contact 页面的测试代码
+
+{% highlight text %}
+ spec/requests/static_pages_spec.rb 
+{% endhighlight %}
+
+{% highlight erb%}
+require 'spec_helper'
+
+describe "Static pages" do
+  .
+  .
+  .
+  describe "Contact page" do
+
+    it "should have the h1 'Contact'" do
+      visit '/static_pages/contact'
+      page.should have_selector('h1', text: 'Contact')
+    end
+
+    it "should have the title 'Contact'" do
+      visit '/static_pages/contact'
+      page.should have_selector('title',
+                    text: "Ruby on Rails Tutorial Sample App | Contact")
+    end
+  end
+end
+{% endhighlight %}
+
+这部分代码的测试应当失败：
+
+{% highlight sh %}
+$ bundle exec rspec spec/requests/static_pages_spec.rb
+{% endhighlight %}
+
+我们需要写的应用代码和 About 页面的 [代码 3.2.2](chapter3.html#list-3-2-2) 差不多：首先修改路由（[代码 5.17](#list-5-17)），然后在 StaticPages controller 中添加 `contact` action（[代码 5.18](#list-5-18)），最后创建页面试图（[代码 5.19](#list-5-19)）
+
+<strong id="list-5-17">代码 5.17</strong> 为 Contact 页面添加路由
+
+{% highlight text %}
+ config/routes.rb 
+{% endhighlight %}
+
+{% highlight erb %}
+SampleApp::Application.routes.draw do
+  get "static_pages/home"
+  get "static_pages/help"
+  get "static_pages/about"
+  get "static_pages/contact"
+  .
+  .
+  .
+end
+{% endhighlight %}
+
+<strong id="list-5-18">代码 5.18</strong> 为 Contact 页面添加 action
+
+{% highlight text %}
+ app/controllers/static_pages_controller.rb 
+{% endhighlight %}
+
+{% highlight erb %}
+class StaticPagesController < ApplicationController
+  .
+  .
+  .
+  def contact
+  end
+end
+{% endhighlight %}
+
+<strong id="list-5-19">代码 5.19</strong> 为 Contact 页面添加试图
+
+% highlight text %}
+ app/views/static_pages/contact.html.erb 
+{% endhighlight %}
+
+{% highlight erb %}
+<% provide(:title, 'Contact') %>
+<h1>Contact</h1>
+<p>
+  Contact Ruby on Rails Tutorial about the sample app at the
+  <a href="http://railstutorial.org/contact">contact page</a>.
+</p>
+{% endhighlight %}
+
+现在再运行测试就应该能通过了：
+
+{% highlight sh %}
+$ bundle exec rspec spec/requests/static_pages_spec.rb
+{% endhighlight %}
+
+<h3 id="sec-5-3-1">5.3.1</h3> 测试路由
+
+写完 static pages 的测试之后，路由的测试就很简单了：只需要把原始地址改成我们在 [表格 5.1](#table-5.1) 期望的命名路由就行。也就是说，把下面这个
+
+{% highlight erb %}
+visit '/static_pages/about'
+{% endhighlight %}
+
+改成这样
+
+{% highlight erb %}
+visit about_path
+{% endhighlight %}
+
+依次类推。完整代码见 [代码 5.20](#list-5-20)
+
+<strong id="list-5-20">代码 5.20</strong> 命名路由的测试代码
+
+{% highlight text %}
+ spec/requests/static_pages_spec.rb 
+{% endhighlight %}
+
+{% highlight erb %}
+require 'spec_helper'
+
+describe "Static pages" do
+
+  describe "Home page" do
+
+    it "should have the h1 'Sample App'" do
+      visit root_path
+      page.should have_selector('h1', text: 'Sample App')
+    end
+
+    it "should have the base title" do
+      visit root_path
+      page.should have_selector('title',
+                        text: "Ruby on Rails Tutorial Sample App")
+    end
+
+    it "should not have a custom page title" do
+      visit root_path
+      page.should_not have_selector('title', text: '| Home')
+    end
+  end
+
+  describe "Help page" do
+
+    it "should have the h1 'Help'" do
+      visit help_path
+      page.should have_selector('h1', text: 'Help')
+    end
+
+    it "should have the title 'Help'" do
+      visit help_path
+      page.should have_selector('title',
+                        text: "Ruby on Rails Tutorial Sample App | Help")
+    end
+  end
+
+  describe "About page" do
+
+    it "should have the h1 'About'" do
+      visit about_path
+      page.should have_selector('h1', text: 'About Us')
+    end
+
+    it "should have the title 'About Us'" do
+      visit about_path
+      page.should have_selector('title',
+                    text: "Ruby on Rails Tutorial Sample App | About Us")
+    end
+  end
+
+  describe "Contact page" do
+
+    it "should have the h1 'Contact'" do
+      visit contact_path
+      page.should have_selector('h1', text: 'Contact')
+    end
+
+    it "should have the title 'Contact'" do
+      visit contact_path
+      page.should have_selector('title',
+                    text: "Ruby on Rails Tutorial Sample App | Contact")
+    end
+  end
+end
+{% endhighlight %}
+
+照旧，还是跑一遍测试，应该是没通过：
+
+{%  highlight sh %}
+$ bundle exec rspec spec/requests/static_pages_spec.rb
+{% endhighlight %}
+
+如果[代码 5.20](#list-5-20) 让你觉得裹脚布一样又臭又长，不要担心，我们会在 [5.3.4 节](#sec-5-3-4) 重构它的。
+
+<h3 id="sec-5-3-2">5.3.2</h3> Rails 路由
+
+
+
+
+
+
+
 ------------------------------------
 [^1]:
 [^2]:
