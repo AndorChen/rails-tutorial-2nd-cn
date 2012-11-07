@@ -575,42 +575,44 @@ footer ul li {
 
 <h2 id="sec-5-2">5.2 Sass 和 asset pipeline</h2>
 
-Rails 3.0 与较新版之间的主要不同之一是 asset pipeline，这个功能可以明显提高如 CSS、JavaScript和图片等静态资源文件的生成和管理效率。本节我们会概览一下 asset pipeline，然后再介绍如何使用 Sass 这个生成 CSS 很强大的工具，Sass 现在是 asset pipeline 默认的一部分。
+asset pipeline 是 Rails 3.0 与之后版本之间最显著的区别之一，它可以明显提高像 CSS、JavaScript 和图片这样的静态资源的生成和管理效率。这节会概览一下 asset pipeline，并展示如何 Sass 这个工具来生成 CSS。
 
-<h3 id="sec-5-1-1">5.1.1 Asset pipeline</h3>
+<h3 id="sec-5-2-1">5.2.1 Asset pipeline</h3>
 
-Asset pipeline 对 Rails做了很多改动，但对 Rails 开发者来说只有三个特性需要了解：资源目录，清单文件（manifest file），还有预处理器引擎（preprocessor engine）。<sup>[8](#fn-8)</sup> 让我们一个一个的学习。
+为了实现新加入的 asset pipeline 功能，其实在 Rails 底层做了很多改变，不过对于 Rails 开发者来说，需要理解的只有三点： asset 目录，清单文件和预处理引擎。[^8]我们按顺序过一遍好了。
 
 #### 资源目录
 
-在 Rails 3.0 之前（包括 3.0），静态文件分别放在如下的 `public/` 目录中：
+在 Rails 3.1 之前的版本中，静态资源分别存放在如下的 `public/` 目录中：
 
-- `public/stylesheets`
-- `public/javascripts`
-- `public/images`
+* `public/stylesheets`
+* `public/javascripts`
+* `public/images`
 
-这些文件夹中的文件通过请求 http://example.com/stylesheets 等地址直接发送给浏览器。（Rails 3.0 之后的版本也会这么做。）
+放在这些目录中的文件，通过像 http://example.com/stylesheets 这样的地址可以直接访问（Rails 3.0 之后的版本也可以）。
 
-从 Rails 3.1 开始，静态文件可以存放在三个标准的目录中，各有各的用途：
+不过从 Rails 3.1 开始，标准的做法是将静态资源放在下面这三个目录中：
 
-- `app/assets`：存放当前应用程序用到的资源文件
-- `lib/assets`：存放开发团队自己开发的代码库用到的资源文件
-- `vendor/assets`：存放第三方代码库用到的资源文件
+* `app/assets`：存放当前应用程序用到的资源文件
+* `lib/assets`：存放开发团队自己开发的代码库用到的资源文件
+* `vendor/assets`：存放第三方代码库用到的资源文件
 
-你可能猜到了，上面的目录中都会有针对不同资源类型的子目录。例如：
+
+你大概也想到了，上面的这些目录都有相对各种资源的子目录。比如：
 
 {% highlight sh %}
 $ ls app/assets/
 images      javascripts stylesheets
 {% endhighlight %}
 
-现在我们就可以知道 [5.1.2 节](#sec-5-1-2)中 `custom.css.scss` 存放位置的用意：因为 `custom.css.scss` 是应用程序本身用到的，所以把它存放在 `app/assets/stylesheets` 中。
+
+这下我们就知道在 [5.1.2 节](#sec-5-1-2) 要把 `custom.css.scss` 放在 `app/assets/stysheets` 里的原因了：因为 `custom.css.scss` 是应用本身要用到的，所以，你懂的。
 
 #### 清单文件
 
-当你把资源文件存放在适当的目录后，要通过清单文件告诉 Rails（使用 [Sprockets](https://github.com/sstephenson/sprockets) gem）怎么把它们合并成一个文件。（只适用于 CSS 和 JavaScript，而不会处理图片。）举个例子说明一下，让我们看一下应用程序默认的样式表清单文件（参见代码 5.14）。
+资源文件放对了地方之后，就可以通过清单文件来告诉 Rails（使用 [Sprockets](https://github.com/sstephenson/sprockets) gem）怎么把这些东西组合起来。（只对 CSS 和 JavaScript 起作用，不会包括图片）比方说，看下面这个默认的样式清单文件（[代码 5.14](#list-5-14)）
 
-**代码 5.14** 应用程序用到的 CSS 文件的清单文件 <br />`app/assets/stylesheets/application.css`
+<strong id="list-5-14">代码 5.14</strong> 应用程序的 CSS 文件的清单文件 <br />`app/assets/stylesheets/application.css`
 
 {% highlight css %}
 /*
@@ -624,7 +626,7 @@ images      javascripts stylesheets
 */
 {% endhighlight %}
 
-这里的关键代码是几行 CSS 注释，Sprockets 通过这些注释加载相应的文件：
+虽然这里只有几行 CSS 注释，不过 Sprockets 还是可以通过它夹杂相应的文件：
 
 {% highlight css %}
 /*
@@ -636,13 +638,13 @@ images      javascripts stylesheets
 */
 {% endhighlight %}
 
-上面代码中的
+看好，
 
 {% highlight text %}
 *= require_tree .
 {% endhighlight %}
 
-会把 `app/assets/stylesheets` 目录中的所有 CSS 文件都引入应用程序的 CSS 文件中。
+上面这行会把 `app/assets/stylesheets` 目录及其子目录中的所有 CSS 文件都引入进来。
 
 下面这行：
 
@@ -650,31 +652,31 @@ images      javascripts stylesheets
 *= require_self
 {% endhighlight %}
 
-会把 `application.css` 这个文件中的 CSS 也加载进来。
+会确保 `application.css` 这个文件本身也能被加载进来。
 
-Rails 提供了一个合用的默认清单文件，所以本书不会对其做任何修改。Rails 指南中有一篇专门[介绍 asset pipeline 的文章](http://guides.rubyonrails.org/asset_pipeline.html)，该文有你需要知道的更为详细的内容。
+Rails 默认的清单文件就很好用，所以我们不需要做任何修改。如果想进一步了解的话，[Rails Guides 中介绍 asset pipeline](http://guides.rubyonrails.org/asset_pipeline.html)的部分值得一看。
 
 #### 预处理器引擎
 
-准备好资源文件后，Rails 会使用一些预处理器引擎来处理它们，通过清单文件将其合并，然后发送给浏览器。我们通过扩展名告诉 Rails 要使用哪个预处理器。三个最常用的扩展名是：Sass 文件的 `.scss`，CoffeeScript 文件的 `.coffee`，ERb 文件的 `.erb`。我们在 [3.3.3 节](chapter3.html#sec-3-3-3)介绍过 ERb，[5.2.2 节](#sec-5-2-2)会介绍 Sass。本教程不需要使用 CoffeeScript，这是一个很小巧的语言，可以编译成 JavaScript。（RailsCast 中[关于 CoffeeScript 的视频](http://railscasts.com/episodes/267-coffeescript-basics)是个很好的入门教程。）
+搞定资源文件之后，Rails 会通过一些预处理引擎来处理，然后按照清单文件的设置将它们组合起来，再发送给浏览器。我们通过设置文件扩展名来告诉 Rails 究竟使用哪一个预处理引擎：最常用的三种扩展名分别是：Sass 的 `.scss`、 CoffeeScript 的`.coffee`和ERb的 `.erb`。ERb 和 Sass，我们在[3.3.3 节]和[5.2.2 节](#sec-5-2-2) 分别见过，而 最后会编译成 JavaScript 代码的 CoffeeScript 在本书里暂时还用不着（不过这种语言灰常优雅，[绝对值得一试](http://railscasts.com/episodes/267-coffeescript-basics)）
 
-预处理器引擎可以连接在一起使用，因此
+标识预处理引擎的扩展名可以连起来使用，比如下面这个就只会使用 CoffeeScript 处理
 
 {% highlight text %}
 foobar.js.coffee
 {% endhighlight %}
 
-只会使用 CoffeeScript 处理器，而
+而下面这个
 
 {% highlight text %}
 foobar.js.erb.coffee
 {% endhighlight %}
 
-会使用 CoffeeScript 和 ERb 处理器（按照扩展名的顺序从右向左处理，所以 CoffeeScript 处理器会先执行）。
+则会使用 CoffeeScript 和 ERb 来处理（按扩展名从右向左处理，所以会先运行 CoffeeScript）
 
 #### 在生产环境中的效率问题
 
-Asset pipeline 带来的好处之一是，它会自动优化资源文件，在生产环境中使用效果极佳。CSS 和 JavaScript 的传统组织方式是将不同功能的代码放在不同的文件中，而且代码的格式是对人类友好的（有很多缩进）。虽然这对编程人员很友好，但在生产环境中使用却效率底下。加载大量的文件会明显增加页面加载时间（这是影响用户体验最主要的因素之一）。使用 asset pipeline，生产环境中应用程序所有的样式都会集中到一个 CSS 文件中（`application.css`），所有 JavaScript 代码都会集中到一个 JavaScript 文件中（`javascript.js`），而且还会压缩这些文件（包括 `lib/assets` 和 `vendor/assets` 中的相关文件），把不必要的空格删除，减小文件大小。这样我们就最好的平衡了两方面的需求：编程人员使用格式友好的多个文件，生产环境中使用优化后的单个文件。
+Asset pipeline 带来的好处之一是它会自动在生产环境中优化资源文件。通常我们会把 CSS 和 JavaScript 按功能分成不同的文件村放，而且还会使用各种更便于阅读的格式，但是这只能给程序员带来方便，生产环境中这么做的效果很差；引入大量的文件会显著的拖慢网页加载（这是用户体验中最重要的一个影响因素）。有了 asset pipeline 之后，在生产环境下，所有的样式文件合并成一个，JavaScript 文件也一样，而像 `lib/assets` `vendor/assets` 里的文件则会通过删除不必要的空白符来见效文件体积。这样就两全其美了，程序员看到的是照惯例组织好的多个文件，生产环境中则优化成一个。
 
 <h3 id="sec-5-2-2">5.2.2 句法强大的样式表</h3>
 
