@@ -1101,7 +1101,7 @@ end
 $ bundle exec rspec spec/requests/static_pages_spec.rb
 {% endhighlight %}
 
-<h3 id="sec-5-3-1">5.3.1</h3> 测试路由
+<h3 id="sec-5-3-1">5.3.1 测试路由</h3> 
 
 写完 static pages 的测试之后，路由的测试就很简单了：只需要把原始地址改成我们在 [表格 5.1](#table-5.1) 期望的命名路由就行。也就是说，把下面这个
 
@@ -1199,8 +1199,401 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
 
 如果[代码 5.20](#list-5-20) 让你觉得裹脚布一样又臭又长，不要担心，我们会在 [5.3.4 节](#sec-5-3-4) 重构它的。
 
-<h3 id="sec-5-3-2">5.3.2</h3> Rails 路由
+<h3 id="sec-5-3-2">5.3.2 Rails 路由</h3> 
 
+URI 的测试写完了，就该想办法让测试通过了。[3.1.2 节](chapter3.html#sec-3-1-2) 里提过，Rails 里 URI 的配置文件是 `config/routes.rb`，如果你看过它的默认配置的话，肯定会觉得内容被无处不在的注释搞得一团糟，不过，这些注释还真的是很管用，通读之后对理解路由很有帮助。关于路由更深入的介绍在[Rails Guides](http://guides.rubyonrails.org/routing.html)。
+
+定义命名路由，需要把下面这样的配置
+
+{% highlight erb %}
+get 'static_pages/help'
+{% endhighlight %}
+
+改成下面这样
+
+{% highlight erb %}
+match '/help', to: 'static_pages#help'
+{% endhighlight %}
+
+以后，不管是 `/help` 还是 `help_path` 都会返回正确的页面，也就是 `static_pages/help`。（实际上，之前用 `get` 定义的配置效果也是一样的，不过使用 `match` 更符合传统一点）
+
+配置文件的全部内容见 [代码 5.21](#list-5-21)。我特意漏掉了 Home 页面，那部分会在 [代码 5.23](#list-5-23)里修改好。
+
+<strong id="list-5-21">代码 5.21</strong> 静态页面的路由
+
+{% highlight text %}
+ config/routes.rb 
+{% endhighlight %}
+
+{% highlight erb %}
+SampleApp::Application.routes.draw do
+  match '/help',    to: 'static_pages#help'
+  match '/about',   to: 'static_pages#about'
+  match '/contact', to: 'static_pages#contact'
+  .
+  .
+  .
+end
+{% endhighlight %}
+
+仔细阅读上面这段代码，你大概就已经理解它的作用了。
+
+{% highlight erb %}
+match '/about', to: 'static_pages#about'
+{% endhighlight %}
+
+这面这行将 `/about` 匹配到了 StaticPages controller 的 `about` action。之前我们采用的是直接指定的办法：
+
+{% highlight erb %}
+get `static_pages/about`
+{% endhighlight %}
+
+虽然都能返回正确页面，但 `/about` 明显更简洁。我们之前也提过，`match '/about'` 会自动为 controller 和 view 创建命名路由：
+
+{% highlight erb %}
+about_path => '/about'
+about_url  => 'http://localhost:3000/about'
+{% endhighlight %}
+
+注意到没有，`about_url` 实际上是一串完整的 URI 地址 http://localhost:3000/about （因为是本地环境，所以主域名是 localhost:3000，实际部署之后会变成 example.com 这样的）[5.3 节](#sec-5-3)里我们介绍过，要获取 /about，可以使用 `about_path`。本书里我们也会照惯例使用 `path` 格式，除非需要重定向，那时会用 `url` 格式的，这是因为，在处理重定向的时候，标准 HTTP 要求的是完整 URI 地址，不过现在大部分的浏览器，这两种情况都能处理。
+
+再跑一遍测试，Hep、About 和 Contact 页面的相关测试应该可以通过了：
+
+{% highlight sh %}
+$ bundle exec rspec spec/requests/static_pages_spec.rb
+{% endhighlight %}
+
+只剩下我们特意漏掉的 Home 页面没通过测试。
+
+添加以下代码：
+
+{% highlight erb %}
+match '/', to: 'static_pages#home'
+{% endhighlight %}
+
+其实没必要这么做，因为 Rails 提供了专门根路径 `/`构建方法，就在配置文件的最下方（[代码 5.22](#list-5-22)）。
+
+<strong id="list-5-22">代码 5.22</strong> 如何定义根路径路由的注释
+
+{% highlight text %}
+config/routes.rb
+{% endhighlight %}
+
+{% highlight erb %}
+SampleApp::Application.routes.draw do
+  .
+  .
+  .
+  # You can have the root of your site routed with "root"
+  # just remember to delete public/index.html.
+  # root :to => "welcome#index"
+  .
+  .
+  .
+end
+{% endhighlight %}
+
+按上面的方法，改写一下，见 [代码 5.23](#list-5-23)。
+
+<strong id="list-5-23">代码 5.23</strong> 添加根路径的路由
+
+{% highlight erb %}
+SampleApp::Application.routes.draw do
+  root to: 'static_pages#home'
+
+  match '/help',    to: 'static_pages#help'
+  match '/about',   to: 'static_pages#about'
+  match '/contact', to: 'static_pages#contact'  
+  .
+  .
+  .
+end
+{% endhighlight %}
+
+这样就把 根路径 / 匹配到了 /static_pages/home，而且还生成了相应的 URI 帮助方法：
+
+{% highlight erb %}
+Sroot_path => '/'
+root_url  => 'http://localhost:3000/'
+{% endhighlight %}
+
+按照[代码 5.22](#list-5-22)的注释的建议，我们还应该删掉 `public/index.html`，预防在访问 / 的时候，Rails 直接渲染默认首页。你可以直接删除这个文件，不过如果你使用了 Git 的话，那么需要像下面这样才行：
+
+{% highlight erb %}
+$ git rm public/index.html
+{% endhighlight %}
+
+你可能想起来 [1.3.5 节](chapter1.html#sec-1-3-5) 里，我们用过一次 `git commit -a -m "Message" `命令，命令里用到了 `-a` 和 `-m` 来表示“包含全部修改”和“提交信息”。Git 允许我们用方便的写法 `git commit -am "Message"`，把两个修饰符组合在一起。
+
+现在，所有的测试应该都能通过了：
+
+{% highlight sh %}
+$ bundle exec rspec spec/requests/static_pages_spec.rb
+{% endhighlight %}
+
+下面就该把这些链接塞进布局里了。
+
+<h3 id="sec-5-3-3">5.3.3 命名路由</h3> 
+
+要把链接塞进布局里，就要牵涉到 `link_to` 的第二个参数了，其实，只要改成相应的命名路由就好了。比如这样的：
+
+{% highlight erb %}
+<%= link_to "About", '#' %>
+{% endhighlight %}
+
+就得改成下面这样
+
+{% highlight erb %}
+<%= link_to "About", about_path %>
+{% endhighlight %}
+
+以此类推。
+
+首先从 header 的 partial 开始好了，`_header.html.erb`（[代码 5.24](#list-5-24)）中包含到 Home 和 Help 页面的链接。另外，照惯例我们还会为 LOGO 添加上去 Home 页面的链接。
+
+<strong id="list-5-24">代码 5.24</strong> Header partial 中的链接
+
+{% highlight text %}
+ app/views/layouts/_header.html.erb 
+{% endhighlight %}
+
+{% highlight erb %}
+<header class="navbar navbar-fixed-top">
+  <div class="navbar-inner">
+    <div class="container">
+      <%= link_to "sample app", root_path, id: "logo" %>
+      <nav>
+        <ul class="nav pull-right">
+          <li><%= link_to "Home",    root_path %></li>
+          <li><%= link_to "Help",    help_path %></li>
+          <li><%= link_to "Sign in", '#' %></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</header>
+{% endhighlight %}
+
+暂时还没有 “Sign in”链接的命名路由，[第 8 章](chapter8.html)的时候会做，现在嘛，还是先用 “#”占位符将就一下。
+
+接下来就是 footer partial 里的链接了， `_footer.html.erb`，里面有 About 和 Contact 页面（[代码 5.25](#list-5-25)）
+
+{% highlight text %}
+ app/views/layouts/_footer.html.erb 
+{% endhighlight %}
+
+{% highlight erb %}
+<footer class="footer">
+  <small>
+    <a href="http://railstutorial.org/">Rails Tutorial</a>
+    by Michael Hartl
+  </small>
+  <nav>
+    <ul>
+      <li><%= link_to "About",   about_path %></li>
+      <li><%= link_to "Contact", contact_path %></li>
+      <li><a href="http://news.railstutorial.org/">News</a></li>
+    </ul>
+  </nav>
+</footer>
+{% endhighlight %}
+
+这样，在[第 3 章](chapter3.html)我们创建的静态页面，以及连接到它们的链接就都搞定了。比如说， [/about](http://localhost:3000/about) 会链接到 About 页面（[图 5.8](#figure-5-8)）。
+
+其实上面做的这些都没太大用处，虽然还没测试过布局中的链接是否有效，但是可以肯定的是，如果没有定义这些路由的话，测试肯定会失败。你可以试一试，把[代码 5.21](#list-5-21)中的路由定义全部注释掉，然后跑一遍测试。有一个测试方法可以确保所有的链接都有效，详情见[5.6 节](#sec-5-6)。
+
+<figure id="#figure-5-8">
+![about_page_styled](assets/images/figures/about_page_styled.png)
+<figcaption> [/about](http://localhost:3000/about) 上的 About 页面
+</figcaption>
+</figure>
+
+<h3 id="sec-5-3-4">5.3.4 漂亮的 RSpec</h3>
+
+在[5.3.1 节](#sec-5-3-1)就说了现在的测试代码丑到不忍直视，参见（[代码 5.20](#list-5-20)）。所以这节的任务就是，用 RSpec 的最后一个特性，让测试代码更紧凑更优雅。
+
+看一下原来的代码，究竟有哪些部分是可以改进的：
+
+{% highlight erb %}
+describe "Home page" do
+
+  it "should have the h1 'Sample App'" do
+    visit root_path
+    page.should have_selector('h1', text: 'Sample App')
+  end
+
+  it "should have the base title" do
+    visit root_path
+    page.should have_selector('title',
+                      text: "Ruby on Rails Tutorial Sample App")
+  end
+
+  it "should not have a custom page title" do
+    visit root_path
+    page.should_not have_selector('title', text: '| Home')
+  end
+end
+{% endhighlight %}
+
+上面的每一个测试都包含了一个访问 root 路径的部分，重复的代码需要消灭，这里就要用到 `before` 代码块：
+
+{% highlight erb %}
+describe "Home page" do
+  before { visit root_path } 
+
+  it "should have the h1 'Sample App'" do
+    page.should have_selector('h1', text: 'Sample App')
+  end
+
+  it "should have the base title" do
+    page.should have_selector('title',
+                      text: "Ruby on Rails Tutorial Sample App")
+  end
+
+  it "should not have a custom page title" do
+    page.should_not have_selector('title', text: '| Home')
+  end
+end
+{% endhighlight %}
+
+这行代码
+
+{% highlight erb %}
+before { visit root_path }
+{% endhighlight %}
+
+作用是在每次测试前，都会访问 root 路径。（`before` 方法还可以通过 `before(:each)` 来调用）
+
+另外就是，每个测试都有这部分
+
+{% highlight erb %}
+it "should have the h1 'Sample App'" do
+{% endhighlight %}
+
+和这部分
+
+{% highlight erb %}
+page.should have_selector('h1', text: 'Sample App')
+{% endhighlight %}
+
+基本都是一样的东西。另外，每个测试都会引用 `page` 变量。可以通过使用 `subject` 来告诉 RSpec，`page` 是每个测试都要用到的物件
+
+{% highlight erb %}
+subject { page }
+{% endhighlight %}
+
+然后再使用一个 it 方法的变体来把代码压缩到一行里：
+
+{% highlight erb %}
+it { should have_selector('h1', text: 'Sample App') }
+{% endhighlight %}
+
+因为因为 Capybara [3.2.1 节](chapter3.html#sec-3-2-1) 提供的方法，在使用了 `subject { page }` 之后，测试中 `should` 将会自动调用 `page` 变量。
+
+修改之后的 Home 页面的测试代码如下
+
+{% highlight erb %}
+subject { page }
+
+  describe "Home page" do
+    before { visit root_path } 
+
+    it { should have_selector('h1', text: 'Sample App') }
+    it { should have_selector 'title',
+                        text: "Ruby on Rails Tutorial Sample App" }
+    it { should_not have_selector 'title', text: '| Home' }
+  end
+{% endhighlight %}
+
+上面的代码看起来舒服多了，不过 title 部分的测试还是有一点长。[代码 5.20](#list-5-20) 中的 title 测试中的文本部分都是这样的：
+
+{% highlight erb %}
+"Ruby on Rails Tutorial Sample App | About"
+{% endhighlight %}
+
+[3.5 节](chapter3.html#sec-3-5)的练习中，建议通过定义一个 `base_title` 并使用字符串内插[代码 3.30](chapter3.html#list-3-30)，消灭一部分重复代码。不过我们可以干的更好，只要定义一个 `full_title`，对，没记错，就是 [代码 4.2](chapter4.html#list-4-2) 里的那个。只不过，这个帮助方法是定义在新建的 `spec/support` 目录下的 `utilities.rb` 里（[代码 5.26](#list-5-26)）。
+
+<strong id="list-5-26">代码 5.26</strong> 
+
+`spec/support/utilities.rb`
+
+{% highlight erb %}
+def full_title(page_title)
+  base_title = "Ruby on Rails Tutorial Sample App"
+  if page_title.empty?
+    base_title
+  else
+    "#{base_title} | #{page_title}"
+  end
+end
+{% endhighlight %}
+
+基本上，就是复制了[代码 4.2](chapter4.html#list-4-2) 里的那个帮助方法。有两个方法可以避免我们在输入 base title 的时候打错字，这种设计看上去不是很可靠，但是明显更先进，就是测试的时候，直接测试 ` full_title`这个帮助方法，[5.6 节](#sec-5-6)里你会看到这个练习的。
+
+` spec/supprot` 目录下的文件都会被 RSpec 自动夹在，也就是说，Home 页面的测试我们可以这么写：
+
+{% highlight erb %}
+ subject { page }
+
+  describe "Home page" do
+    before { visit root_path } 
+
+    it { should have_selector('h1',    text: 'Sample App') }
+    it { should have_selector('title', text: full_title('')) }
+  end
+{% endhighlight %}
+
+同样的方法，也可以用来简化 Help、 About 和 Contact 页面的测试代码了。简化之后的完整代码见[代码 5.27](#list-5-27)。
+
+<strong id="list-5-27">代码 5.27</strong> 更高更快更强的静态页面测试
+
+` spec/requests/static_pages_spec.rb `
+
+{% highlight erb %}
+ require 'spec_helper'
+
+describe "Static pages" do
+
+  subject { page }
+
+  describe "Home page" do
+    before { visit root_path }
+
+    it { should have_selector('h1',    text: 'Sample App') }
+    it { should have_selector('title', text: full_title('')) }
+    it { should_not have_selector 'title', text: '| Home' }
+  end
+
+  describe "Help page" do
+    before { visit help_path }
+
+    it { should have_selector('h1',    text: 'Help') }
+    it { should have_selector('title', text: full_title('Help')) }
+  end
+
+  describe "About page" do
+    before { visit about_path }
+
+    it { should have_selector('h1',    text: 'About') }
+    it { should have_selector('title', text: full_title('About Us')) }
+  end
+
+  describe "Contact page" do
+    before { visit contact_path }
+
+    it { should have_selector('h1',    text: 'Contact') }
+    it { should have_selector('title', text: full_title('Contact')) }
+  end
+end
+{% endhighlight %}
+
+修改完之后，测试应该也是可以通过的：
+
+{% highlight sh %}
+$ bundle exec rspec spec/requests/static_pages_spec.rb
+{% endhighlight %}
+
+[代码 5.27](#list-5-27) 的 RSpec 看起来要比 [代码 5.20](#list-5-20) 里的简洁多了，其实，我们还能继续精简（[5.6 节](#sec-5-6)）。后面我们会一直用这种简洁的风格来开发应用的剩余部分。
 
 
 
