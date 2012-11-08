@@ -1595,18 +1595,347 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
 
 [代码 5.27](#list-5-27) 的 RSpec 看起来要比 [代码 5.20](#list-5-20) 里的简洁多了，其实，我们还能继续精简（[5.6 节](#sec-5-6)）。后面我们会一直用这种简洁的风格来开发应用的剩余部分。
 
+<h2 id="sec-5-4"> 5.4 用户注册 第一部分 </h2>
 
+这章我们会以完成用户注册页面的路由来做结尾，也就是说，要創建第二个 controller 了。这第一步，对于实现用户注册功能是至关重要的，至于下面的，我们会在第六章和第七章完成。
 
+<h3 id="sec-5-4-1"> 5.4.1 用户 controller </h3>
 
+StaticPages 之后，我们就没怎么碰过 controller 了，现在是时候创建第二个，Users controller 了。和之前一样，我们还是会用 `generate` 来生成最简单的 controller，暂时只需要一个新用户注册的页面。按照 Rails 喜欢的 [REST 结构](http://en.wikipedia.org/wiki/Representational_State_Transfer)，新用户注册对应的 action，我们应当将它命名为 `new`，然后作为参数传递给 `generate controller`（[代码 5.28](#list-5-28)）。
 
+<strong id="list-5-28"> 代码 5.28 </strong> 生成 Users controller
+
+{% highlight sh %}
+$ rails generate controller Users new --no-test-framework
+      create  app/controllers/users_controller.rb
+       route  get "users/new"
+      invoke  erb
+      create    app/views/users
+      create    app/views/users/new.html.erb
+      invoke  helper
+      create    app/helpers/users_helper.rb
+      invoke  assets
+      invoke    coffee
+      create      app/assets/javascripts/users.js.coffee
+      invoke    scss
+      create      app/assets/stylesheets/users.css.scss
+{% endhighlight %}
+
+这样就生成了包含一个 `new` action 的 Users controller （[代码 5.29](#list-5-29)）以及一个新用户注册页面的 view （[代码 5.30](#list-5-30)）。
+
+<strong id="list-5-29"> 代码 5.29 </strong> 初始状态的 Users controler
+
+` app/controllers/users_controller.rb `
+
+{% highlight erb %}
+class UsersController < ApplicationController
+  def new
+  end
+
+end
+{% endhighlight %}
+
+<strong id="list-5-30"> 代码 5.30 </strong> 初始状态的 新用户注册页面的 view
+
+` app/views/users/new.html.erb `
+
+{% highlight erb %}
+<h1>Users#new</h1>
+<p>Find me in app/views/users/new.html.erb</p>
+{% endhighlight %}
+
+<h3 id="sec-5-4-2"> 5.4.2 Signup URI </h3>
+
+上一节里面，我们已经完成了 /users/new 上的页面，不过按照[表格 5.1](#table-5-1)的模式，注册的 URI 应该是 /signup。老规矩，还是先写测试：
+
+{% highlight sh %}
+$ rails generate integration_test user_pages
+{% endhighlight %}
+
+然后按照[代码 5.27]的路数，先给测试里的 `h1` `title` 标签加上内容 （[代码 5.31](#list-5-31)）
+
+<strong id="list-5-31"> 代码 5.31 </strong> 
+
+` spec/requests/user_pages_spec.rb `
+
+{% highlight erb %}
+require 'spec_helper'
+
+describe "User pages" do
+
+  subject { page }
+
+  describe "signup page" do
+    before { visit signup_path }
+
+    it { should have_selector('h1',    text: 'Sign up') }
+    it { should have_selector('title', text: full_title('Sign up')) }
+  end
+end
+{% endhighlight %}
+
+先跑一遍测试：
+
+{% highlight sh %}
+$ bundle exec rspec spec/requests/user_pages_spec.rb
+{% endhighlight %}
+
+虽然没什么用处，不过其实，测试命令里我们可以把整个目录都作为参数传进去：
+
+{% highlight sh %}
+$ bundle exec rspec spec/requests/
+{% endhighlight %}
+
+还可以更进一步，把所有的测试都传进去：
+
+{% highlight sh %}
+$ bundle exec rspec spec/
+{% endhighlight %}
+
+为了测试的完整性，后面的测试我都会用这个方法来跑。顺便一说，虽然还是没什么大用的，但你可能看别人这么用过，你可以直接用 Rake 来跑 `spec`：
+
+{% highlight sh %}
+$ bundle exec rake spec
+{% endhighlight %}
+
+（实际上，你可以直接输入`rake`；因为 `rake` 的默认动作就是跑测试。。。）
+
+根据错提示，因为 Users controller 已经有 `new` action，所以，要让测试通过，我们只需要创建正确的路由和试图内容。照着 [代码 5.21](#list-5-21)的做法，添加 `match '/signup'`（[代码 5.32](#list-5-32)）
+
+<strong id="list-5-32"> 代码 5.32 </strong>  注册页面的路由
+
+`config/routes.rb`
+
+{% highlight erb %}
+SampleApp::Application.routes.draw do
+  get "users/new"
+
+  root to: 'static_pages#home'
+
+  match '/signup',  to: 'users#new'
+
+  match '/help',    to: 'static_pages#help'
+  match '/about',   to: 'static_pages#about'
+  match '/contact', to: 'static_pages#contact'
+  .
+  .
+  .
+end
+{% endhighlight %}
+
+注意，我们保留了自动生成的 `get "users/new"`。虽然不符合 REST，但是目前这条配置能确保 `users/new` 路由正常工作。我们会在 [7.1.2 节](chapter7.html#sec-7-1-2)中消灭它。
+
+现在，只需要给 view 添加 title 和 “Sign up”标题了（[代码 5.33](#list-5-33)）。
+
+<strong id="list-5-33"> 代码 5.33 </strong>  修改后的注册页面
+
+` app/views/users/new.html.erb `
+
+{% highlight erb %} 
+<% provide(:title, 'Sign up') %>
+<h1>Sign up</h1>
+<p>Find me in app/views/users/new.html.erb</p>
+{% endhighlight %}
+
+这样注册页面的测试就能通过了。接着就该给 Home 页面里的注册按钮填上正确的链接地址了。和其他的路由一样，`match '/signup'` 给我们提供了 `signup_path` 这个命名路由，在[代码 5.34](#list-5-34)里会用到。
+
+<strong id="list-5-34"> 代码 5.34 </strong> 链接到 Signup 页面的按钮
+
+` app/views/static_pages/home.html.erb `
+
+{% highlight erb %} 
+<div class="center hero-unit">
+  <h1>Welcome to the Sample App</h1>
+
+  <h2>
+    This is the home page for the
+    <a href="http://railstutorial.org/">Ruby on Rails Tutorial</a>
+    sample application.
+  </h2>
+
+  <%= link_to "Sign up now!", signup_path, class: "btn btn-large btn-primary" %>
+</div>
+
+<%= link_to image_tag("rails.png", alt: "Rails"), 'http://rubyonrails.org/' %>
+{% endhighlight %}
+
+这样，链接和路由就全都搞定了，至少在[第 8 章](chapter8.html)我们添加登陆路由之前，一切都不会有问题。新用户注册页面 （/signup）的样子见[图 5.9](#figure-5-9)。
+
+<figure id="figure-5-9">
+![new_signup_page_bootstrap](assets/images/figures/new_signup_page_bootstrap.png )
+<figcaption>图 5.9： [/signup](http://localhost:3000/signup)上的注册页面</figcaption>
+</figure>
+
+最后测试一下，肯定通过了：
+
+{% highlight sh %} 
+$ bundle exec rspec spec/
+{% endhighlight %}
+
+<h2 id="5.5"> 5.5 </h2> 小节
+
+这节我们主要是在打磨应用的布局和路由，本书剩下的部分，基本上就是在充实这个应用了：首先，实现用户注册、登陆、注销；其次，实现用户发推功能；最后，实现关注其他用户功能。
+
+如果你使用 Git 来做版本惯例的，现在应该把分支上的改变合并到主分支上去了：
+
+{% highlight sh %} 
+$ git add .
+$ git commit -m "Finish layout and routes"
+$ git checkout master
+$ git merge filling-in-layout
+{% endhighlight %}
+
+也可以推送到 GitHub去：
+
+{% highlight sh %} 
+$ git push
+{% endhighlight %}
+
+最后，你就可以部署到 Heroku 上了：
+
+{% highlight sh %} 
+$ git push heroku
+{% endhighlight %}
+
+成果可以这样看到：
+
+{% highlight sh %} 
+$ heroku open
+{% endhighlight %}
+
+如果有问题，查看 Heroku 的日志文件来除错：
+
+{% highlight sh %} 
+$ heroku logs
+{% endhighlight %}
+
+<h2 id="sec-5-6"> 5.6 练习</h2>
+
+1. [代码 5.27](#list-5-27)中静态页面的测试代码虽然已经很简洁，但还是稍微有那么一丢丢的罗嗦。RSpec 提供了一个叫做 shared examples 的工具来消除重复代码，按照 [代码 5.35](#list-5-35)的例子，继续精简 Help、About 和 Contact 页面的测试代码。注意， [代码 3.30](#list-3-30) 里介绍过的 `let` 命令，可以按照要求创建一个本地变量，与实例变量相比，本地变量实在赋值后创建的。
+
+2. 你大概也注意到了，我们对链接的测试其实只是测试了路由，而并没有真的去检查链接是否能够正确的访问。要实现这个测试，需要用到 RSpec 内置的`visit` 和 `click_link`。补全[代码 5.36](#list-5-36)来检查这些链接是否正确。
+
+3. 要清除对 [代码 5.26](#list-5-26)里的 `full_title` 帮助方法的一览，就必须创建自身的帮助方法，见[代码 5.37](#list-5-37)。（你需要创建 `spec/helpers` 目录和 `application_helper_spec.rb`文件），然后使用[代码 5.38](#list-5-38)中的代码将它 `include` 进来。然后跑一遍测试来检查新加入的代码是否能正确运作。注意，[代码 5.37](#list-5-37)使用了正则表达式，这个我们会在 [6.2.4 节](#list-6-2-4)学到。
+
+<strong id="list-5-35"> 代码 5.35 </strong>使用 RSpec 的 shared example 来消除重复的测试代码
+
+` spec/requests/static_pages_spec.rb `
+
+{% highlight erb %} 
+require 'spec_helper'
+
+describe "Static pages" do
+
+  subject { page }
+
+  shared_examples_for "all static pages" do
+    it { should have_selector('h1',    text: heading) }
+    it { should have_selector('title', text: full_title(page_title)) }
+  end
+
+  describe "Home page" do
+    before { visit root_path }
+    let(:heading)    { 'Sample App' }
+    let(:page_title) { '' }
+
+    it_should_behave_like "all static pages"
+    it { should_not have_selector 'title', text: '| Home' }
+  end
+
+  describe "Help page" do
+    .
+    .
+    .
+  end
+
+  describe "About page" do
+    .
+    .
+    .
+  end
+
+  describe "Contact page" do
+    .
+    .
+    .
+  end
+end
+{% endhighlight %}
+
+<strong id="list-5-36"> 代码 5.36 </strong> 链接的测试
+
+`spec/requests/static_pages_spec.rb`
+
+{% highlight erb %} 
+require 'spec_helper'
+
+describe "Static pages" do
+  .
+  .
+  .
+  it "should have the right links on the layout" do
+    visit root_path
+    click_link "About"
+    page.should have_selector 'title', text: full_title('About Us')
+    click_link "Help"
+    page.should # fill in
+    click_link "Contact"
+    page.should # fill in
+    click_link "Home"
+    click_link "Sign up now!"
+    page.should # fill in
+    click_link "sample app"
+    page.should # fill in
+  end
+end
+{% endhighlight %}
+
+<strong id="list-5-37"> 代码 5.37 </strong>
+
+` spec/helpers/application_helper_spec.rb `
+
+{% highlight erb %} 
+require 'spec_helper'
+
+describe ApplicationHelper do
+
+  describe "full_title" do
+    it "should include the page title" do
+      full_title("foo").should =~ /foo/
+    end
+
+    it "should include the base title" do
+      full_title("foo").should =~ /^Ruby on Rails Tutorial Sample App/
+    end
+
+    it "should not include a bar for the home page" do
+      full_title("").should_not =~ /\|/
+    end
+  end
+end
+{% endhighlight %}
+
+<strong id="list-5-38"> 代码 5.38 </strong>
+
+`spec/support/utilities.rb`
+
+{% highlight erb %}
+include ApplicationHelper
+{% endhighlight %}
+
+<div class="navigation">
+  <a class="prev_page" href="chapter4.html">&laquo; 第四章 Rails 背后的 Ruby</a>
+  <a class="next_page" href="chapter6.html">第六章 Modeling users &raquo;</a>
+</div>
 
 ------------------------------------
-[^1]:
-[^2]:
-[^3]:
-[^4]:
-[^5]:
-[^6]:
-[^7]:
-[^8]:
-[^9]:
+
+[^1]: 感谢读者 [Colm Tuite](https://twitter.com/colmtuite)将 Bootstrap 转换到我们的示例程序上。
+[^2]: 本书中的所有构思图都是通过 [Mockingbird](http://gomockingbird.com/)这个在线应用制作的。
+[^3]: 这些 class 和 Ruby 的类一点关系都没有。
+[^4]: 你大概注意到了 `img` 这个标签的格式，不是 <img>...</img> 而是 <img ... />。这样的标签叫做自关闭标签。
+[^5]: 在 asset pipeline 中使用 LESS 当然也是可以的，详情见 [less-rails-bootstrap gem](http://rubygems.org/gems/less-rails-bootstrap)
+[^6]: 很多 Rails 程序员都会使用一个 `shared` 目录来存放需要在不同的 view 中分享使用的 partial。我倾向于在 `shared` 目录中存在功能性的 partial，而把那些每个页面都会用到的 partial 放在`layouts` 目录中。 （我们会在[第 7 章](chapter7.html)创建 `shared` 目录）这样的分割在我看来才比较符合逻辑，不过，把它们都放在 `shared` 目录里对正常运作没有影响。
+[^7]: 你可能想知道为什么使用了 `footer` 标签和 `.footer` class。理由就是，这样的标签对于人类来说更容易理解，而那个 class 是因为 Bootstrap 里在用，所以不得不用。愿意的话，用 `div` 标签来代替 `footer` 也没什么问题。
+[^8]: 这节是按照[这篇博客](http://2beards.net/2011/11/the-rails-3-asset-pipeline-in-about-5-minutes/)架构的。更深入的东西，去[the Rails Guide on the Asset Pipeline](http://guides.rubyonrails.org/asset_pipeline.html)看。
+[^9]: Sass 仍然支持较早的 `.sass` 格式，这个格式相对来说更简洁，花括号更少，但是对现存项目不太友好，已经熟悉 CSS 的人的学习难度也相对更大。
