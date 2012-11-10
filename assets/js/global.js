@@ -10,7 +10,7 @@ var tutorialScript = {
 	},
 
 	generateTOC: function() {
-		$('#toc').tableOfContents('#content', {
+		$('.toc').tableOfContents('.main', {
 			'startLevel': 2,
 			'depth': 2
 		});
@@ -30,7 +30,7 @@ var tutorialScript = {
 
 	// add an id to the footnote element in the content
 	addIdToSup: function() {
-		var $sup = $('sup', '#content'),
+		var $sup = $('sup', '.main'),
 		    id = 'fnref-'+$sup.text();
 		$sup.each(function(index){
 			$(this).attr('id', 'fnref-'+(index+1));

@@ -3,10 +3,16 @@
 <head>
 	<meta charset="utf-8" />
 	<title>Ruby on Rails 教程{% if page.title %} - {{ page.title }}{% endif %}</title>
-	<link rel="stylesheet" type="text/css" href="assets/css/style.css" />
-	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="assets/css/style.css?5" />
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
 	<script type="text/javascript" src="assets/js/jquery.tableofcontents.min.js"></script>
 	<script type="text/javascript" src="assets/js/global.js"></script>
 </head>
 <body>
-	<div id="book">
+	<div class="wrapper">
+        <header>
+            <hgroup>
+                <h1 class="logo"><a class="ir" href="{{ site.url }}">Ruby on Rails 教程</a></h1>
+                <h2 class="subtitle">Ruby on Rails Tutorial 原书第二版</h2>
+            </hgroup>
+        </header>
