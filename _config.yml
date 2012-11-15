@@ -2,4 +2,4 @@ url: http://about.ac/rails-tutorial-2nd-cn
 auto: true
 pygments: true
 markdown: rdiscount
-exclude: ['README.md', 'rails-tutorial-2nd-cn.sublime-project', 'rails-tutorial-2nd-cn.sublime-workspace']
+exclude: ['README.md', 'rails-tutorial-2nd-cn.sublime-project', 'rails-tutorial-2nd-cn.sublime-workspace', 'Gemfile', 'Gemfile.lock']
