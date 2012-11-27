@@ -11,8 +11,8 @@ layout: default
 		<li><a href="chapter3.html" title="第三章 基本静态的页面">第三章 基本静态的页面</a></li>
 		<li><a href="chapter4.html" title="第四章 Rails 背后的 Ruby">第四章 Rails 背后的 Ruby</a></li>
 		<li><a href="chapter5.html" title="第五章 完善布局">第五章 完善布局</a></li>
-		<li><a href="chapter6.html" title="第六章 用户模型">第六章 用户模型（翻译中）</a></li>
-		<li><a href="chapter7.html" title="">第七章 未翻译</a></li>
+		<li><a href="chapter6.html" title="第六章 用户模型">第六章 用户模型</a></li>
+		<li><a href="chapter7.html" title="第七章 用户注册">第七章 用户注册（翻译中）</a></li>
 		<li><a href="chapter8.html" title="">第八章 未翻译</a></li>
 		<li><a href="chapter9.html" title="">第九章 未翻译</a></li>
 		<li><a href="chapter10.html" title="">第十章 未翻译</a></li>
