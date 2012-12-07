@@ -23,7 +23,7 @@ $ git checkout -b sign-in-out
 
 <h3 id="sec-8-1-1">8.1.1 Sessions 控制器</h3>
 
-登录和退出功能其实是由 Sessions 控制器中相应的动作处理的，登录表单在 `new` 动作中处理（本节的内容），登录的过程就是向 `create` 动作发送 `POST` 请求（[8.1 节](#sec-8-1)和 [8.2 节](#sec-8-2)），退出则是向 `destroy` 动作发送 `DELETE` 请求（[8.2.6 节]）。（HTTP 请求和 REST 动作之间的对应关系可以参看[表格 7.1](chapter7.html#sec-7-1)。）首先，我们要生成 Sessions 控制器，以及验证系统所需的集成测试：
+登录和退出功能其实是由 Sessions 控制器中相应的动作处理的，登录表单在 `new` 动作中处理（本节的内容），登录的过程就是向 `create` 动作发送 `POST` 请求（[8.1 节](#sec-8-1)和 [8.2 节](#sec-8-2)），退出则是向 `destroy` 动作发送 `DELETE` 请求（[8.2.6 节](#sec-8-2-6)）。（HTTP 请求和 REST 动作之间的对应关系可以参看[表格 7.1](chapter7.html#sec-7-1)。）首先，我们要生成 Sessions 控制器，以及验证系统所需的集成测试：
 
 {% highlight sh %}
 $ rails generate controller Sessions --no-test-framework
@@ -1029,7 +1029,656 @@ end
   => "the user"
   </pre>
   <p>不难理解吧！</p>
-  <p>**译者注：**这里对 <code>||=</code> 的分析和 Peter Cooper 的分析有点差异，我推荐你看以下 Ruby Inside 中的《<a href="http://www.rubyinside.com/what-rubys-double-pipe-or-equals-really-does-5488.html">What Ruby’s ||= (Double Pipe / Or Equals) Really Does</a>》一文。</p>
+  <p><strong>译者注：</strong>这里对 <code>||=</code> 的分析和 Peter Cooper 的分析有点差异，我推荐你看以下 Ruby Inside 中的《<a href="http://www.rubyinside.com/what-rubys-double-pipe-or-equals-really-does-5488.html">What Ruby’s ||= (Double Pipe / Or Equals) Really Does</a>》一文。</p>
 </div>
 
-<h3 id="sec-8-2-4">8.2.4 </h3>
+<h3 id="sec-8-2-4">8.2.4 改变导航链接</h3>
+
+本小节我们要完成的是实现登录、退出功能的最后一步，根据登录状态改变布局中的导航链接。如图 8.3 所示，我们要在登录和退出后显示不同的导航，要添加指向列出所有用户页面的链接、到用户设置页面的链接（[第九章](chapter9.html)加入），还有到当前登录用户资料页面的链接。加入这些链接之后，代码 8.6 中的测试就可以通过了，这是本章到目前位置测试首次变绿通过。
+
+在网站的布局中改变导航链接需要用到 ERb 的 if-else 分支结构：
+
+{% highlight erb %}
+<% if signed_in? %>
+# Links for signed-in users
+<% else %>
+# Links for non-signed-in-users
+<% end %>
+{% endhighlight %}
+
+若要上述代码起作用，先要用 `signed_in?` 方法。我们现在就来定义。
+
+如果 session 中存有当前用户的话，就可以说用户已经登录了。我们要判断 `current_user` 的值是不是 `nil`，这里需要用到取反操作符，用感叹号 ! 表示，一般读作“bang”。只要 `current_user` 的值不是 `nil`，就说明用户登录了，如代码 8.23 所示。
+
+**代码 8.23** 定义 `signed_in?` 帮助方法<br />`app/helpers/sessions_helper.rb`
+
+{% highlight ruby %}
+module SessionsHelper
+
+  def sign_in(user)
+    cookies.permanent[:remember_token] = user.remember_token
+    self.current_user = user
+  end
+
+  def signed_in?
+    !current_user.nil?
+  end
+  .
+  .
+  .
+end
+{% endhighlight %}
+
+定义了 `signed_in?` 方法后就可以着手修改布局中的导航了。我们要添加四个新链接，其中两个的链接地址先不填（[第九章](chapter.html)再填）：
+
+{% highlight erb %}
+<%= link_to "Users", '#' %>
+<%= link_to "Settings", '#' %>
+{% endhighlight %}
+
+退出链接的地址使用代码 8.2 中定义的 `signout_path`：
+
+{% highlight erb %}
+<%= link_to "Sign out", signout_path, method: "delete" %>
+{% endhighlight %}
+
+（注意，我们还为退出链接指定了类型为 Hash 的参数，指明点击链接后发送的是 HTTP `DELETE` 请求。<sup>[8](#fn-8)</sup>）最后，我们还要添加一个到资料页面的链接：
+
+{% highlight erb %}
+<%= link_to "Profile", current_user %>
+{% endhighlight %}
+
+这个链接我们本可以写成
+
+{% highlight erb %}
+<%= link_to "Profile", user_path(current_user) %>
+{% endhighlight %}
+
+不过我们可以直接把链接地址设为 `current_user`，Rails 会自动将其转换成 `user_path(current_user)`。
+
+在添加导航链接的过程中，我们还要使用 Bootstrap 实现下来菜单的效果，具体的实现方式可以参阅 Bootstrap 的文档。添加导航链接的所需的代码如代码 8.24 所示。注意其中和 Bootstrap 下来菜单有关的 CSS id 和 class。
+
+**代码 8.24** 根据登录状态改变导航链接<br />`app/views/layouts/_header.html.erb`
+
+{% highlight erb %}
+<header class="navbar navbar-fixed-top">
+  <div class="navbar-inner">
+    <div class="container">
+      <%= link_to "sample app", root_path, id: "logo" %>
+      <nav>
+        <ul class="nav pull-right">
+          <li><%= link_to "Home", root_path %></li>
+          <li><%= link_to "Help", help_path %></li>
+          <% if signed_in? %>
+            <li><%= link_to "Users", '#' %></li>
+            <li id="fat-menu" class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                Account <b class="caret"></b>
+              </a>
+              <ul class="dropdown-menu">
+                <li><%= link_to "Profile", current_user %></li>
+                <li><%= link_to "Settings", '#' %></li>
+                <li class="divider"></li>
+                <li>
+                  <%= link_to "Sign out", signout_path, method: "delete" %>
+                </li>
+              </ul>
+            </li>
+          <% else %>
+            <li><%= link_to "Sign in", signin_path %></li>
+          <% end %>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</header>
+{% endhighlight %}
+
+实现下拉菜单还要用到 Bootstrap 中的 JavaScript 代码，我们可以编辑应用程序的 JavaScript 文件，通过 asset pipeline 引入所需的文件，如代码 8.25 所示。
+
+**代码 8.25** 把 Bootstrap 的 JavaScript 代码加入 `application.js`<br />`app/assets/javascripts/application.js`
+
+{% highlight javascript %}
+//= require jquery
+//= require jquery ujs
+//= require bootstrap
+//= require tree .
+{% endhighlight %}
+
+引入文件的功能是由 Sprockets 实现的，而文件本身是由 [5.1.2 节](chapter5.html#sec-5-1-2)中添加的 `bootstrap-sass` gem 提供的。
+
+添加了代码 8.24 之后，所有的测试应该都可以通过了：
+
+{% highlight sh %}
+$ bundle exec rspec spec/
+{% endhighlight %}
+
+不过，如果你在浏览器中试用的话，网站还不能正常使用。这是因为“记住我”这个功能要求用户记录的记忆权标属性不为空，而现在这个用户是在 [7.4.3 节](chapter7.html#sec-7-4-3)中创建的，远在实现生成记忆权标的回调函数之前，所以记忆权标还没有值。为了解决这个问题，我们要再次保存用户，触发代码 8.18 中的 `before_save` 回调函数，生成用户的记忆权标：
+
+{% highlight sh %}
+$ rails console
+>> User.first.remember_token
+=> nil
+>> User.all.each { |user| user.save(validate: false) }
+>> User.first.remember_token
+=> "Im9P0kWtZvD0RdyiK9UHtg"
+{% endhighlight %}
+
+我们遍历了数据库中的所有用户，以防之前创建了多个用户。注意，我们向 `save` 方法传入了一个参数。如果不指定这个参数的话，就无法保存，因为我们没有指定密码及密码确认的值。在实际的网站中，我们根本就无法获知用户的密码，但是我们还是要执行保存操作，这时就要指定 `validate: false` 参数跳过 Active Record 的数据验证（更多内容请阅读 Rails API 中关于 save 的文档）。
+
+做了上述修正之后，登录的用户就可以看到代码 8.24 中添加的新链接和下拉菜单了，如图 8.9 所示。
+
+![profile_with_signout_link_bootstrap](assets/images/figures/profile_with_signout_link_bootstrap.png)
+
+图 8.9：登录后显示了新链接和下拉菜单
+
+现在你可以验证一下是否可以登录，然后关闭浏览器，再打开看一下是否还是登入的状态。如果需要，你还可以直接查看浏览器的 cookies，如图 8.10 所示。
+
+![cookie_in_browser](assets/images/figures/cookie_in_browser.png)
+
+图 8.10：查看浏览器中的记忆权标 cookie
+
+<h3 id="sec-8.2.5">8.2.5 注册后直接登录</h3>
+
+虽然现在基本完成了用户身份验证功能，但是新注册的用户可能还是会困惑，为什么注册后没有登录呢。在实现退出功能之前，我们还要实现注册后直接登录的功能。我们要先编写测试，在身份验证的测试中加入一行代码，如代码 8.26 所示。这段代码要用到[第七章](chapter7.html)一个练习中的“after saving the user” `describe` 块（参见代码 7.32），如果之前你没有做这个练习的话，现在请添加相应的测试代码。
+
+**代码 8.26** 测试刚注册的用户是否会自动登录<br />`spec/requests/user_pages_spec.rb`
+
+{% highlight ruby %}
+require 'spec_helper'
+
+describe "User pages" do
+  .
+  .
+  .
+  describe "with valid information" do
+    .
+    .
+    .
+    describe "after saving the user" do
+      .
+      .
+      .
+      it { should have_link('Sign out') }
+    end
+  end
+end
+{% endhighlight %}
+
+我们检测页面中有没有退出链接，来验证用户注册后是否登录了。
+
+有了 [8.2 节](#sec-8-2)中定义的 `sign_in` 方法，要让这个测试通过就很简单了：在用户保存到数据库中之后加上 `sign_in @user` 就可以了，如代码 8.27 所示。
+
+**代码 8.27** 用户注册后直接登录<br />`app/controllers/users_controller.rb`
+
+{% highlight ruby %}
+class UsersController < ApplicationController
+  .
+  .
+  .
+  def create
+    @user = User.new(params[:user])
+    if @user.save
+      sign_in @user
+      flash[:success] = "Welcome to the Sample App!"
+      redirect_to @user
+    else
+      render 'new'
+    end
+  end
+end
+{% endhighlight %}
+
+<h3 id="sec-8-2-6">8.2.6 退出</h3>
+
+在 [8.1 节](#sec-8-1)中介绍过，我们要实现的身份验证机制会记住用户的登录状态，直到用户点击退出链接为止。本小节，我们就要实现退出功能。
+
+目前为止，Sessions 控制器的动作完全遵从了 REST 架构，`new` 动作用于登录页面，`create` 动作实现登录的过程。我们还要添加一个 `destroy` 动作，删除 session，实现退出功能。针对退出功能的测试，我们可以检测点击退出链接后，页面中是否有登录链接，如代码 8.28 所示。
+
+**代码 8.28** 测试用户退出<br />`spec/requests/authentication_pages_spec.rb`
+
+{% highlight ruby %}
+require 'spec_helper'
+
+describe "Authentication" do
+  .
+  .
+  .
+  describe "signin" do
+    .
+    .
+    .
+    describe "with valid information" do
+      .
+      .
+      .
+      describe "followed by signout" do
+        before { click_link "Sign out" }
+        it { should have_link('Sign in') }
+      end
+    end
+  end
+end
+{% endhighlight %}
+
+登录功能是由 `sign_in` 方法实现的，对应的，我们会使用 `sign_out` 方法实现退出功能，如代码 8.29 所示。
+
+**代码 8.29** 销毁 session，实现退出功能<br />`app/controllers/sessions_controller.rb`
+
+{% highlight ruby %}
+class SessionsController < ApplicationController
+  .
+  .
+  .
+  def destroy
+    sign_out
+    redirect_to root_path
+  end
+end
+{% endhighlight %}
+
+和其他身份验证相关的方法一样，我们会在 Sessions 控制的帮助方法模块中定义 `sign_out` 方法。方法本身的实现很简单，我们先把当前用户设为 `nil`，然后在 cookies 上调用 `delete` 方法从 session 中删除记忆权标，如代码 8.30 所示。（其实这里没必要把当前用户设为 `nil`，因为在 `destroy` 动作中我们加入了转向操作。现在加了这行代码是为了防止以后退出时不进行转向操作。）
+
+**代码 8.30** Sessions 帮助方法模块中定义的 `sign_out` 方法<br />`app/helpers/sessions_helper.rb`
+
+{% highlight ruby %}
+module SessionsHelper
+
+  def sign_in(user)
+    cookies.permanent[:remember_token] = user.remember_token
+    self.current_user = user
+  end
+  .
+  .
+  .
+  def sign_out
+    self.current_user = nil
+    cookies.delete(:remember_token)
+  end
+end
+{% endhighlight %}
+
+现在，注册、登录和退出三个功能都实现了，测试也应该可以通过了：
+
+{% highlight sh %}
+$ bundle exec rspec spec/
+{% endhighlight %}
+
+有一点需要注意，我们的测试覆盖了身份验证机制的大多数功能，但不是全部。例如，我们没有测试“记住我”到底记住了多久，也没测试是否设置了记忆权标。我们当然可以加入这些测试，不过经验告诉我们，直接测试 cookie 的值不可靠，而且要依赖具体的实现细节，而实现的方法在不同的 Rails 版本中可能会有所不同，即便应用程序可以使用，测试却会失败。所以我们只关注抽象的功能（验证用户是否可以登录，是否可以保持登录状态，以及是否可以退出），编写的测试没必要针对实现的细节。
+
+<h2 id="sec-8-3">8.3 Cucumber 简介（选读）</h2>
+
+前面两节基本完成了示例程序的身份验证系统，这一节我们将介绍如何使用 Cucumber 编写登录测试。Cucumber 是一个流行的行为驱动开发（Behavior-driven Development, BDD）工具，在 Ruby 社区中占据着一定的地位。本节的内容是选读的，你可以直接跳过，不会影响后续内容。
+
+Cucumber 使用纯文本的故事（story）描述应用程序的行为，很多 Rails 开发者发现使用 Cucumber 处理客户案例时十分方便，因为非技术人员也能读懂这些行为描述，Cucumber 测试可以用于和客户沟通，甚至经常是由客户来编写的。当然，使用不是纯 Ruby 代码组成的测试框架有它的局限性，而且我还发现纯文本的故事很啰嗦。不管怎样，Cucumber 在 Ruby 测试工具中还是有其存在意义的，我特别欣赏它对抽象行为的关注，而不是死盯底层的具体实现。
+
+因为本书着重介绍的是 RSpec 和 Capybara，所以本节对 Cucumber 的介绍很浅显，也不完整，很多内容都没做详细说明，我只是想让你体验一下如何使用 Cucumber，如果你感觉不错，可以阅读专门介绍 Cucumber 的书籍深入学习。（一般我会推荐你阅读 David Chelimsky 的《The RSpec Book》，Ryan Bigg 和 Yehuda Katz 的《Rails 3 in Action》，以及 Matt Wynne 和 Aslak Hellesøy 的《The Cucumber Book》。）
+
+<h3 id="sec-8-3-1">8.3.1 安装和设置</h3>
+
+若要安装 Cucumber，需要在 `Gemfile` 的 `:test` 组中加入 `cucumber-rails` 和 `database_cleaner` 这两个 gem，如代码 8.31 所示。
+
+**代码 8.31** 在 `Gemfile` 中加入 `cucumber-rails`
+
+{% highlight ruby %}
+.
+.
+.
+group :test do
+  .
+  .
+  .
+  gem 'cucumber-rails', '1.2.1', require: false
+  gem 'database_cleaner', '0.7.0'
+end
+.
+.
+.
+{% endhighlight %}
+
+然后和之前一样运行一下命令安装：
+
+{% highlight sh %}
+$ bundle install
+{% endhighlight %}
+
+如果要在程序中使用 Cucumber，我们先要生成一些所需的文件和文件夹：
+
+{% highlight sh %}
+$ rails generate cucumber:install
+{% endhighlight %}
+
+这个命令会在根目录中创建 `features` 文件夹，Cucumber 相关的文件都会存在这个文件夹中。
+
+<h3 id="sec-8-3-2">8.3.2 功能和步骤定义</h3>
+
+Cucumber 中的功能就是希望应用程序实现的行为，使用一种名为 Gherkin 的纯文本语言写就。使用 Gherkin 编写的测试和写的很好的 RSpec 测试用例差不多，不过因为 Gherkin 是纯文本，所以特别适合那些不是很懂 Ruby 代码而可以理解英语的人使用。
+
+下面我们要编写一些 Cucumber 功能，实现代码 8.5 和代码 8.6 中针对登录功能的部分测试用例。首先，我们在 `features` 文件夹中新建名为 `signing_in.feature` 的文件。
+
+Cucumber 的功能由一个简短的描述文本开始，如下所示：
+
+{% highlight gherkin %}
+Feature: Signing in
+{% endhighlight %}
+
+然后再添加一定数量相对独立的场景（scenario）。例如，要测试登录失败的情况，我们可以按照如下的方式编写场景：
+
+{% highlight gherkin %}
+  Scenario: Unsuccessful signin
+    Given a user visits the signin page
+    When he submits invalid signin information
+    Then he should see an error message
+{% endhighlight %}
+
+类似的，测试登录成功时，我们可以加入如下的场景：
+
+{% highlight gherkin %}
+  Scenario: Successful signin
+    Given a user visits the signin page
+      And the user has an account
+      And the user submits valid signin information
+    Then he should see his profile page
+      And he should see a signout link
+{% endhighlight %}
+
+把上述的文本放在一起，就组成了代码 8.32 所示的 Cucumber 功能文件。
+
+**代码 8.32** 测试用户登录功能<br />`features/signing_in.feature`
+
+{% highlight gherkin %}
+Feature: Signing in
+
+  Scenario: Unsuccessful signin
+    Given a user visits the signin page
+    When he submits invalid signin information
+    Then he should see an error message
+
+  Scenario: Successful signin
+    Given a user visits the signin page
+      And the user has an account
+      And the user submits valid signin information
+    Then he should see his profile page
+      And he should see a signout link
+{% endhighlight %}
+
+然后使用 `cucumber` 命令运行这个功能：
+
+{% highlight sh %}
+$ bundle exec cucumber features/
+{% endhighlight %}
+
+上述命令和执行 RSpec 测试的命令类似：
+
+{% highlight sh %}
+$ bundle exec rspec spec/
+{% endhighlight %}
+
+提示一下，Cucumber 和 RSpec 一样，可以通过 Rake 命令执行：
+
+{% highlight sh %}
+$ bundle exec rake cucumber
+{% endhighlight %}
+
+（鉴于某些原因，我经常使用的命令是 `rake cucumber:ok`。）
+
+我们只是写了一些纯文本，所以毫无意外，Cucumber 场景现在不会通过。若要让测试通过，我们要新建一个步骤定义文件，把场景中的纯文本和 Ruby 代码对应起来。步骤定义文件存放在 `features/step_definition` 文件夹中，我盟要将其命名为 `authentication_steps.rb`。
+
+以 `Feature` 和 `Scenario` 开头的行基本上只被视作文档，其他的行则都要和 Ruby 代码对应。例如，功能文件中下面这行
+
+{% highlight gherkin %}
+Given a user visits the signin page
+{% endhighlight %}
+
+对应到步骤定义中的
+
+{% highlight ruby %}
+Given /ˆa user visits the signin page$/ do
+  visit signin_path
+end
+{% endhighlight %}
+
+在功能文件中，`Given` 只是普通的字符串，而在步骤定义中 `Given` 则是一个方法，可以接受一个正则表达式作为参数，后面还可以跟着一个块。`Given` 方法的正则表达式参数是用来拼配功能文件中某个特定行的，块中的代码则是实现描述的行为所需的 Ruby 代码。本例中的“a user visits the signin page”是由下面这行代码实现的：
+
+{% highlight ruby %}
+visit signin_path
+{% endhighlight %}
+
+你可能觉得这行代码很眼熟，不错，这就是前面用过的 Capybara 提供的方法，Cucumber 的步骤定义文件会自动引入 Capybara。接下来两行的代码实现也同样眼熟。如下的场景步骤：
+
+{% highlight gherkin %}
+When he submits invalid signin information
+Then he should see an error message
+{% endhighlight %}
+
+对应到步骤定义文件中的
+
+{% highlight ruby %}
+When /ˆhe submits invalid signin information$/ do
+  click_button "Sign in"
+end
+
+Then /ˆhe should see an error message$/ do
+  page.should have_selector('div.alert.alert-error')
+end
+{% endhighlight %}
+
+上面这段代码的第一步还是用了 Capybara，第二步则结合了 Capybara 的 `page` 和 RSpec。很明显，之前我们使用 RSpec 和 Capybara 编写的测试，在 Cucumber 中也是有用武之地的。
+
+场景中接下来的步骤也可以做类似的处理。最终的步骤定义文件如代码 8.33 所示。你可以一次只添加一个步骤，然后执行下面的代码，直到测试都通过为止：
+
+{% highlight sh %}
+$ bundle exec cucumber features/
+{% endhighlight %}
+
+**代码 8.33** 使登录功能通过的步骤定义<br />`features/step_definitions/authentication_steps.rb`
+
+{% highlight ruby %}
+Given /ˆa user visits the signin page$/ do
+  visit signin_path
+end
+
+When /ˆhe submits invalid signin information$/ do
+  click_button "Sign in"
+end
+
+Then /ˆhe should see an error message$/ do
+  page.should have_selector('div.alert.alert-error')
+end
+
+Given /ˆthe user has an account$/ do
+  @user = User.create(name: "Example User", email: "user@example.com",
+                      password: "foobar", password_confirmation: "foobar")
+end
+
+When /ˆthe user submits valid signin information$/ do
+  fill_in "Email", with: @user.email
+  fill_in "Password", with: @user.password
+  click_button "Sign in"
+end
+
+Then /ˆhe should see his profile page$/ do
+  page.should have_selector('title', text: @user.name)
+end
+
+Then /ˆhe should see a signout link$/ do
+  page.should have_link('Sign out', href: signout_path)
+end
+{% endhighlight %}
+
+添加了代码 8.33，Cucumber 测试应该就可以通过了：
+
+{% highlight sh %}
+$ bundle exec cucumber features/
+{% endhighlight %}
+
+<h3 id="sec-8-3-3">8.3.3 小技巧：自定义 RSpec 匹配器</h3>
+
+编写了一些简单的 Cucumber 场景之后，我们来和相应的 RSpec 测试用例对比一下。先看一下代码 8.32 中的 Cucumber 功能和代码 8.33 中的步骤定义，然后再看一下如下的 RSpec 集成测试：
+
+{% highlight ruby %}
+describe "Authentication" do
+
+  subject { page }
+
+
+  describe "signin" do
+    before { visit signin_path }
+
+    describe "with invalid information" do
+      before { click_button "Sign in" }
+
+      it { should have_selector('title', text: 'Sign in') }
+      it { should have_selector('div.alert.alert-error', text: 'Invalid') }
+    end
+
+    describe "with valid information" do
+      let(:user) { FactoryGirl.create(:user) }
+      before do
+        fill_in "Email", with: user.email
+        fill_in "Password", with: user.password
+        click_button "Sign in"
+      end
+
+      it { should have_selector('title', text: user.name) }
+      it { should have_selector('a', 'Sign out', href: signout_path) }
+    end
+  end
+end
+{% endhighlight %}
+
+由此你大概就可以看出 Cucumber 和集成测试各自的优缺点了。Cucumber 功能可读性很好，但是却和测试代码分隔开了，同时削弱了功能和测试代码的作用。我觉得 Cucumber 测试读起来很顺口，但是写起来怪怪的；而集成测试读起来不太顺口，但是很容易编写。
+
+Cucumber 把功能描述和步骤定义分开，可以很好的实现抽象层面的行为。例如，下面这个描述
+
+{% highlight gherkin %}
+Then he should see an error message
+{% endhighlight %}
+
+表达的意思是，期望看到一个错误提示信息。如下的步骤定义则检测了能否实现这个期望：
+
+{% highlight ruby %}
+Then /ˆhe should see an error message$/ do
+  page.should have_selector('div.alert.alert-error', text: 'Invalid')
+end
+{% endhighlight %}
+
+Cucumber 这种分离方式特别便捷的地方在于，只有步骤定义是依赖具体实现的，所以假如我们修改了错误提示信息所用的 CSS class，功能描述文件是不需要修改的。
+
+那么，如果你只是向检测页面中是否显示有错误提示信息，就不想在多个地方重复的编写下面的测试：
+
+{% highlight ruby %}
+should have_selector('div.alert.alert-error', text: 'Invalid')
+{% endhighlight %}
+
+如果你真的这么做了，就把测试和具体的实现绑死了，一旦改变了实现方式，就要到处修改测试。在 RSpec 中，可以自定义匹配器来解决这个问题，我们可以直接这么写：
+
+{% highlight ruby %}
+should have_error_message('Invalid')
+{% endhighlight %}
+
+我们可以在 [5.3.4 节](chapter5.html#sec-5-3-4) 中定义 `full_title` 测试帮助方法的文件中定义这个匹配器，代码如下：
+
+{% highlight ruby %}
+RSpec::Matchers.define :have_error_message do |message|
+  match do |page|
+    page.should have_selector('div.alert.alert-error', text: message)
+  end
+end
+{% endhighlight %}
+
+我们还可以为一些常用的操作定义帮助方法，例如：
+
+{% highlight ruby %}
+def valid_signin(user)
+  fill_in "Email", with: user.email
+  fill_in "Password", with: user.password
+  click_button "Sign in"
+end
+{% endhighlight %}
+
+最终的文件如代码 8.34 所示（把 [5.6 节](chapter5.html#sec-5-6)中的代码 5.37 和代码 5.38 合并了）。我觉得这种方法比 Cucumber 的步骤定义还要灵活，特别是当匹配器和帮助方法可以接受一个参数时，例如 `valid_signin(user)`。我们也可以用步骤定义中的正则表达式匹配来实现这种功能，不过太过繁杂。
+
+**代码 8.34** 添加一个帮助函数和一个 RSpec 自定义匹配器<br />`spec/support/utilities.rb`
+
+{% highlight ruby %}
+include ApplicationHelper
+
+def valid_signin(user)
+  fill_in "Email", with: user.email
+  fill_in "Password", with: user.password
+  click_button "Sign in"
+end
+
+RSpec::Matchers.define :have_error_message do |message|
+  match do |page|
+    page.should have_selector('div.alert.alert-error', text: message)
+  end
+end
+{% endhighlight %}
+
+添加了代码 8.34 之后，我们就可以直接写
+
+{% highlight ruby %}
+it { should have_error_message('Invalid') }
+{% endhighlight %}
+
+和
+
+{% highlight ruby %}
+describe "with valid information" do
+  let(:user) { FactoryGirl.create(:user) }
+  before { valid_signin(user) }
+  .
+  .
+  .
+{% endhighlight %}
+
+还有很多测试用例把测试和具体的实现绑缚在一起了，我们会在 [8.5 节](#sec-8-5)的练习中彻底的搜查现有的测试组件，使用自定义匹配器和帮助方法解耦测试和具体实现。
+
+<h2 id="sec-8-4">8.4 小结</h2>
+
+本章我们介绍了很多基础知识，也为稍显简陋的应用程序实现了注册和登录功能。实现了用户身份验证功能后，我们就可以根据登录状态和用户的身份限制对特定页面的访问权限。在实现限制访问的过程中，我们会为用户添加编辑个人信息的功能，还会为管理员添加删除用户的功能。这些是[第九章](chapter9.html)的主要内容。
+
+在继续阅读之前，先把本章的改动合并到主分支吧：
+
+{% highlight sh %}
+$ git add .
+$ git commit -m "Finish sign in"
+$ git checkout master
+$ git merge sign-in-out
+{% endhighlight %}
+
+然后再推送到 GitHub 和 Heroku 生成环境服务器：
+
+{% highlight sh %}
+$ git push
+$ git push heroku
+$ heroku run rake db:migrate
+{% endhighlight %}
+
+如果之前你在生产服务器中注册过用户，我建议你按照 [8.2.4 节](#sec-8-2-4)中介绍的方法，为各用户生成记忆权标，这时不能用本地的控制台，而要用 Heroku 的控制台：
+
+{% highlight sh %}
+$ heroku run console
+>> User.all.each { |user| user.save(validate: false) }
+{% endhighlight %}
+
+<h2 id="sec-8-5">8.5 练习</h2>
+
+1. 重构登录表单，把 `form_for` 换成 `form_tag`，确保测试还是可以通过的。提示：可以参照 Railscasts 第 270 集《[Authentication in Rails 3.1](http://railscasts.com/episodes/270-authentication-in-rails-3-1)》，特别留意一下 `params` Hash 结构的变化。
+2. 参照 [8.3.3 节](#sec-8-3-3)中的示例，遍览用户和身份验证相关的集成测试，在 `spec/support/utilities.rb` 中定义帮助函数，解耦测试和具体实现。附加题：把这些帮助方法放到不同的文件和模块中，然后在引入相应的模块。
+
+<div class="navigation">
+  <a class="prev_page" href="chapter7.html">&laquo; 第七章 用户注册</a>
+  <a class="next_page" href="chapter9.html">第九章 更新、显示和删除用户 &raquo;</a>
+</div>
+
+1. 另外一个常见的 session 处理方式是，在一定时间之后失效。这种方式特别适合包含敏感信心的网站，例如银行和交易账户。
+2. 图片来自 <http://www.flickr.com/photos/hermanusbackpackers/3343254977/>
+3. 我选择这么生成记忆权标是因为看了 Railscasts 第 274 集《[Remember Me & Reset Password](http://railscasts.com/episodes/274-remember-me-reset-password)》。
+4. Active Record 支持的其他回调函数[在 Rails 指南中](http://guides.rubyonrails.org/active_record_validations_callbacks.html#callbacks-overview)有介绍。
+5. 其实这两种方式是完全等效的，`attr_accessor` 会自动创建取值和设定方法。
+6. 一般来说，这句话的意思是把初始值为 `nil` 的变量附上了是新值，不过 `||=` 也会把初始值为 `false` 的变量附上新值。
+7. 这也是一种备忘（memoization），详情参见[旁注 6.3](chapter6.html#sec-6-3)。
+8. 浏览器其实并不能发送 `DELETE` 请求，Rails 是通过 JavaScript 伪造的。
