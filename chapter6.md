@@ -40,7 +40,7 @@ $ git checkout -b modeling-users
 
 {% highlight ruby %}
 class User
-  attr accessor :name, :email
+  attr_accessor :name, :email
   .
   .
   .
@@ -62,10 +62,10 @@ $ rails generate controller Users new --no-test-framework
 {% highlight sh %}
 $ rails generate model User name:string email:string
       invoke active record
-      create db/migrate/[timestamp] create users.rb
+      create db/migrate/[timestamp]_create_users.rb
       create app/models/user.rb
       invoke rspec
-      create spec/models/user spec.rb
+      create spec/models/user_spec.rb
 {% endhighlight %}
 
 （注意，和控制器的命令习惯不同，模型的名字是单数：控制器是 Users，而模型是 User。）我们提供了可选的参数 `name:string` 和 `email:string`，告诉 Rails 我们需要的两个属性是什么，以及各自的类型（两个都是字符串）。你可以把这两个参数与代码 3.4 和代码 5.28 中的动作名称对比一下，看看有什么不同。
@@ -128,7 +128,7 @@ $ bundle exec rake db:migrate
 
 {% highlight ruby %}
 class User < ActiveRecord::Base
-  attr accessible :name, :email
+  attr_accessible :name, :email
 end
 {% endhighlight %}
 
@@ -185,7 +185,7 @@ Annotated (1): User
 # updated_at :datetime
 #
 class User < ActiveRecord::Base
-  attr accessible :name, :email
+  attr_accessible :name, :email
 end
 {% endhighlight %}
 
@@ -199,7 +199,7 @@ end
 
 {% highlight ruby %}
 class User < ActiveRecord::Base
-  attr accessible :name, :email
+  attr_accessible :name, :email
 end
 {% endhighlight %}
 
@@ -207,7 +207,7 @@ end
 
 <h3 id="sec-6-1-3">6.1.3 创建用户对象</h3>
 
-我们已经做了充足的准备工作，现在可以和刚创建的 User 模型交互一下，来了解 Active Record 的功能。和 [第四章](chapter4.html)一样，我们使用的工具是 Rails 控制台。因为我们（还）不想改动数据库，所以我们要在沙盒模式（sandbox）中启动控制台：
+我们已经做了充足的准备工作，现在可以和刚创建的 User 模型交互一下，来了解 Active Record 的功能。和 [第四章](chapter4.html)一样，我们使用的工具是 Rails 控制台。因为我们还不想改动数据库，所以我们要在沙盒模式（sandbox）中启动控制台：
 
 {% highlight sh %}
 $ rails console --sandbox
@@ -222,15 +222,14 @@ Any modifications you make will be rolled back on exit
 
 {% highlight sh %}
 >> User.new
-=> #<User id: nil, name: nil, email: nil, created at: nil, updated at: nil>
+=> #<User id: nil, name: nil, email: nil, created_at: nil, updated_at: nil>
 {% endhighlight %}
 
 上述的的控制台显示了用户对象的默认值，列出了与图 6.2 和代码 6.5 一致的属性。如果不为 `User.new` 制定参数，创建的对象所有属性值都是 `nil`。在 [4.4.5 节](chapter4.html#sec-4-4-5)中，自己编写的 `User` 类可以接受一个 Hash 参数用来初始化对象的属性，这种方式是受 Active Record 启发的，在 Active Record 的对象中也可以使用相同的方式指定初始值：
 
 {% highlight sh %}
 >> user = User.new(name: "Michael Hartl", email: "mhartl@example.com")
-=> #<User id: nil, name: "Michael Hartl", email: "mhartl@example.com",
-created at: nil, updated at: nil>
+=> #<User id: nil, name: "Michael Hartl", email: "mhartl@example.com", created_at: nil, updated_at: nil>
 {% endhighlight %}
 
 我们看到 `name` 和 `email` 属性的值都已经设定了。
@@ -248,8 +247,7 @@ created at: nil, updated at: nil>
 
 {% highlight sh %}
 >> user
-=> #<User id: 1, name: "Michael Hartl", email: "mhartl@example.com",
-created at: "2011-12-05 00:57:46", updated at: "2011-12-05 00:57:46">
+=> #<User id: 1, name: "Michael Hartl", email: "mhartl@example.com", created_at: "2011-12-05 00:57:46", updated_at: "2011-12-05 00:57:46">
 {% endhighlight %}
 
 如上述代码所示，`id` 的值变成 `1` 了，那两个自动创建的时间戳属性也变成了当前的时间。<sup>[6](#fn-6)</sup> 现在这两个时间戳是一样的，[6.1.5 节](#sec-6-1-5)会看到二者不同的情况。
@@ -261,7 +259,7 @@ created at: "2011-12-05 00:57:46", updated at: "2011-12-05 00:57:46">
 => "Michael Hartl"
 >> user.email
 => "mhartl@example.com"
->> user.updated at
+>> user.updated_at
 => Tue, 05 Dec 2011 00:57:46 UTC +00:00
 {% endhighlight %}
 
@@ -269,11 +267,9 @@ created at: "2011-12-05 00:57:46", updated at: "2011-12-05 00:57:46">
 
 {% highlight sh %}
 >> User.create(name: "A Nother", email: "another@example.org")
-#<User id: 2, name: "A Nother", email: "another@example.org", created at:
-"2011-12-05 01:05:24", updated at: "2011-12-05 01:05:24">
+=> #<User id: 2, name: "A Nother", email: "another@example.org", created_at: "2011-12-05 01:05:24", updated_at: "2011-12-05 01:05:24">
 >> foo = User.create(name: "Foo", email: "foo@bar.com")
-#<User id: 3, name: "Foo", email: "foo@bar.com", created at: "2011-12-05
-01:05:42", updated at: "2011-12-05 01:05:42">
+=> #<User id: 3, name: "Foo", email: "foo@bar.com", created_at: "2011-12-05 01:05:42", updated_at: "2011-12-05 01:05:42">
 {% endhighlight %}
 
 注意，`User.create` 的返回值不是 `true` 或 `false`，而是返回创建的用户对象，直接复制给变量（例如上面第二个命令中的 `foo` 变量）.
@@ -282,16 +278,14 @@ created at: "2011-12-05 00:57:46", updated at: "2011-12-05 00:57:46">
 
 {% highlight sh %}
 >> foo.destroy
-=> #<User id: 3, name: "Foo", email: "foo@bar.com", created at: "2011-12-05
-01:05:42", updated at: "2011-12-05 01:05:42">
+=> #<User id: 3, name: "Foo", email: "foo@bar.com", created at: "2011-12-05 01:05:42", updated_at: "2011-12-05 01:05:42">
 {% endhighlight %}
 
 奇怪的是，`destroy` 和 `create` 一样，返回值是销毁的对象。我不觉得什么地方会用到 `destroy` 的返回值。更奇怪的事情是，销毁的对象还在内存中：
 
 {% highlight sh %}
 >> foo
-=> #<User id: 3, name: "Foo", email: "foo@bar.com", created at: "2011-12-05
-01:05:42", updated at: "2011-12-05 01:05:42">
+=> #<User id: 3, name: "Foo", email: "foo@bar.com", created_at: "2011-12-05 01:05:42", updated_at: "2011-12-05 01:05:42">
 {% endhighlight %}
 
 那么我们怎么知道对象是否真的被销毁了呢？对于已经保存而没有销毁的对象，怎样从数据库中获取呢？要回答这些问题，我们要先学习如何使用 Active Record 查找用户对象。
@@ -302,8 +296,7 @@ Active Record 为查找对象提供了好几种方法。我们要使用这些方
 
 {% highlight sh %}
 >> User.find(1)
-=> #<User id: 1, name: "Michael Hartl", email: "mhartl@example.com",
-created at: "2011-12-05 00:57:46", updated at: "2011-12-05 00:57:46">
+=> #<User id: 1, name: "Michael Hartl", email: "mhartl@example.com", created_at: "2011-12-05 00:57:46", updated_at: "2011-12-05 00:57:46">
 {% endhighlight %}
 
 我们把用户的 id 传递给 `User.find` 方法，Active Record 会返回 id 为1 的用户对象。
@@ -312,7 +305,7 @@ created at: "2011-12-05 00:57:46", updated at: "2011-12-05 00:57:46">
 
 {% highlight sh %}
 >> User.find(3)
-ActiveRecord::RecordNotFound: Couldn't find User with ID=3
+=> #ActiveRecord::RecordNotFound: Couldn't find User with ID=3
 {% endhighlight %}
 
 因为在 [6.1.3 节](#sec-6-1-3)中销毁了第三个用户，所以 Active Record 无法在数据库中找到，抛出了一个异常，说明在查找过程中出现了问题。因为 id 不存在，所以 `find` 方法才会抛出 `ActiveRecord::RecordNotFound` 异常。<sup>[8](#fn-8)</sup>
@@ -320,9 +313,8 @@ ActiveRecord::RecordNotFound: Couldn't find User with ID=3
 除了 `find` 方法之外，Active Record 还支持指定属性来查找用户：
 
 {% highlight sh %}
->> User.find by email("mhartl@example.com")
-=> #<User id: 1, name: "Michael Hartl", email: "mhartl@example.com",
-created at: "2011-12-05 00:57:46", updated at: "2011-12-05 00:57:46">
+>> User.find_by_email("mhartl@example.com")
+=> #<User id: 1, name: "Michael Hartl", email: "mhartl@example.com", created_at: "2011-12-05 00:57:46", updated_at: "2011-12-05 00:57:46">
 {% endhighlight %}
 
 `find_by_email` 方法是 Active Record 根据 `users` 表中的 `email` 列自动定义的（你可能猜到了，Active Record 还定义了 `find_by_name` 方法）。因为我们会把 Email 地址当成用户名使用，所以在实现用户登录功能时，这种查找用户的方式会很有用（参见[第七章](chapter7.html)）。你也许会担心如果用户数量过多，使用 `find_by_email` 的效率不高。事实的确如此，我们会在 [6.2.5 节](#sec-6-2-5)介绍这个问题，以及解决方法，即使用数据库索引。
@@ -331,18 +323,15 @@ created at: "2011-12-05 00:57:46", updated at: "2011-12-05 00:57:46">
 
 {% highlight sh %}
 >> User.first
-=> #<User id: 1, name: "Michael Hartl", email: "mhartl@example.com",
-created at: "2011-12-05 00:57:46", updated at: "2011-12-05 00:57:46">
+=> #<User id: 1, name: "Michael Hartl", email: "mhartl@example.com", created_at: "2011-12-05 00:57:46", updated_at: "2011-12-05 00:57:46">
 {% endhighlight %}
 
 很明显，`first` 会返回数据库中的第一个用户。还有 `all` 方法：
 
 {% highlight sh %}
 >> User.all
-=> [#<User id: 1, name: "Michael Hartl", email: "mhartl@example.com",
-created at: "2011-12-05 00:57:46", updated at: "2011-12-05 00:57:46">,
-#<User id: 2, name: "A Nother", email: "another@example.org", created at:
-"2011-12-05 01:05:24", updated at: "2011-12-05 01:05:24">]
+=> [#<User id: 1, name: "Michael Hartl", email: "mhartl@example.com", created_at: "2011-12-05 00:57:46", updated_at: "2011-12-05 00:57:46">,
+#<User id: 2, name: "A Nother", email: "another@example.org", created_at: "2011-12-05 01:05:24", updated_at: "2011-12-05 01:05:24">]
 {% endhighlight %}
 
 `all` 方法会返回一个数组，包含数据库中的所有用户。
@@ -353,8 +342,7 @@ created at: "2011-12-05 00:57:46", updated at: "2011-12-05 00:57:46">,
 
 {% highlight sh %}
 >> user # Just a reminder about our user's attributes
-=> #<User id: 1, name: "Michael Hartl", email: "mhartl@example.com",
-created at: "2011-12-05 00:57:46", updated at: "2011-12-05 00:57:46">
+=> #<User id: 1, name: "Michael Hartl", email: "mhartl@example.com", created_at: "2011-12-05 00:57:46", updated_at: "2011-12-05 00:57:46">
 >> user.email = "mhartl@example.net"
 => "mhartl@example.net"
 >> user.save
@@ -375,16 +363,16 @@ created at: "2011-12-05 00:57:46", updated at: "2011-12-05 00:57:46">
 现在我们已经更新了用户数据，如在 [6.1.3 节](#sec-6-1-3)中所说，自动创建的那两个时间戳属性就不一样了：
 
 {% highlight sh %}
->> user.created at
+>> user.created_at
 => "2011-12-05 00:57:46"
->> user.updated at
+>> user.updated_at
 => "2011-12-05 01:37:32"
 {% endhighlight %}
 
 更新数据的第二种方式是使用 `update_attributes` 方法：
 
 {% highlight sh %}
->> user.update attributes(name: "The Dude", email: "dude@abides.org")
+>> user.update_attributes(name: "The Dude", email: "dude@abides.org")
 => true
 >> user.name
 => "The Dude"
@@ -407,16 +395,16 @@ created at: "2011-12-05 00:57:46", updated at: "2011-12-05 00:57:46">
 **代码 6.7** 几乎没什么内容的 User 模型测试文件<br />`spec/models/user_spec.rb`
 
 {% highlight ruby %}
-require 'spec helper'
+require 'spec_helper'
 describe User do
-  pending "add some examples to (or delete) #{ FILE }"
+  pending "add some examples to (or delete) #{__FILE__}"
 end
 {% endhighlight %}
 
 上述代码使用了 `pending` 方法，提示我们应该编写一些真正有用的测试。我们可以运行 User 模型的测试看一下现在的情况：
 
 {% highlight sh %}
-$ bundle exec rspec spec/models/user spec.rb
+$ bundle exec rspec spec/models/user_spec.rb
 *
 
 Finished in 0.01999 seconds
@@ -435,7 +423,7 @@ Pending:
 **代码 6.8** 对 `:name` 和 `:email` 属性的测试<br />`spec/models/user_spec.rb`
 
 {% highlight ruby %}
-require 'spec helper'
+require 'spec_helper'
 
 describe User do
 
@@ -520,7 +508,7 @@ $ bundle exec rake db:test:prepare
 
 {% highlight ruby %}
 class User < ActiveRecord::Base
-  attr accessible :name, :email
+  attr_accessible :name, :email
 
   validates :name, presence: true
 end
@@ -530,7 +518,7 @@ end
 
 {% highlight ruby %}
 class User < ActiveRecord::Base
-  attr accessible(:name, :email)
+  attr_accessible(:name, :email)
 
   validates(:name, presence: true)
 end
@@ -550,7 +538,7 @@ $ rails console --sandbox
 `user.save` 的返回值是 `false`，说明存储失败了。最后一个命令使用了 `valid?` 方法，如果对象没有通过任何一个验证就会返回 `false`，如果全部验证都通过了则返回 `true`。这个例子只有一个验证，所以我们知道是哪个验证失败了，不过看一下失败的提示信息还是会有点收获的：
 
 {% highlight sh %}
->> user.errors.full messages
+>> user.errors.full_messages
 => ["Name can't be blank"]
 {% endhighlight %}
 
@@ -562,7 +550,7 @@ $ rails console --sandbox
 
 {% highlight ruby %}
 class User < ActiveRecord::Base
-  attr accessible :name, :email
+  attr_accessible :name, :email
 
   # validates :name, presence: true
 end
@@ -573,7 +561,7 @@ end
 **代码 6.11** 验证 `name` 属性的失败测试<br />`spec/models/user_spec.rb`
 
 {% highlight ruby %}
-require 'spec helper'
+require 'spec_helper'
 
 describe User do
 
@@ -633,7 +621,7 @@ end
 现在你可以看一下测试是否是失败的：
 
 {% highlight sh %}
-$ bundle exec rspec spec/models/user spec.rb
+$ bundle exec rspec spec/models/user_spec.rb
 ...F
 4 examples, 1 failure
 {% endhighlight %}
@@ -641,7 +629,7 @@ $ bundle exec rspec spec/models/user spec.rb
 现在去掉验证代码前的注释（把代码 6.10 变回代码 6.9），测试就可以通过了：
 
 {% highlight sh %}
-$ bundle exec rspec spec/models/user spec.rb
+$ bundle exec rspec spec/models/user_spec.rb
 ...
 4 examples, 0 failures
 {% endhighlight %}
@@ -651,7 +639,7 @@ $ bundle exec rspec spec/models/user spec.rb
 **代码 6.12** 对 `email` 属性存在性的测试<br />`spec/models/user_spec.rb`
 
 {% highlight ruby %}
-require 'spec helper'
+require 'spec_helper'
 
 describe User do
 
@@ -674,7 +662,7 @@ end
 
 {% highlight ruby %}
 class User < ActiveRecord::Base
-  attr accessible :name, :email
+  attr_accessible :name, :email
 
   validates :name, presence: true
   validates :email, presence: true
@@ -692,7 +680,7 @@ end
 **代码 6.14** 对名字长度的测试<br />`spec/models/user_spec.rb`
 
 {% highlight ruby %}
-require 'spec helper'
+require 'spec_helper'
 
 describe User do
   before do
@@ -722,7 +710,7 @@ describe User do
 
 {% highlight ruby %}
 class User < ActiveRecord::Base
-  attr accessible :name, :email
+  attr_accessible :name, :email
 
   validates :name, presence: true, length: { maximum: 50 }
   validates :email, presence: true
@@ -754,7 +742,7 @@ THE US-ER@foo.bar.org
 **代码 6.16** 对 Email 格式验证的测试<br />`spec/models/user_spec.rb`
 
 {% highlight ruby %}
-require 'spec helper'
+require 'spec_helper'
 
 describe User do
 
@@ -794,7 +782,7 @@ end
 
 {% highlight ruby %}
 class User < ActiveRecord::Base
-  attr accessible :name, :email
+  attr_accessible :name, :email
 
   validates :name, presence: true, length: { maximum: 50 }
   VALID_EMAIL_REGEX = /\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i
@@ -885,7 +873,7 @@ validates :email, presence: true, format: { with: VALID_EMAIL_REGEX }
 **代码 6.18** 拒绝相同 Email 地址的测试<br />`spec/models/user_spec.rb`
 
 {% highlight ruby %}
-require 'spec helper'
+require 'spec_helper'
 
 describe User do
 
@@ -901,7 +889,7 @@ describe User do
       user with same email.save
     end
 
-    it { should not be valid }
+    it { should_not be valid }
   end
 end
 {% endhighlight %}
@@ -926,7 +914,7 @@ end
 **代码 6.20** 拒绝相同 Email 地址的测试，不区分大小写<br />`spec/models/user_spec.rb`
 
 {% highlight ruby %}
-require 'spec helper'
+require 'spec_helper'
 
 describe User do
 
@@ -970,7 +958,9 @@ class User < ActiveRecord::Base
   .
   .
   .
-  validates :email, presence: true, format: { with: VALID_EMAIL_REGEX }, uniqueness: { case_sensitive: false }
+  validates :email, presence: true,
+                    format: { with: VALID_EMAIL_REGEX },
+                    uniqueness: { case_sensitive: false }
 end
 {% endhighlight %}
 
@@ -992,7 +982,7 @@ end
 为 `email` 列建立索引就要改变数据库模型，在 Rails 中可以通过迁移实现（参见 [6.1.1 节](#sec-6-1-1)）。在 [6.1.1 节](#sec-6-1-1) 中我们看到，生成 User 模型时会自动创建一个迁移文件（参见代码 6.2），现在我们是要改变已经存在的模型结构，那么使用 `migration` 命令直接创建迁移文件就可以了：
 
 {% highlight sh %}
-$ rails generate migration add index to users email
+$ rails generate migration add_index_to_users_email
 {% endhighlight %}
 
 和 User 模型的迁移不一样，实现 Email 唯一性的迁移操作没有事先定义的模板可用，所以我们要手动把代码 6.22 中的内容写入迁移文件。<sup>[14](#fn-14)</sup>
@@ -1018,7 +1008,7 @@ $ bundle exec rake db:migrate
 （如果失败的话，就退出所有打开的控制台沙盒会话，这些会话可能会锁定数据库，拒绝进行迁移操作。）如果你想看一下操作执行后的效果，请打开 `db/schema.rb` 文件，会发现多了一行：
 
 {% highlight ruby %}
-add_index "users", ["email"], :name => "index users on email", :unique => true
+add_index "users", ["email"], :name => "index_users_on_email", :unique => true
 {% endhighlight %}
 
 为了保证 Email 地址的唯一性，还要做些修改：存入数据库之前把 Email 地址转换成全小写字母的形式，因为不是所有数据库适配器的索引都是区分大小写的。<sup>[15](#fn-15)</sup> 为此，我们要使用回调函数（callback），在 Active Record 对象生命周期的特定时刻调用（参阅 Rails API 中关于回调函数的文档）。本例中，我们要使用的回调函数是 `before_save`，在用户存入数据库之前强行把 Email 地址转换成全小写字母形式，如代码 6.23 所示。
@@ -1085,7 +1075,7 @@ $ bundle install
 **代码 6.25** 确保 `users` 表中有 `password_digest` 列<br />`spec/models/user_spec.rb`
 
 {% highlight ruby %}
-require 'spec helper'
+require 'spec_helper'
 
 describe User do
 
@@ -1141,12 +1131,15 @@ $ bundle exec rspec spec/
 **代码 6.27** 测试 `password` 和 `password_confirmation` 属性<br />`spec/models/user_spec.rb`
 
 {% highlight ruby %}
-require 'spec helper'
+require 'spec_helper'
 
 describe User do
 
   before do
-    @user = User.new(name: "Example User", email: "user@example.com", password: "foobar", password_confirmation: "foobar")
+    @user = User.new(name: "Example User",
+                     email: "user@example.com",
+                     password: "foobar",
+                     password_confirmation: "foobar")
   end
 
   subject { @user }
@@ -1167,7 +1160,10 @@ end
 
 {% highlight ruby %}
 before do
-  @user = User.new(name: "Example User", email: "user@example.com", password: "foobar", password_confirmation: "foobar")
+  @user = User.new(name: "Example User",
+                   email: "user@example.com",
+                   password: "foobar",
+                   password_confirmation: "foobar")
 end
 {% endhighlight %}
 
@@ -1229,11 +1225,14 @@ end
 **代码 6.28** 对 `password` 和 `password_confirmation` 的测试<br />`spec/models/user_spec.rb`
 
 {% highlight ruby %}
-require 'spec helper'
+require 'spec_helper'
 
 describe User do
   before do
-    @user = User.new(name: "Example User", email: "user@example.com", password: "foobar", password_confirmation: "foobar")
+    @user = User.new(name: "Example User",
+                     email: "user@example.com",
+                     password: "foobar",
+                     password_confirmation: "foobar")
   end
 
   subject { @user }
@@ -1278,7 +1277,7 @@ user = User.find_by_email(email)
 接下来的第二步，可以使用 `authenticate` 方法验证用户的密码。在[第八章](chapter8.html)中会使用类似下面的代码获取当前登录的用户：
 
 {% highlight ruby %}
-current user = user.authenticate(password)
+current_user = user.authenticate(password)
 {% endhighlight %}
 
 如果提交的密码和用户的密码一致，上述代码就会返回一个用户对象，否则返回 `false`。
@@ -1349,12 +1348,14 @@ end
 **代码 6.29** 对 `authenticate` 方法的测试<br />`spec/models/user_spec.rb`
 
 {% highlight ruby %}
-require 'spec helper'
+require 'spec_helper'
 
 describe User do
   before do
-    @user = User.new(name: "Example User", email: "user@example.com",
-                     password: "foobar", password_confirmation: "foobar")
+    @user = User.new(name: "Example User",
+                     email: "user@example.com",
+                     password: "foobar",
+                     password_confirmation: "foobar")
   end
 
   subject { @user }
@@ -1397,8 +1398,10 @@ end
 首先，要把 `password` 和 `password_confirmation` 属性设为可访问的（参见 [6.1.2 节](#sec-6-1-2)），然后才能使用如下的初始化参数创建用户对象；
 
 {% highlight ruby %}
-@user = User.new(name: "Example User", email: "user@example.com",
-                 password: "foobar", password_confirmation: "foobar")
+@user = User.new(name: "Example User",
+                 email: "user@example.com",
+                 password: "foobar",
+                 password_confirmation: "foobar")
 {% endhighlight %}
 
 按照代码 6.6 中的做法，我们要把这两个属性对应的 Symbol 加到可访问的属性列表中：
@@ -1433,7 +1436,7 @@ validates :password_confirmation, presence: true
 
 {% highlight ruby %}
 class User < ActiveRecord::Base
-  attr accessible :name, :email, :password, :password_confirmation
+  attr_accessible :name, :email, :password, :password_confirmation
   has_secure_password
 
   before_save { |user| user.email = email.downcase }
@@ -1489,8 +1492,7 @@ password_digest: "$2a$10$P9OnzpdCON80yuMVk3jGr.LMA16VwOExJgjlw0G4f21y...">
 >> user.authenticate("invalid")
 => false
 >> user.authenticate("foobar")
-=> #<User id: 1, name: "Michael Hartl", email: "mhartl@example.com",
-created_at: "2011-12-07 03:38:14", updated_at: "2011-12-07 03:38:14",
+=> #<User id: 1, name: "Michael Hartl", email: "mhartl@example.com", created_at: "2011-12-07 03:38:14", updated_at: "2011-12-07 03:38:14",
 password_digest: "$2a$10$P9OnzpdCON80yuMVk3jGr.LMA16VwOExJgjlw0G4f21y...">
 {% endhighlight %}
 
