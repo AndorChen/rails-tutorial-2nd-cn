@@ -315,7 +315,7 @@ created at: "2011-12-05 00:57:46", updated at: "2011-12-05 00:57:46">
 ActiveRecord::RecordNotFound: Couldn't find User with ID=3
 {% endhighlight %}
 
-因为在 [6.1.3 节](#sec-6-1-3)中销魂了第三个用户，所以 Active Record 无法在数据库中找到，抛出了一个异常，说明在查找过程中出现了问题。因为 id 不存在，所以 `find` 方法才会抛出 `ActiveRecord::RecordNotFound` 异常。<sup>[8](#fn-8)</sup>
+因为在 [6.1.3 节](#sec-6-1-3)中销毁了第三个用户，所以 Active Record 无法在数据库中找到，抛出了一个异常，说明在查找过程中出现了问题。因为 id 不存在，所以 `find` 方法才会抛出 `ActiveRecord::RecordNotFound` 异常。<sup>[8](#fn-8)</sup>
 
 除了 `find` 方法之外，Active Record 还支持指定属性来查找用户：
 
