@@ -26,7 +26,7 @@ $ git checkout -b modeling-users
 
 接下来的三章最终是要实现网站的“注册”页面（构思图如图 6.1 所示），在此之前我们要解决用户的存储问题，因为现在还没有地方存储用户信息。因此，实现用户注册功能的第一步是要创建一个数据结构，获取并存储用户的信息。
 
-![signup_mockup_bootstrap](fassets/images/figures/signup_mockup_bootstrap.png)
+![signup_mockup_bootstrap](assets/images/figures/signup_mockup_bootstrap.png)
 
 图 6.1：用户注册页面的构思图
 

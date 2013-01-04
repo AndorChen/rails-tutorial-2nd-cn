@@ -44,7 +44,7 @@ end
 gem 'jquery-rails', '2.0.2'
 
 group :test do
-  gem 'capybara', '1.1.2'
+  gem 'capybara', '1.1.2' # 必须确保capybara的版本是1.1.2，最新的capybara版本(2.0.1)将不支持下文测试中的visit等方法。
 end
 
 group :production do
