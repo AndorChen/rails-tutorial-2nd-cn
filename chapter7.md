@@ -120,7 +120,7 @@ action: home
 
 这是 `params` 变量的 YAML<sup>[3](#fn-3)</sup> 形式，和 Hash 类似，显示了当前页面的控制器名和动作名。在 [7.1.2 节](#sec-7-1-2)中会介绍其他调试信息的意思。
 
-我们不想让部属后的示例程序显示这个调试信息，所以代码 7.1 中用如下的代码做了限制，只在“开发环境”中显示：
+我们不想让部署后的示例程序显示这个调试信息，所以代码 7.1 中用如下的代码做了限制，只在“开发环境”中显示：
 
 {% highlight ruby %}
 if Rails.env.development?
@@ -164,7 +164,7 @@ if Rails.env.development?
   <p>如果要在“生产环境”中运行应用程序，先要提供生产环境数据库。在“生产环境”中执行 <code>rake db:migrate</code> 命令可以生成“生产环境”所需的数据库：</p>
   <pre>$ bundle exec rake db:migrate RAILS_ENV=production</pre>
   <p>（我发现在控制台、服务器和迁移命令中指定其他环境的方法不一样，这可能会产生混淆，所以我特意演示了三个命令的用法。）</p>
-  <p>顺便说一下，把应用程序部属到 Heroku 后，可以使用如下的命令进入远端的控制台：</p>
+  <p>顺便说一下，把应用程序部署到 Heroku 后，可以使用如下的命令进入远端的控制台：</p>
   <pre>
   $ heroku run console
   Ruby console for yourapp.herokuapp.com
@@ -173,7 +173,7 @@ if Rails.env.development?
   >> Rails.env.production?
   => true
   </pre>
-  <p>Heroku 是用来部属网站的平台，自然会在“生产环境”中运行应用程序。</p>
+  <p>Heroku 是用来部署网站的平台，自然会在“生产环境”中运行应用程序。</p>
 </div>
 
 <h3 id="sec-7-1-2">7.1.2 Users 资源</h3>
@@ -733,7 +733,7 @@ initial.should == final
 替换成简单的一行代码
 
 {% highlight ruby %}
-expect { click_button "Create my account" }.not to change(User, :count)
+expect { click_button "Create my account" }.not_to change(User, :count)
 {% endhighlight %}
 
 这样读起来更顺口，代码也更简洁。
@@ -999,7 +999,7 @@ Rails 会以 `name` 属性的值为键，用户输入的内容为值，构成一
 首先，要确保当前的注册表单可以正常使用。我们可以直接在浏览器中提交表单试试，也可以运行提交不合法数据的测试检测：
 
 {% highlight sh %}
-$ bundle exec rspec spec/requests/user pages spec.rb \
+$ bundle exec rspec spec/requests/user_pages_spec.rb \
 -e "signup with invalid information"
 {% endhighlight %}
 
@@ -1102,7 +1102,7 @@ controller: users
 现在表单已经可以正常使用，不会出错了，针对不合法数据的测试也可以通过了：
 
 {% highlight sh %}
-$ bundle exec rspec spec/requests/user pages spec.rb \
+$ bundle exec rspec spec/requests/user_pages_spec.rb \
 -e "signup with invalid information"
 {% endhighlight %}
 
@@ -1240,7 +1240,7 @@ $ rails console
 我们可以通过下面的方法模拟代码 7.16 中针对不合法数据的测试过程，来看一下本节编程的效果：在浏览器中，访问“注册”页面，什么也不填，直接点击“Create my account”按钮。结果如图 7.18 所示。既然“注册”页面可以正常使用了，相应的测试也应该可以通过了。
 
 {% highlight sh %}
-$ bundle exec rspec spec/requests/user pages spec.rb \
+$ bundle exec rspec spec/requests/user_pages_spec.rb \
 > -e "signup with invalid information"
 {% endhighlight %}
 
@@ -1263,7 +1263,7 @@ $ bundle exec rspec spec/requests/user pages spec.rb \
 要完成注册表单的功能，我们要把代码 7.21 中的注释部分换成相应的处理代码。现在，对提交合法数据的测试还是失败的：
 
 {% highlight sh %}
-$ bundle exec rspec spec/requests/user pages spec.rb \
+$ bundle exec rspec spec/requests/user_pages_spec.rb \
 > -e "signup with valid information"
 {% endhighlight %}
 
