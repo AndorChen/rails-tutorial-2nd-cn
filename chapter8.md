@@ -144,7 +144,7 @@ end
 
 接下来还要创建“登录”页面的视图，因为“登录”页面的目的是创建新 session，所以创建的视图位于 `app/views/sessions/new.html.erb`。在视图中我们要显示网页的标题和一个一级标头，如代码 8.4 所示。
 
-**代码 8.4 “登录”页面的视图<br />`app/views/sessions/new.html.erb`
+**代码 8.4** “登录”页面的视图<br />`app/views/sessions/new.html.erb`
 
 {% highlight erb %}
 <% provide(:title, "Sign in") %>
