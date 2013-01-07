@@ -17,7 +17,7 @@ $ git checkout -b sign-in-out
 
 <h2 id="sec-8-1">8.1 session 和登录失败</h2>
 
-[session](http://en.wikipedia.org/wiki/Session_(computer_science)) 是两个电脑（例如运行有网页浏览器的客户端电脑和运行 Rails 的服务器）之间的半永久性连接，我们就是利用它来实现登录过程中常见问题的。网络中常见的 session 处理方式有好几种：可以在用户关闭浏览器后清除 session；也可以提供一个“记住我”单选框让用户选择持久性的 session，直到用户退出后 session 才会失效。<sup>[1](#fn-1)</sup> 在示例程序中我们选择使用第二中处理方式，即用户登录后，会永久的记住登录状态，知道用户点击“退出”链接之后才清除 session。（在 [8.2.1 节](#sec-8-2-1)中会介绍“永久”到底有多久。）
+[session](http://en.wikipedia.org/wiki/Session_(computer_science\)) 是两个电脑（例如运行有网页浏览器的客户端电脑和运行 Rails 的服务器）之间的半永久性连接，我们就是利用它来实现登录过程中常见问题的。网络中常见的 session 处理方式有好几种：可以在用户关闭浏览器后清除 session；也可以提供一个“记住我”单选框让用户选择持久性的 session，直到用户退出后 session 才会失效。<sup>[1](#fn-1)</sup> 在示例程序中我们选择使用第二中处理方式，即用户登录后，会永久的记住登录状态，知道用户点击“退出”链接之后才清除 session。（在 [8.2.1 节](#sec-8-2-1)中会介绍“永久”到底有多久。）
 
 很显然，我们可以把 session 视作一个符合 REST 架构的资源，在登录页面中准备一个新的 session，登录后创建这个 session，退出则会销毁 session。不过 session 和 Users 资源有所不同，Users 资源使用数据库（通过 User 模型）持久的存储数据，而 Sessions 资源是利用 [cookie](http://en.wikipedia.org/wiki/HTTP_cookie) 来存储数据的。cookie 是存储在浏览器中的少量文本。实现登录功能基本上就是在实现基于 cookie 的验证机制。在本节及接下来的一节中，我们会构建 Sessions 控制器，创建登录表单，还会实现控制器中相关的动作。在 [8.2 节](#sec-8-2)中会加入处理 cookie 所需的代码。
 
@@ -277,7 +277,7 @@ it { should have_link('Profile', href: user_path(user)) }
 注册表单和登录表单的区别在于，程序中没有 Session 模型，因此也就没有和 `@user` 类似的变量。也就是说，在构建登录表单时，我们要给 `form_for` 提供更多的信息。一般来说，如下的代码
 
 {% highlight erb %}
-form for(@user)
+form_for(@user)
 {% endhighlight %}
 
 Rails 会自动向 /users 地址发送 `POST` 请求。对于登录表单，我们则要明确的指定资源的名称已经相应的 URI 地址：
@@ -502,7 +502,7 @@ end
 Flash 消息没有按预期消失算是程序的一个 bug，在修正之前，我们最好编写一个测试来捕获这个错误。现在，登录失败时的测试是可以通过的：
 
 {% highlight sh %}
-$ bundle exec rspec spec/requests/authentication pages spec.rb \
+$ bundle exec rspec spec/requests/authentication_pages_spec.rb \
 > -e "signin with invalid information"
 {% endhighlight %}
 
@@ -550,7 +550,7 @@ end
 新添加的测试和预期一致，是失败的：
 
 {% highlight sh %}
-$ bundle exec rspec spec/requests/authentication pages spec.rb \
+$ bundle exec rspec spec/requests/authentication_pages_spec.rb \
 > -e "signin with invalid information"
 {% endhighlight %}
 
@@ -693,7 +693,7 @@ $ bundle exec rake db:test:prepare
 现在，User 模型的测试应该可以通过了：
 
 {% highlight sh %}
-$ bundle exec rspec spec/models/user spec.rb
+$ bundle exec rspec spec/models/user_spec.rb
 {% endhighlight %}
 
 接下来我们要考虑记忆权标要保存什么数据，这有很多种选择，其实任何足够长的随机字符串都是可以的。因为用户的密码是经过加密处理的，所以原则上我们可以直接把用户的 `password_hash` 值拿来用，不过这样做可能会向潜在的攻击者暴露用户的密码。以防万一，我们还是用 Ruby 标准库中 `SecureRandom` 模块提供的 `urlsafe_base64` 方法来生成随机字符串吧。`urlsafe_base64` 方法生成的是 Base64 字符串，可以放心的在 URI 中使用（因此也可以放心的在 cookie 中使用）。<sup>[3](#fn-3)</sup>写作本书时，`SecureRandom.urlsafe_base64` 创建的字符串长度为 16，由 A-Z、a-z、0-9、下划线（_）和连字符（-）组成，每一位字符都有 64 中可能的情况，所以两个记忆权标相等的概率就是 1/64<sup>16</sup>=2<sup>-96</sup>≈10<sup>-29</sup>，完全可以忽略。
@@ -738,7 +738,7 @@ it { @user.remember_token.should_not be_blank }
 程序所需的代码会涉及到一些新的知识。其一，我们添加了一个回调函数来生成记忆权标：
 
 {% highlight ruby %}
-before save :create_remember_token
+before_save :create_remember_token
 {% endhighlight %}
 
 当 Rails 执行到这行代码时，会寻找一个名为 `create_remember_token` 的方法，然后在保存用户之前执行这个方法。其二，`create_remember_token` 只会在 User 模型内部使用，所以就没必要把它开放给用户之外的对象了。在 Ruby 中，我们可以使用 `private` 关键字（译者注：其实 `private` 是方法而不是关键字，请参阅《Ruby 编程语言》P233）限制方法的可见性：
@@ -818,10 +818,10 @@ module SessionsHelper
 end
 {% endhighlight %}
 
-上述代码中用到的 `coockies` 是由 Rails 提供的，我们可以把它看成 Hash，其中每个元素又都是一个 Hash，包含两个元素，`value` 指定 cookie 的文本，`expires` 指定 cookie 的失效日期。例如，我们可以使用下述代码实现登录功能，把 cookie 的值设为用户的记忆权标，失效日期设为 20 年之后：
+上述代码中用到的 `cookies` 是由 Rails 提供的，我们可以把它看成 Hash，其中每个元素又都是一个 Hash，包含两个元素，`value` 指定 cookie 的文本，`expires` 指定 cookie 的失效日期。例如，我们可以使用下述代码实现登录功能，把 cookie 的值设为用户的记忆权标，失效日期设为 20 年之后：
 
 {% highlight ruby %}
-cookies[:remember token] = { value: user.remember_token,
+cookies[:remember_token] = { value: user.remember_token,
                              expires: 20.years.from_now.utc }
 {% endhighlight %}
 
@@ -1140,7 +1140,7 @@ end
 
 {% highlight javascript %}
 //= require jquery
-//= require jquery ujs
+//= require jquery_ujs
 //= require bootstrap
 //= require tree .
 {% endhighlight %}
