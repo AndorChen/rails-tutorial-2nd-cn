@@ -90,7 +90,7 @@ end
       <%= f.password_field :password %>
 
       <%= f.label :password_confirmation, "Confirm Password" %>
-      <%= f.password_field :password confirmation %>
+      <%= f.password_field :password_confirmation %>
 
       <%= f.submit "Save changes", class: "btn btn-large btn-primary" %>
     <% end %>
@@ -319,7 +319,7 @@ describe "User pages" do
         click_button "Save changes"
       end
 
-      it { should have_selector('title', text: new name) }
+      it { should have_selector('title', text: new_name) }
       it { should have_selector('div.alert.alert-success') }
       it { should have_link('Sign out', href: signout_path) }
       specify { user.reload.name.should == new_name }
@@ -432,7 +432,7 @@ describe "submitting to the update action" do
 end
 {% endhighlight %}
 
-上述代码会向 /users/1 地址发送 `PUT` 请求，由 Users 控制器的 `update` 动作处理（参见[表格 7.1](chapter7.html#table-7-1)）。我们必须这么做，因为浏览器无法直接访问 `update` 动作，必须先提交编辑表单，所以 Capybara 也做不到。访问编辑资料页面只能测试 `edit` 动作是否有权限继续操作，而不能测试 `update` 动作的授权情况。所以，如果要测试 `update` 动作是否有权限进行操作智能直接发送 `PUT` 请求。（你可能已经踩到了，除了 `put` 方法之外，Rails 中的测试还支持 `get`、`post` 和 `delete` 方法。）
+上述代码会向 /users/1 地址发送 `PUT` 请求，由 Users 控制器的 `update` 动作处理（参见[表格 7.1](chapter7.html#table-7-1)）。我们必须这么做，因为浏览器无法直接访问 `update` 动作，必须先提交编辑表单，所以 Capybara 也做不到。访问编辑资料页面只能测试 `edit` 动作是否有权限继续操作，而不能测试 `update` 动作的授权情况。所以，如果要测试 `update` 动作是否有权限进行操作只能直接发送 `PUT` 请求。（你可能已经猜到了，除了 `put` 方法之外，Rails 中的测试还支持 `get`、`post` 和 `delete` 方法。）
 
 直接发送某种 HTTP 请求时，我们需要处理更底层的 `response` 对象。和 Capybara 提供的 `page` 对象不同，我们可以使用 `response` 测试服务器的响应。本例我们检测了 `update` 动作的响应是否转向了登录页面：
 
@@ -446,7 +446,7 @@ specify { response.should redirect_to(signin_path) }
 
 {% highlight ruby %}
 class UsersController < ApplicationController
-  before filter :signed_in_user, only: [:edit, :update]
+  before_filter :signed_in_user, only: [:edit, :update]
   .
   .
   .
