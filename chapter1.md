@@ -1105,13 +1105,12 @@ seyjhflo.heroku.com
 jhyicevg.heroku.com
 {% endhighlight %}
 
-使用这样随机的域名，只有你将地址告诉别人他们才能访问你的网站。（顺便说一下，让你一窥 Ruby 的强大，以下是我用来生成随机域名的代码：
+使用这样随机的域名，只有你将地址告诉别人他们才能访问你的网站。（顺便说一下，让你一窥 Ruby 的强大，以下是我用来生成随机域名的代码，很精妙吧。）
 
 {% highlight sh %}
 ('a'..'z').to_a.shuffle[0..7].join
 {% endhighlight %}
 
-很精妙吧。）
 
 除了支持子域名，Heroku 也支持自定义域名。（事实上[本书的网站](http://railstutorial.org/)（译者注：原网站在 Heroku，本中文版在 Github 上）就放在 Heroku 上。如果你阅读的是本书的在线版，你现在就正在浏览一个托管在 Heroku 上的网站。）在 [Heroku 文档](http://devcenter.heroku.com/) 中可以查看更多关于自定义域名的信息以及其他 Heroku 相关的话题。
 
