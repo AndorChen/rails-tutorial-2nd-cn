@@ -217,7 +217,7 @@ $ rails console
 
 <h3 id="sec-4-2-2">4.2.2 字符串</h3>
 
-字符串算是 Web 应用程序中最有用的数据结构了，因为网页的内容就是从数据库发送到浏览器的字符串。然我们现在控制台中体验一下字符串，这次我们使用 `rails c` 启动控制台，这是 `rails console` 的快捷方式：
+字符串算是 Web 应用程序中最有用的数据结构了，因为网页的内容就是从数据库发送到浏览器的字符串。我们现在控制台中体验一下字符串，这次我们使用 `rails c` 启动控制台，这是 `rails console` 的快捷方式：
 
 {% highlight sh %}
 $ rails c
@@ -981,7 +981,7 @@ type="text/css" />
 
 图 4.1：`String` 类的继承关系
 
-要跟深入的理解类，没什么比自己实际编写一个更好的方法了。我们来创建一个名为 `Word` 的类，包含一个名为 `palindrome?` 方法，如果单词顺读和反读时都一样则返回 `true`：
+要更深入的理解类，没什么比自己实际编写一个更好的方法了。我们来创建一个名为 `Word` 的类，包含一个名为 `palindrome?` 方法，如果单词顺读和反读时都一样则返回 `true`：
 
 {% highlight sh %}
 >> class Word
@@ -1009,7 +1009,7 @@ type="text/css" />
 
 {% highlight sh %}
 >> class Word < String             # Word 继承自 String
->>   # 如果字符串和自己翻转后相等则返回 true
+>>   # 如果字符串和自己反转后相等则返回 true
 >>   def palindrome?
 >>     self == self.reverse        # self 代表这个字符串本身
 >>   end
@@ -1045,7 +1045,7 @@ type="text/css" />
 
 图 4.2：代码 4.8 中定义的 `Word` 类（非内置类）的继承关系
 
-在代码 4.8 中，注意，要检查单词和单词的翻转是否相同，要在 `Word` 类中引用这个单词，在 Ruby 中我们使用 `self` 进行引用：在 `Word` 类中，`self` 代表的就是对象本身。所以我们可以使用
+在代码 4.8 中，注意，要检查单词和单词的反转是否相同，要在 `Word` 类中引用这个单词，在 Ruby 中我们使用 `self` 进行引用：在 `Word` 类中，`self` 代表的就是对象本身。所以我们可以使用
 
 {% highlight ruby %}
 self == self.reverse
@@ -1066,7 +1066,7 @@ NoMethodError: undefined method `palindrome?\' for "level":String
 
 {% highlight sh %}
 >> class String
->>   # 如果字符串和自己翻转后相等则返回 true
+>>   # 如果字符串和自己反转后相等则返回 true
 >>   def palindrome?
 >>     self == self.reverse
 >>   end
