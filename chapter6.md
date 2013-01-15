@@ -9,7 +9,7 @@ title: 第六章 用户模型
 
 <div id="box-6-1" class="aside">
     <h4>旁注6.1 为什么要自己开发用户验证系统</h4>
-    <p>基本上所有的 Web 应用程序都会需要某种登录和用户验证系统。所以 Web 框架大都有很多验证系统的实现方案，Rails 当然也不例外。用户验证及授权系统很很多，包括 Clearance、Authlogic、Devise 和 CanCan（还有一些不是专门针对 Rails 的基于 OpenID 和 OAuth 开发的系统）。所以你就肯定会问，为什么还要重复制造轮子，为什么不直接用现有的解决方案，而要自己开发呢？</p>
+    <p>基本上所有的 Web 应用程序都会需要某种登录和用户验证系统。所以 Web 框架大都有很多验证系统的实现方案，Rails 当然也不例外。用户验证及授权系统有很多，包括 Clearance、Authlogic、Devise 和 CanCan（还有一些不是专门针对 Rails 的基于 OpenID 和 OAuth 开发的系统）。所以你就肯定会问，为什么还要重复制造轮子，为什么不直接用现有的解决方案，而要自己开发呢？</p>
     <p>首先，实践已经证明，大多数网站的用户验证系统都要对第三方代码库做一些定制和修改，这往往比重新开发一个验证系统工作量更大。再者，现有的方案就像一个“黑盒”，你无法了解其中到底有些什么功能，而自己开发的话就能更好的理解实现的过程。而且，Rails 最近的更新（参见[6.3 节](#sec-6-3)），使开发验证系统变得很简单。最后，如果后续开发要用第三方代码库的话，因为自己开发过，所以你可以更好的理解它的实现过程，便于定制功能。</p>
 </div>
 
@@ -480,7 +480,7 @@ $ rails console --sandbox
 it { should respond_to(:name) }
 {% endhighlight %}
 
-为 User 模型添加新方法或新属性时可以采用这种测试方式，而且使用这种方式还能清新的列出 `User` 实例对象可以响应的所有的方法。
+为 User 模型添加新方法或新属性时可以采用这种测试方式，而且使用这种方式还能清晰的列出 `User` 实例对象可以响应的所有的方法。
 
 现在你可以看一下测试是不是失败的：
 
@@ -721,7 +721,7 @@ end
 
 <h3 id="sec-6-2-4">6.2.4 格式验证</h3>
 
-对 `name` 属性的验证只需做一些简单的限制就好，任何非空、长度小于 51 个字符的字符床就可以。不过 `email` 属性则需要更复杂的限制。目前我们只是拒绝空的 Email 地址，本节我们要限制 Email 地址符合常用的形式，类似 `user@example.com` 这种。
+对 `name` 属性的验证只需做一些简单的限制就好，任何非空、长度小于 51 个字符的字符串就可以。不过 `email` 属性则需要更复杂的限制。目前我们只是拒绝空的 Email 地址，本节我们要限制 Email 地址符合常用的形式，类似 `user@example.com` 这种。
 
 这里我们用到的测试和验证不是十全十美的，只是刚刚好可以接受大多数的合法 Email 地址，并拒绝大多数不合法的 Email 地址。我们会先对一些合法的 Email 集合和不合法的 Email 集合进行测试。我们使用 `%w[]` 来创建集合，集合中的元素都是字符串形式，如下面的控制台会话所示：
 
@@ -755,7 +755,7 @@ describe User do
   describe "when email format is invalid" do
     it "should be invalid" do
       addresses = %w[user@foo,com user at foo.org example.user@foo. foo@bar baz.com foo@bar+baz.com]
-      addresses.each do |invalid address|
+      addresses.each do |invalid_address|
         @user.email = invalid_address
         @user.should_not be_valid
       end
@@ -764,8 +764,8 @@ describe User do
 
   describe "when email format is valid" do
     it "should be valid" do
-      addresses = %w[user@foo.COM A US-ER@f.b.org frst.lst@foo.jp a+b@baz.cn]
-      addresses.each do |valid address|
+      addresses = %w[user@foo.COM A-US-ER@f.b.org frst.lst@foo.jp a+b@baz.cn]
+      addresses.each do |valid_address|
         @user.email = valid_address
         @user.should be_valid
       end
@@ -885,11 +885,11 @@ describe User do
   .
   describe "when email address is already taken" do
     before do
-      user with same email = @user.dup
-      user with same email.save
+      user_with_same_email = @user.dup
+      user_with_same_email.save
     end
 
-    it { should_not be valid }
+    it { should_not be_valid }
   end
 end
 {% endhighlight %}
@@ -1028,10 +1028,10 @@ end
 
 在代码 6.23 中，`before_save` 后跟有一个块，块中的代码调用了字符串的 `downcase` 方法，把用户的 Email 地址转换成小写字母形式。这些代码有些深度，此时你只需相信这些代码可以达到目的就行了。如果你有所怀疑，可以把代码 6.19 中的唯一性验证代码注释掉，创建几个 Email 地址一样的用户，看一下得到存储时得到的错误信息。（[8.2.1 节](chapter8.html#sec-8-2-1) 还会用到这种方法。）
 
-至此，上面 Alice 遇到的问题就解决了，数据库会请求 1 创建的用户，不会存储请求 2 差un关键的用户，因为它违反了唯一性限制。（在 Rails 的日志中会显示一个错误，不过无大碍。其实我们可以捕获抛出的 `ActiveRecord::StatementInvalid` 异常（Insoshi 就这么做了），不过本教程不会涉及异常处理。）为 `email` 列建立索引同时也解决了 [6.1.4 节](#sec-6-1-4)中提到的 `find_by_email` 的效率问题（参阅[旁注 6.2](#box-6-2)）。
+至此，上面 Alice 遇到的问题就解决了，数据库会存储请求 1 创建的用户，不会存储请求 2 创建的用户，因为它违反了唯一性限制。（在 Rails 的日志中会显示一个错误，不过无大碍。其实我们可以捕获抛出的 `ActiveRecord::StatementInvalid` 异常（Insoshi 就这么做了），不过本教程不会涉及异常处理。）为 `email` 列建立索引同时也解决了 [6.1.4 节](#sec-6-1-4)中提到的 `find_by_email` 的效率问题（参阅[旁注 6.2](#box-6-2)）。
 
 <div id="box-6-2" class="aside">
-    <p>创建数据库列时，要考虑是否会用这个列进行查询。例如，代码 6.2 中的迁移，创建了 `email` 列，[第七章](chapter7.html)中实现的用户登录功能，会通过提交的 Email 地址查询对应的用户记录。按照现有的数据模型，使用 Email 地址查找用户的唯一方式是遍历数据库中所有的用户记录，对比提交的 Email 地址和记录中的 `email` 列，看看是否一致。在数据库的术语中，这叫做“全表扫描（full-table scan）”，对一个有上千用户的网站而言，这可不是一件轻松的事。</p>
+    <p>创建数据库列时，要考虑是否会用这个列进行查询。例如，代码 6.2 中的迁移，创建了 `email` 列，<a href="/chapter7.html">第七章</a>中实现的用户登录功能，会通过提交的 Email 地址查询对应的用户记录。按照现有的数据模型，使用 Email 地址查找用户的唯一方式是遍历数据库中所有的用户记录，对比提交的 Email 地址和记录中的 `email` 列，看看是否一致。在数据库的术语中，这叫做“全表扫描（full-table scan）”，对一个有上千用户的网站而言，这可不是一件轻松的事。</p>
     <p>为 `email` 列建立索引则可以解决这个问题。我们可以将数据库索引比拟成书籍的索引。如果要在一本书中找出某个字符串（例如 `"foobar"`）出现的所有位置，我们需要翻看书中的每一页。但是如果有索引的话，只需在索引中找到 `"foobar"` 条目，就能看到所有包含 `"foobar"` 的页码。数据库索引基本上也是这种原理。</p>
 </div>
 
