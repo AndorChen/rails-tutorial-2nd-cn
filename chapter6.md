@@ -1325,7 +1325,7 @@ describe "with invalid password" do
 end
 {% endhighlight %}
 
-再次用到了 `let` 方法，还用到了 `specify` 方法。`specify` 是 `it` 方法的别名，如果你觉得某个地方用 `it` 读起来怪怪的，就可以换用 `specify`。本例中，“it should not equal wrong user”读起来很顺，不过“user: user for invalid password should be false”有点累赘，换用“specify: user for invalid password should be false”感觉就好些。
+再次用到了 `let` 方法，还用到了 `specify` 方法。`specify` 是 `it` 方法的别名，如果你觉得某个地方用 `it` 读起来怪怪的，就可以换用 `specify`。本例中，“it should not equal wrong user”读起来很顺，不过“user: user with invalid password should be false”有点累赘，换用“specify: user with invalid password should be false”感觉就好些。
 
 <div id="box-6-3" class="aside">
     <h4>旁注 6.3 `let` 方法</h4>
