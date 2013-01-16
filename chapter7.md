@@ -1385,7 +1385,7 @@ end
 
 {% highlight sh %}
 $ rails console
->> User.find by email("example@railstutorial.org")
+>> User.find_by_email("example@railstutorial.org")
 => #<User id: 1, name: "Rails Tutorial", email: "example@railstutorial.org",
 created at: "2011-12-13 05:51:34", updated at: "2011-12-13 05:51:34",
 password digest: "$2a$10$A58/j7wwh3aAffGkMAO9Q.jjh3jshd.6akhDKtchAz/R...">
@@ -1579,4 +1579,4 @@ en:
 9. 我之所以知道要引入 `ActionView::Helpers::TextHelper` 模块，是因为我在 [Rails API](http://api.rubyonrails.org/v3.2.0/classes/ActionView/Helpers/TextHelper.html#method-i-pluralize) 中查了 `pluralize` 的文档。
 10. 其实我们真正想用的是 `flash.now`，`flash` 和 `flash.now` 之间还是有细微差别的，后续会介绍。
 11. 严格来说，SSL 现在的称呼是 TLS（Transport Layer Security，安全传输层协议），不过人们已经习惯了 SSL 这个名字。
-12. 想把 Heroku 当做实际生成环境的读者可能会对 [Kumade](https://github.com/thoughtbot/kumade) 感兴趣，这个 gem 可以自动处理数据库迁移等操作。
+12. 想把 Heroku 当做实际生产环境的读者可能会对 [Kumade](https://github.com/thoughtbot/kumade) 感兴趣，这个 gem 可以自动处理数据库迁移等操作。
