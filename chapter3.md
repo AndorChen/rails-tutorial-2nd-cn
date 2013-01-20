@@ -877,7 +877,7 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
 
 所以，“首页”的测试现在应该可以通过了。你还会看到红色的错误提示是因为“帮助”页面和“关于”页面的测试还是失败的，我们使用代码 3.20 和代码 3.21 中的代码让它们也通过测试。
 
-**代码 3.20** “帮助”页面的完整 HTML <br />`app/views/static_pages/home.html.erb`
+**代码 3.20** “帮助”页面的完整 HTML <br />`app/views/static_pages/help.html.erb`
 
 {% highlight erb %}
 <!DOCTYPE html>
@@ -897,7 +897,7 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
 </html>
 {% endhighlight %}
 
-**代码 3.21** “关于”页面的完整 HTML <br />`app/views/static_pages/home.html.erb`
+**代码 3.21** “关于”页面的完整 HTML <br />`app/views/static_pages/about.html.erb`
 
 {% highlight erb %}
 <!DOCTYPE html>
@@ -994,7 +994,7 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
 </html>
 {% endhighlight %}
 
-**代码 3.24** 标题中使用了嵌入式 Ruby 代码的“关于”页面视图 <br />`app/views/static_pages/help.html.erb`
+**代码 3.24** 标题中使用了嵌入式 Ruby 代码的“关于”页面视图 <br />`app/views/static_pages/about.html.erb`
 
 {% highlight erb %}
 <% provide(:title, 'About Us') %>
