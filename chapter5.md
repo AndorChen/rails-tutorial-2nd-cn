@@ -17,9 +17,9 @@ title: 第五章 完善布局
 
 和之前一样，如果你使用 Git 做版本控制的话，现在最好创建一个新分支：
 
-{% highlight sh %}
+```sh
 $ git checkout -b filling-in-layout
-{% endhighlight %}
+```
 
 <h3 id="sec-5-1-1">5.1.1 网站导航</h3>
 
@@ -27,7 +27,7 @@ $ git checkout -b filling-in-layout
 
 **代码 5.1** 添加一些结构后的网站布局文件 <br />`app/views/layouts/application.html.erb`
 
-{% highlight erb %}
+```erb
 <!DOCTYPE html>
 <html>
   <head>
@@ -59,41 +59,41 @@ $ git checkout -b filling-in-layout
     </div>
   </body>
 </html>
-{% endhighlight %}
+```
 
 需要特别注意一下 Hash 风格从 Ruby 1.8 到 Ruby 1.9 的转变（参见 [4.3.3 节](chapter4.html#sec-4-3-3)）。即把
 
-{% highlight erb %}
+```erb
 <%= stylesheet_link_tag "application", :media => "all" %>
-{% endhighlight %}
+```
 
 换成
 
-{% highlight erb %}
+```erb
 <%= stylesheet_link_tag "application", media: "all" %>
-{% endhighlight %}
+```
 
 有一点很重要需要注意一下，因为旧的 Hash 风格使用范围还很广，所以两种用法你都要能够识别。
 
 我们从上往下看一下代码 5.1 中新添加的元素。[3.1 节](chapter3.html#sec-3-1)简单的介绍过，Rails 3 默认会使用 HTML5（如 `<!DOCTYPE html>` 所示），因为 HTML5 标准还很新，有些浏览器（特别是较旧版本的 IE 浏览器）还没有完全支持，所以我们加载了一些 JavaScript 代码（称作“[HTML5 shim](http://code.google.com/p/html5shim/)”）来解决这个问题：
 
-{% highlight html %}
+```html
 <!--[if lt IE 9]>
 <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
 <![endif]-->
-{% endhighlight %}
+```
 
 如下有点古怪的句法
 
-{% highlight html %}
+```html
 <!--[if lt IE 9]>
-{% endhighlight %}
+```
 
 只有当 IE 浏览器的版本小于 9 时（`if lt IE 9`）才会加载其中的代码。这个奇怪的 `[if lt IE 9]` 句法不是 Rails 提供的，其实它是 IE 浏览器为了解决兼容性问题而特别支持的[条件注释](http://en.wikipedia.org/wiki/Conditional_comment)（conditional comment）。这就带来了一个好处，因为这说明我们只会在 IE9 以前的版本中加载 HTML5 shim，而其他的 Firefox、Chrome 和 Safari 等浏览器则不会受到影响。
 
 后面的区域是一个 `header`，包含网站的 LOGO（纯文本）、一些小区域（使用 `div` 标签）和一个导航列表元素：
 
-{% highlight erb %}
+```erb
 <header class="navbar navbar-fixed-top">
   <div class="navbar-inner">
     <div class="container">
@@ -108,26 +108,26 @@ $ git checkout -b filling-in-layout
     </div>
   </div>
 </header>
-{% endhighlight %}
+```
 
 `header` 标签的意思是放在网页顶部的内容。我们为 `header` 标签指定了两个 CSS class<sup>[3](#fn-3)</sup>，`navbar` 和 `navbar-fixed-top`，用空格分开：
 
-{% highlight html %}
+```html
 <header class="navbar navbar-fixed-top">
-{% endhighlight %}
+```
 
 所有的 HTML 元素都可以指定 class 和 id，它们不仅是个标注，在 CSS 样式中也有用（[5.1.2 节](#sec-5-1-2)）。class 和 id 之间主要的区别是，class 可以在同一个网页中多次使用，而 id 只能使用一次。这里的 `navbar` 和 `navbar-fixed-top` 在 Bootstrap 框架中有特殊的意义，我们会在 [5.1.2 节](#sec-5-1-2)中安装并使用 Bootstrap。`header` 标签内是一些 `div` 标签：
 
-{% highlight html %}
+```html
 <div class="navbar-inner">
   <div class="container">
-{% endhighlight %}
+```
 
 `div` 标签是常规的区域，除了把文档分成不同的部分之外，没有特殊的意义。在以前的 HTML 中，`div` 标签被用来划分网站中几乎所有的区域，但是 HTML5 增加了 `header`、`nav` 和 `section` 元素，用来划分大多数网站中都有用到的区域。本例中，每个 `div` 也都指定了一个 CSS class。和 `header` 标签的 class 一样，这些 class 在 Bootstrap 中也有特殊的意义。
 
 在这些 `div` 之后，有一些 ERb 代码：
 
-{% highlight erb %}
+```erb
 <%= link_to "sample app", '#', id: "logo" %>
 <nav>
   <ul class="nav pull-right">
@@ -136,13 +136,13 @@ $ git checkout -b filling-in-layout
     <li><%= link_to "Sign in", '#' %></li>
   </ul>
 </nav>
-{% endhighlight %}
+```
 
 这里使用了 Rails 中的 `link_to` 帮助方法来创建链接（在 [3.3.2 节](chapter3.html#sec-3-3-2)中我们是直接创建 `a` 标签来实现的）。`link_to` 的第一个参数是链接文本，第二个参数是链接地址。在 [5.3.3 节](#sec-5-3-3)中我们会指定链接地址为设置好的路由，这里我们用的是 Web 设计中经常使用的占位符 `#`。第三个参数是可选的，为一个 Hash，本例使用这个参数为 LOGO 添加了一个 `logo` id。（其他三个链接没有使用这个 Hash 参数，没关系，因为这个参数是可选的。）Rails 帮助方法经常这样使用 Hash 参数，可以让我们仅使用 Rails 的帮助方法就能灵活的添加 HTML 属性。
 
 第二个 `div` 中是个导航链接列表，使用无序列表标签 `ul`，以及列表项目标签 `li`：
 
-{% highlight erb %}
+```erb
 <nav>
   <ul class="nav pull-right">
     <li><%= link_to "Home",    '#' %></li>
@@ -150,11 +150,11 @@ $ git checkout -b filling-in-layout
     <li><%= link_to "Sign in", '#' %></li>
   </ul>
 </nav>
-{% endhighlight %}
+```
 
 上面代码中的 `nav` 标签以前是不需要的，它的目的是显示导航链接。`ul` 标签指定的 `nav` 和 `pull-right` class 在 Bootstrap 中有特殊的意义。 Rails 处理这个布局文件并执行其中的 ERb 代码后，生成的列表如下面的代码所示：
 
-{% highlight erb %}
+```erb
 <nav>
   <ul class="nav pull-right">
     <li><a href="#">Home</a></li>
@@ -162,15 +162,15 @@ $ git checkout -b filling-in-layout
     <li><a href="#">Sign in</a></li>
   </ul>
 </nav>
-{% endhighlight %}
+```
 
 布局文件的最后一个 `div` 是主内容区域：
 
-{% highlight erb %}
+```erb
 <div class="container">
   <%= yield %>
 </div>
-{% endhighlight %}
+```
 
 和之前一样，`container` class 在 Bootstrap 中有特殊的意义。[3.3.4 节](chapter3.html#sec-3-3-4)已经介绍过，`yield` 会把各页面中的内容插入网站的布局中。
 
@@ -178,7 +178,7 @@ $ git checkout -b filling-in-layout
 
 **代码 5.2** “首页”的代码，包含一个到注册页面的链接 <br />`app/views/static_pages/home.html.erb`
 
-{% highlight erb %}
+```erb
 <div class="center hero-unit">
   <h1>Welcome to the Sample App</h1>
 
@@ -192,21 +192,21 @@ $ git checkout -b filling-in-layout
 </div>
 
 <%= link_to image_tag("rails.png", alt: "Rails"), 'http://rubyonrails.org/' %>
-{% endhighlight %}
+```
 
 上面代码中第一个 `link_to` 创建了一个占位链接，指向[第七章](chapter7.html)中会加入的用户注册页面
 
-{% highlight erb %}
+```erb
 <a href="#" class="btn btn-large btn-primary">Sign up now!</a>
-{% endhighlight %}
+```
 
 `div` 标签中的 `hero-unit` class 在 Bootstrap 中有特殊的意义，注册按钮的 `btn`、`btn-large` 和 `btn-primary` 也是一样。
 
 第二个 `link_to` 用到了 `image_tag` 帮助方法，第一个参数是图片的路径；第二个参数是可选的，一个 Hash，本例中这个 Hash 参数使用一个 Symbol 键设置了图片的 `alt` 属性。为了更好的理解，我们来看一下生成的 HTML：<sup>[4](#fn-4)</sup>
 
-{% highlight html %}
+```html
 <img alt="Rails" src="/assets/rails.png" />
-{% endhighlight %}
+```
 
 `alt` 属性的内容会在图片无法加载时显示，也会在针对视觉障碍人士的屏幕阅读器中显示。人们有时懒得加上 `alt` 属性，可是在 HTML 标准中却是必须的。幸运的是，Rails 默认会加上 `alt` 标签，如果你没有在调用 `image_tag` 时指定的话，Rails 就会使用图片的文件名（不包括扩展名）。本例中，我们自己设定了 `alt` 文本，显示一个首字母大写的“Rails”。
 
@@ -226,7 +226,7 @@ $ git checkout -b filling-in-layout
 
 **代码 5.3** 把 bootstrap-sass 加入 `Gemfile`
 
-{% highlight ruby %}
+```ruby
 source 'https://rubygems.org'
 
 gem 'rails', '3.2.8'
@@ -234,35 +234,35 @@ gem 'bootstrap-sass', '2.0.4'
 .
 .
 .
-{% endhighlight %}
+```
 
 像往常一样，运行 `bundle install` 安装 Bootstrap：
 
-{% highlight sh %}
+```sh
 $ bundle install
-{% endhighlight %}
+```
 
 然后重启 Web 服务器，改动才能在应用程序中生效。（在大多数系统中可以使用 Ctrl-C 结束服务器，然后再执行 `rails server` 命令。）
 
 要向应用程序中添加自定义的 CSS，首先要创建一个 CSS 文件：
 
-{% highlight text %}
+```text
 app/assets/stylesheets/custom.css.scss
-{% endhighlight %}
+```
 
 （使用你喜欢的文本编辑器或者 IDE 创建这个文件。）文件存放的目录和文件名都很重要。其中目录
 
-{% highlight text %}
+```text
 app/assets/stylesheets
-{% endhighlight %}
+```
 
 是 asset pipeline 的一部分（[5.2 节](#sec-5-2)），这个目录中的所有样式表都会自动的包含在网站的 `application.css` 中。`custom.css.scss` 文件的第一个扩展名是 `.css`，说明这是个 CSS 文件；第二个扩展名是 `.scss`，说明这是个“Sassy CSS”文件。asset pipeline 会使用 Sass 处理这个文件。（在 [5.2.2 节](#sec-5-2-2)中才会使用 Sass，bootstrap-sass 有了它才能运作。）创建了自定义 CSS 所需的文件后，我们可以使用 `@import` 引入 Bootstrap，如代码 5.4 所示。
 
 **代码 5.4** 引入 Bootstrap <br />`app/assets/stylesheets/custom.css.scss`
 
-{% highlight css %}
+```css
 @import "bootstrap";
-{% endhighlight %}
+```
 
 这行代码会引入整个 Bootstrap CSS 框架，结果如图 5.3 所示。（或许你要通过 Ctrl-C 来重启服务器。）可以看到，文本的位置还不是很合适，LOGO 也没有任何样式，不过颜色搭配和注册按钮看起来还不错。
 
@@ -274,7 +274,7 @@ app/assets/stylesheets
 
 **代码 5.5** 添加全站使用的 CSS <br />`app/assets/stylesheets/custom.css.scss`
 
-{% highlight css %}
+```css
 @import "bootstrap";
 
 /* universal */
@@ -302,7 +302,7 @@ textarea {
 .center h1 {
   margin-bottom: 10px;
 }
-{% endhighlight %}
+```
 
 ![sample_app_universal](assets/images/figures/sample_app_universal.png)
 
@@ -310,19 +310,19 @@ textarea {
 
 注意代码 5.5 中的 CSS 格式是很统一的。一般来说，CSS 规则是通过 class、id、HTML 标签或者三者结合在一起来定义的，后面会跟着一些样式声明。例如：
 
-{% highlight css %}
+```css
 body {
   padding-top: 60px;
 }
-{% endhighlight %}
+```
 
 把页面的上内边距设为 60 像素。我们在 `header` 标签上指定了 `navbar-fixed-top` class，Bootstrap 就把这个导航条固定在页面的顶部。所以页面的上内边距会把主内容区和导航条隔开一段距离。下面的 CSS 规则：
 
-{% highlight css %}
+```css
 .center {
   text-align: center;
 }
-{% endhighlight %}
+```
 
 把 `.center` class 的样式定义为 `text-align: center;`。`.center` 中的点号说明这个规则是样式化一个 class。（我们会在代码 5.7 中看到，`#` 是样式化一个 id。）这个规则的意思是，任何 class 为 `.center` 的标签（例如 `div`），其中包含的内容都会在页面中居中显示。（代码 5.2 中有用到这个 class。）
 
@@ -330,7 +330,7 @@ body {
 
 **代码 5.6** 添加一些精美的文字排版样式 <br />`app/assets/stylesheets/custom.css.scss`
 
-{% highlight css %}
+```css
 @import "bootstrap";
 .
 .
@@ -362,7 +362,7 @@ p {
   font-size: 1.1em;
   line-height: 1.7em;
 }
-{% endhighlight %}
+```
 
 ![sample_app_typography](assets/images/figures/sample_app_typography.png)
 
@@ -372,7 +372,7 @@ p {
 
 **代码 5.7** 添加网站 LOGO 的样式 <br />`app/assets/stylesheets/custom.css.scss`
 
-{% highlight css %}
+```css
 @import "bootstrap";
 .
 .
@@ -396,7 +396,7 @@ p {
   color: #fff;
   text-decoration: none;
 }
-{% endhighlight %}
+```
 
 其中 `color: #fff;` 会把 LOGO 文字的颜色变成白色。HTML 中的颜色代码是由 3 个 16 进制数组成的，分别代表了三原色中的红、绿、蓝。`#ffffff` 是 3 中颜色都为最大值的情况，代表了纯白色。`#fff` 是 `#ffffff` 的简写形式。CSS 标准中为很多常用的 HTML 颜色定义了别名，例如 `white` 代表的是 `#fff`。代码 5.7 中的样式效果如图 5.6 所示。
 
@@ -410,7 +410,7 @@ p {
 
 **代码 5.8** 定义了 HTML shim 和头部局部视图之后的网站布局 <br />`app/views/layouts/application.html.erb`
 
-{% highlight erb %}
+```erb
 <!DOCTYPE html>
 <html>
   <head>
@@ -427,13 +427,13 @@ p {
     </div>
   </body>
 </html>
-{% endhighlight %}
+```
 
 代码 5.8 中，我们把加载 HTML shim 的那几行代码换成了对 Rails 帮助函数 `render` 的调用：
 
-{% highlight erb %}
+```erb
 <%= render 'layouts/shim' %>
-{% endhighlight %}
+```
 
 这行代码会寻找一个名为 `app/views/layouts/_shim.html.erb` 的文件，执行文件中的代码，然后把结果插入视图。<sup>[6](#fn-6)</sup>（回顾一下，执行 Ruby 表达式并将结果插入到模板中要使用 `<%=...%>`。）注意文件名 `_shim.html.erb` 的开头是个下划线，这个下划线是局部视图的命名约定，可以在目录中快速定位所有的局部视图。
 
@@ -441,17 +441,17 @@ p {
 
 **代码 5.9** HTML shim 局部视图 <br />`app/views/layouts/_shim.html.erb`
 
-{% highlight erb %}
+```erb
 <!--[if lt IE 9]>
 <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
 <![endif]-->
-{% endhighlight %}
+```
 
 类似的，我们可以把头部的内容移入局部视图，如代码 5.10 所示，然后再次调用 `render` 把这个局部视图插入布局中。
 
 **代码 5.10** 网站头部的局部视图 <br />`app/views/layouts/_header.html.erb`
 
-{% highlight erb %}
+```erb
 <header class="navbar navbar-fixed-top">
   <div class="navbar-inner">
     <div class="container">
@@ -466,13 +466,13 @@ p {
     </div>
   </div>
 </header>
-{% endhighlight %}
+```
 
 现在我们已经知道怎么创建局部视图了，让我们来加入和头部对应的网站底部吧。你或许已经猜到了，我们会把这个局部视图命名为 `_footer.html.erb`，放在布局目录中（参见代码 5.11）。<sup>[7](#fn-7)</sup>
 
 **代码 5.11** 网站底部的局部视图 <br />`app/views/layouts/_footer.html.erb`
 
-{% highlight erb %}
+```erb
 <footer class="footer">
   <small>
     <a href="http://railstutorial.org/">Rails Tutorial</a>
@@ -486,7 +486,7 @@ p {
     </ul>
   </nav>
 </footer>
-{% endhighlight %}
+```
 
 和头部类似，在底部我们使用 `link_to` 创建到“关于”页面和“联系”页面的链接，地址暂时使用占位符 `#`。（和 `header` 一样，`footer` 标签也是 HTML5 新增加的。）
 
@@ -494,7 +494,7 @@ p {
 
 **代码 5.12** 网站的布局，包含底部局部视图 <br />`app/views/layouts/application.html.erb`
 
-{% highlight erb %}
+```erb
 <!DOCTYPE html>
 <html>
   <head>
@@ -512,13 +512,13 @@ p {
     </div>
   </body>
 </html>
-{% endhighlight %}
+```
 
 当然，如果没有样式的话，底部还是很丑的（样式参见代码 5.13）。添加样式后的效果如图 5.7 所示。
 
 **代码 5.13** 添加底部所需的 CSS <br />`app/assets/stylesheets/custom.css.scss`
 
-{% highlight scss %}
+```scss
 .
 .
 .
@@ -553,7 +553,7 @@ footer ul li {
   float: left;
   margin-left: 10px;
 }
-{% endhighlight %}
+```
 
 ![site_with_footer_bootstrap](assets/images/figures/site_with_footer_bootstrap.png)
 
@@ -585,10 +585,10 @@ Asset pipeline 对 Rails做了很多改动，但对 Rails 开发者来说只有�
 
 你可能猜到了，上面的目录中都会有针对不同资源类型的子目录。例如：
 
-{% highlight sh %}
+```sh
 $ ls app/assets/
 images javascripts stylesheets
-{% endhighlight %}
+```
 
 现在我们就可以知道 [5.1.2 节](#sec-5-1-2)中 `custom.css.scss` 存放位置的用意：因为 `custom.css.scss` 是应用程序本身用到的，所以把它存放在 `app/assets/stylesheets` 中。
 
@@ -598,7 +598,7 @@ images javascripts stylesheets
 
 **代码 5.14** 应用程序的样式表清单文件 <br />`app/assets/stylesheets/application.css`
 
-{% highlight css %}
+```css
 /*
  * This is a manifest file that'll automatically include all the stylesheets
  * available in this directory and any sub-directories. You're free to add
@@ -608,11 +608,11 @@ images javascripts stylesheets
  *= require_self
  *= require_tree .
 */
-{% endhighlight %}
+```
 
 这里的关键代码是几行 CSS 注释，Sprockets 通过这些注释加载相应的文件：
 
-{% highlight css %}
+```css
 /*
  * .
  * .
@@ -620,21 +620,21 @@ images javascripts stylesheets
  *= require_self
  *= require_tree .
 */
-{% endhighlight %}
+```
 
 上面代码中的
 
-{% highlight text %}
+```text
 *= require_tree .
-{% endhighlight %}
+```
 
 会把 `app/assets/stylesheets` 目录中的所有 CSS 文件都引入应用程序的样式表中。
 
 下面这行：
 
-{% highlight text %}
+```text
 *= require_self
-{% endhighlight %}
+```
 
 会把 `application.css` 这个文件中的 CSS 也加载进来。
 
@@ -646,15 +646,15 @@ Rails 提供的默认清单文件可以满足我们的要求，所以本书不�
 
 预处理器引擎可以连接在一起使用，因此
 
-{% highlight text %}
+```text
 foobar.js.coffee
-{% endhighlight %}
+```
 
 只会使用 CoffeeScript 处理器，而
 
-{% highlight text %}
+```text
 foobar.js.erb.coffee
-{% endhighlight %}
+```
 
 会使用 CoffeeScript 和 ERb 处理器（按照扩展名的顺序从右向左处理，所以 CoffeeScript 处理器会先执行）。
 
@@ -672,7 +672,7 @@ Sass 是一种编写 CSS 的语言，它从多方面增强了 CSS 的功能。�
 
 样式表中经常会定义嵌套元素的样式，例如，在代码 5.1 中，定义了 `.center` 和 `.centr h1` 两个样式：
 
-{% highlight css %}
+```css
 .center {
   text-align: center;
 }
@@ -680,24 +680,24 @@ Sass 是一种编写 CSS 的语言，它从多方面增强了 CSS 的功能。�
 .center h1 {
   margin-bottom: 10px;
 }
-{% endhighlight %}
+```
 
 使用 Sass 可将其改写成
 
-{% highlight scss %}
+```scss
 .center {
   text-align: center;
   h1 {
     margin-bottom: 10px;
   }
 }
-{% endhighlight %}
+```
 
 上面代码中的 `h1` 会自动嵌入 `.center` 中。
 
 嵌套还有另一种形式，句法稍有不同。在代码 5.7 中，有如下的代码
 
-{% highlight css %}
+```css
 #logo {
   float: left;
   margin-right: 10px;
@@ -714,11 +714,11 @@ Sass 是一种编写 CSS 的语言，它从多方面增强了 CSS 的功能。�
   color: #fff;
   text-decoration: none;
 }
-{% endhighlight %}
+```
 
 其中 LOGO 的 id `#logo` 出现了两次，一次是单独出现的，另一次是和 `hover` 伪类一起出现的（鼠标悬停其上时的样式）。如过要嵌套第二个样式，我们需要引用父级元素 `#logo`，在 SCSS 中，使用 `&` 符号实现：
 
-{% highlight scss %}
+```scss
 #logo {
   float: left;
   margin-right: 10px;
@@ -734,13 +734,13 @@ Sass 是一种编写 CSS 的语言，它从多方面增强了 CSS 的功能。�
     text-decoration: none;
   }
 }
-{% endhighlight %}
+```
 
 把 SCSS 转换成 CSS 时，Sass 会把 `&:hover` 编译成 `#logo:hover`。
 
 这两种嵌套方式都可以用于代码 5.13 中的底部样式上，转换后的样式如下：
 
-{% highlight scss %}
+```scss
 footer {
   margin-top: 45px;
   padding-top: 5px;
@@ -764,7 +764,7 @@ footer {
     }
   }
 }
-{% endhighlight %}
+```
 
 自己动手转换一下代码 5.13 是个不错的练习，转换之后你应该验证一下 CSS 是否还能正常使用。
 
@@ -772,7 +772,7 @@ footer {
 
 Sass 允许我们自定义变量来避免重复，这样也可以写出更具表现力的代码。例如，代码 5.6 和代码 5.13 中都重复使用了同一个颜色代码：
 
-{% highlight scss %}
+```scss
 h2 {
   .
   .
@@ -788,17 +788,17 @@ footer {
   .
   color: #999;
 }
-{% endhighlight %}
+```
 
 上面代码中的 `#999` 是淡灰色（ligh gray），我们可以为它定义一个变量：
 
-{% highlight scss %}
+```scss
 $lightGray: #999;
-{% endhighlight %}
+```
 
 然后我们就可以这样写 SCSS：
 
-{% highlight scss %}
+```scss
 $lightGray: #999;
 .
 .
@@ -818,17 +818,17 @@ footer {
   .
   color: $lightGray;
 }
-{% endhighlight %}
+```
 
 因为像 `$lightGray` 这样的变量名比 `#999` 更具说明性，所以为没有重复使用的值定义变量往往也是很有用的。Bootstrap 框架定义了很多颜色变量，[Bootstrap 页面中有这些变量的 LESS 形式](http://bootstrapdocs.com/v2.0.4/docs/less.html)。这个页面中的变量使用的是 LESS 句法，而不是 Sass 句法，不过 bootstrap-sass gem 为我们提供了对应的 Sass 形式。二者之间的对应关系也不难猜出，LESS 使用 `@` 符号定义变量，而 Sass 使用 `$` 符号。在 Bootstrap 的变量页面我们可以看到为淡灰色定义的变量：
 
-{% highlight text %}
+```text
 @grayLight: #999;
-{% endhighlight %}
+```
 
 也就是说，在 bootstrap-sass gem 中会有一个对应的 SCSS 变量 `$grayLight`。我们可以用它换掉自己定义的 `$lightGray` 变量：
 
-{% highlight scss %}
+```scss
 h2 {
   .
   .
@@ -844,7 +844,7 @@ footer {
   .
   color: $grayLight;
 }
-{% endhighlight %}
+```
 
 使用 Sass 提供的嵌套和定义变量功能后得到的完整 SCSS 文件如代码 5.15 所示。这段代码中使用了 Sass 形式的颜色变量（参照 Bootstrap 变量页面中定义的 LESS 形式的颜色变量）和内置的颜色名称（例如，`white` 代表 `#fff`）。特别注意一下 `footer` 标签样式明显的改进。
 
@@ -852,7 +852,7 @@ footer {
 
 **代码 5.15** 使用嵌套和变量转后后的 SCSS 文件 <br />`app/assets/stylesheets/custom.css.scss`
 
-{% highlight scss %}
+```scss
 @import "bootstrap";
 
 /* mixins, variables, etc. */
@@ -955,7 +955,7 @@ footer {
     }
   }
 }
-{% endhighlight %}
+```
 
 Sass 提供了很多功能，可以用来简化样式表，不过代码 5.15 只用到了最主要的功能，这是个好的开端。更多功能请查看 [Sass 网站](http://sass-lang.com/)。
 
@@ -963,15 +963,15 @@ Sass 提供了很多功能，可以用来简化样式表，不过代码 5.15 只
 
 我们已经为网站的布局定义了看起来还不错的样式，下面要把链接中暂时使用的占位符 `#` 换成真正的链接地址。当然，我们可以像下面这样手动加入链接：
 
-{% highlight html %}
+```html
 <a href="/static_pages/about">About</a>
-{% endhighlight %}
+```
 
 不过这样不太符合 Rails 风格。一者，“关于”页面的地址如果是 /about 而不是 /static_pages/about 就好了；再者，Rails 习惯使用具名路由（named route）来指定链接地址，相应的代码如下：
 
-{% highlight erb %}
+```erb
 <%= link_to "About", about_path %>
-{% endhighlight %}
+```
 
 使用这种方式能更好的表达链接与 URI 和路由的对应关系，如[表格 5.1](#table-5-1) 所示。本章完结之前除了最后一个链接之外，其他的链接都会设定好。（[第八章](chapter8.html)会添加最后一个。）
 
@@ -1021,7 +1021,7 @@ Sass 提供了很多功能，可以用来简化样式表，不过代码 5.15 只
 
 **代码 5.16** “联系”页面的测试 <br />`spec/requests/static_pages_spec.rb`
 
-{% highlight ruby %}
+```ruby
 require 'spec_helper'
 
 describe "Static pages" do
@@ -1042,19 +1042,19 @@ describe "Static pages" do
     end
   end
 end
-{% endhighlight %}
+```
 
 你应该看一下这个测试是否是失败的：
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/requests/static_pages_spec.rb
-{% endhighlight %}
+```
 
 这里采用的步骤和 [3.2.2 节](chapter3.html#sec-3-2-2)中添加“关于”页面的步骤是一致的：先更新路由设置（参见代码 5.17），然后在 StaticPages 控制器中添加 `contact` 动作（参见代码 5.18），最后再编写“联系”页面的视图（参见代码 5.19）。
 
 **代码 5.17** 添加“联系”页面的路由设置 <br />`config/routes.rb`
 
-{% highlight ruby %}
+```ruby
 SampleApp::Application.routes.draw do
   get "static_pages/home"
   get "static_pages/help"
@@ -1064,11 +1064,11 @@ SampleApp::Application.routes.draw do
   .
   .
 end
-{% endhighlight %}
+```
 
 **代码 5.18** 添加“联系”页面所需的动作 <br />`app/controllers/static_pages_controller.rb`
 
-{% highlight ruby %}
+```ruby
 class StaticPagesController < ApplicationController
   .
   .
@@ -1076,44 +1076,44 @@ class StaticPagesController < ApplicationController
   def contact
   end
 end
-{% endhighlight %}
+```
 
 **代码 5.19** “联系”页面的视图 <br />`app/views/static_pages/contact.html.erb`
 
-{% highlight erb %}
+```erb
 <% provide(:title, 'Contact') %>
 <h1>Contact</h1>
 <p>
   Contact Ruby on Rails Tutorial about the sample app at the
   <a href="http://railstutorial.org/contact">contact page</a>.
 </p>
-{% endhighlight %}
+```
 
 再看一下测试是否可以通过：
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/requests/static_pages_spec.rb
-{% endhighlight %}
+```
 
 <h3 id="sec-5-3-1">5.3.1 路由测试</h3>
 
 静态页面的集成测试编写完之后，再编写路由测试就简单了：只需把硬编码的地址换成[表格 5.1](#table-5-1)中相应的具名路由就可以了。也就是说，要把
 
-{% highlight ruby %}
+```ruby
 visit '/static_pages/about'
-{% endhighlight %}
+```
 
 修改为
 
-{% highlight ruby %}
+```ruby
 visit about_path
-{% endhighlight %}
+```
 
 其他的页面也这样做，修改后的结果如代码 5.20 所示。
 
 **代码 5.20** 具名路由测试 <br />`spec/requests/static_pages_spec.rb`
 
-{% highlight ruby %}
+```ruby
 require 'spec_helper'
 
 describe "Static pages" do
@@ -1179,13 +1179,13 @@ describe "Static pages" do
     end
   end
 end
-{% endhighlight %}
+```
 
 和往常一样，现在应该看一下测试是否是失败的（红色）：
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/requests/static_pages_spec.rb
-{% endhighlight %}
+```
 
 顺便说一下，很多人都会觉得代码 5.20 有很多重复，也很啰嗦，我们会在 [5.3.4 节](#sec-5-3-4)进行重构。
 
@@ -1195,15 +1195,15 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
 
 定义具名路由，要把
 
-{% highlight ruby %}
+```ruby
 get 'static_pages/help'
-{% endhighlight %}
+```
 
 修改为
 
-{% highlight ruby %}
+```ruby
 match '/help', to: 'static_pages#help'
-{% endhighlight %}
+```
 
 这样在 /help 地址上就有了一个可访问的页面，也定义了一个名为 `help_path` 的具名路由，该函数会返回相应页面的地址。（其实把 `match` 换成 `get` 效果是一样的，不过使用 `match` 更符合约定。）
 
@@ -1211,7 +1211,7 @@ match '/help', to: 'static_pages#help'
 
 **代码 5.21** 静态页面的路由 <br />`config/routes.rb`
 
-{% highlight ruby %}
+```ruby
 SampleApp::Application.routes.draw do
   match '/help',    to: 'static_pages#help'
   match '/about',   to: 'static_pages#about'
@@ -1220,48 +1220,48 @@ SampleApp::Application.routes.draw do
   .
   .
 end
-{% endhighlight %}
+```
 
 如果认真阅读代码 5.21，或许会发现它的作用。例如，你会发现
 
-{% highlight ruby %}
+```ruby
 match '/about', to: 'static_pages#about'
-{% endhighlight %}
+```
 
 会匹配 /about 地址，并将其分发到 StaticPages 控制器的 `about` 动作上。之前的设置意图更明显，我们用
 
-{% highlight ruby %}
+```ruby
 get 'static_pages/about'
-{% endhighlight %}
+```
 
 也可以得到相同的页面，不过 /about 的地址形式更简洁。而且，如前面提到的，`match '/about'` 会自动创建具名路由函数，可以在控制器和视图中使用：
 
-{% highlight ruby %}
+```ruby
 about_path => '/about'
 about_url  => 'http://localhost:3000/about'
-{% endhighlight %}
+```
 
 注意，`about_url` 返回的结果是完整的 URI 地址 http://localhost:3000/about（部署后，会用实际的域名替换 `localhost:3000`，例如 `example.com`）。如 [5.3 节](#sec-5-3)的用法，如果只想返回 /about，使用 `about_path` 就可以了。本书基本上都会使用惯用的 `path` 形式，不过在页面转向时会使用 `url` 形式，因为 HTTP 标准要求转向后的地址为完整的 URI，不过大多数浏览器都可以正常使用这两种形式。
 
 设置了这些路由之后，“帮助”页面、“关于”页面和“联系”页面的测试应该可以通过了：
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/requests/static_pages_spec.rb
-{% endhighlight %}
+```
 
 不过“首页”的测试还是失败的。
 
 要设置“首页”的路由，可以使用如下的代码：
 
-{% highlight sh %}
+```sh
 match '/', to: 'static_pages#home'
-{% endhighlight %}
+```
 
 不过没必要这么做。Rails 在路由设置文件的下部为根地址 `/`（斜线）提供了特别的设置方式（参见代码 5.22）。
 
 **代码 5.22** 注释掉的根路由设置说明 <br />`config/routes.rb`
 
-{% highlight ruby %}
+```ruby
 SampleApp::Application.routes.draw do
   .
   .
@@ -1273,13 +1273,13 @@ SampleApp::Application.routes.draw do
   .
   .
 end
-{% endhighlight %}
+```
 
 按照上述说明，把根地址 `/` 映射到“首页”上（参见代码 5.23）。
 
 **代码 5.23** 添加根地址的路由设置 <br />`config/routes.rb`
 
-{% highlight ruby %}
+```ruby
 SampleApp::Application.routes.draw do
   root to: 'static_pages#home'
 
@@ -1290,26 +1290,26 @@ SampleApp::Application.routes.draw do
   .
   .
 end
-{% endhighlight %}
+```
 
 上面的代码会把根地址 `/` 映射到 /static_pages/home 页面上，同时生成了两个 URI 地址帮助方法，如下所示：
 
-{% highlight sh %}
+```sh
 root_path => '/'
 root_url  => 'http://localhost:3000/'
-{% endhighlight %}
+```
 
 我们应该按照代码 5.22 中注释的提示，删掉 `public/index.html` 文件，避免访问根目录时显示默认的首页（如图 1.3）。你当然可以直接把这个文件丢进垃圾桶，不过，如果使用 Git 做版本控制的话，可以使用 `git rm` 命令，删除文件的同时也告知 Git 系统做了这个删除操作：
 
-{% highlight sh %}
+```sh
 $ git rm public/index.html
-{% endhighlight %}
+```
 
 至此，所有静态页面的路由都设置好了，而且所有测试应该都可以通过了：
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/requests/static_pages_spec.rb
-{% endhighlight %}
+```
 
 下面，我们要在布局中插入这些链接。
 
@@ -1317,15 +1317,15 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
 
 现在要在布局中使用上一小节设置的路由帮助方法，把 `link_to` 函数的第二个参数设为相应的具名路由。例如，要把
 
-{% highlight erb %}
+```erb
 <%= link_to "About", '#' %>
-{% endhighlight %}
+```
 
 改为
 
-{% highlight erb %}
+```erb
 <%= link_to "About", about_path %>
-{% endhighlight %}
+```
 
 其他链接以此类推。
 
@@ -1333,7 +1333,7 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
 
 **代码 5.24** 头部局部视图，包含一些链接 <br />`app/views/layouts/_header.html.erb`
 
-{% highlight erb %}
+```erb
 <header class="navbar navbar-fixed-top">
   <div class="navbar-inner">
     <div class="container">
@@ -1348,7 +1348,7 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
     </div>
   </div>
 </header>
-{% endhighlight %}
+```
 
 [第八章](chapter8.html)才会为“注册”页面设置具名路由，所以现在还是用占位符 `#` 代替页面的地址。
 
@@ -1356,7 +1356,7 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
 
 **代码 5.25** 底部局部视图，包含一些链接 <br />`app/views/layouts/_footer.html.erb`
 
-{% highlight erb %}
+```erb
 <footer class="footer">
   <small>
     <a href="http://railstutorial.org/">Rails Tutorial</a>
@@ -1370,7 +1370,7 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
     </ul>
   </nav>
 </footer>
-{% endhighlight %}
+```
 
 如此一来，[第三章](chapter3.html)创建的所有静态页面的链接都加入布局了，以“关于”页面为例，输入 /about 网址，就会进入网站的“关于”页面（如图 5.8）。
 
@@ -1386,7 +1386,7 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
 
 先看一下如何改进下面的代码：
 
-{% highlight ruby %}
+```ruby
 describe "Home page" do
 
   it "should have the h1 'Sample App'" do
@@ -1405,11 +1405,11 @@ describe "Home page" do
     page.should_not have_selector('title', text: '| Home')
   end
 end
-{% endhighlight %}
+```
 
 我们注意到，三个测试用例都访问了根地址，使用 `before` 块可以消除这个重复：
 
-{% highlight ruby %}
+```ruby
 describe "Home page" do
   before { visit root_path }
 
@@ -1426,45 +1426,45 @@ describe "Home page" do
     page.should_not have_selector('title', text: '| Home')
   end
 end
-{% endhighlight %}
+```
 
 上面的代码使用
 
-{% highlight ruby %}
+```ruby
 before { visit root_path }
-{% endhighlight %}
+```
 
 在每个测试用例运行之前访问根地址。（`before` 方法还可以使用别名 `before(:each)` 调用。）
 
 还有个代码在每个用例中都出现了，我们使用了
 
-{% highlight ruby %}
+```ruby
 it "should have the h1 'Sample App'" do
-{% endhighlight %}
+```
 
 同时还使用了
 
-{% highlight ruby %}
+```ruby
 page.should have_selector('h1', text: 'Sample App')
-{% endhighlight %}
+```
 
 二者虽然形式不同，要表达的意思却是相同的。而且两个用例都引用了 `page` 变量。我们可以告诉 RSpec，`page` 就是要测试的对象（subject），这样就可以避免多次使用 `page`：
 
-{% highlight ruby %}
+```ruby
 subject { page }
-{% endhighlight %}
+```
 
 然后再使用 `it` 方法的另一种形式，把测试代码和描述文本合二为一：
 
-{% highlight ruby %}
+```ruby
 it { should have_selector('h1', text: 'Sample App') }
-{% endhighlight %}
+```
 
 因为指明了 `subject { page }`，所以调用 `should` 时就会自动使用 Capybara 提供的 `page` 变量（参见 [3.2.1 节](chapter3.html#sec-3-2-1)）。
 
 使用这些技巧可以把“首页”的测试变得简洁一些：
 
-{% highlight ruby %}
+```ruby
   subject { page }
 
   describe "Home page" do
@@ -1475,13 +1475,13 @@ it { should have_selector('h1', text: 'Sample App') }
                         text: "Ruby on Rails Tutorial Sample App" }
     it { should_not have_selector 'title', text: '| Home' }
   end
-{% endhighlight %}
+```
 
 这样代码看起来就舒服多了，不过标题的测试还有点长。其实，代码 5.20 中大多数标题都是这样的长标题：
 
-{% highlight erb %}
+```erb
 "Ruby on Rails Tutorial Sample App | About"
-{% endhighlight %}
+```
 
 [3.5 节](chapter3.html#sec-3-5)的练习题建议定义一个 `base_title` 变量，再使用字符串插值来消除这个重复（参见代码 3.30）。我们可以更进一步，定义一个和代码 4.2 中 `full_title` 类似的方法。
 
@@ -1489,7 +1489,7 @@ it { should have_selector('h1', text: 'Sample App') }
 
 **代码 5.26** RSpec 通用函数文件，包含 `full_title` 方法 <br />`spec/support/utilities.rb`
 
-{% highlight ruby %}
+```ruby
 def full_title(page_title)
   base_title = "Ruby on Rails Tutorial Sample App"
   if page_title.empty?
@@ -1498,13 +1498,13 @@ def full_title(page_title)
     "#{base_title} | #{page_title}"
   end
 end
-{% endhighlight %}
+```
 
 其实这就是代码 4.2 中那个帮助方法的复制，不过，定义两个独立的方法可以捕获标题公共部分中的错误，不过这样也不太靠得住，更好的（也更强大的）方法是直接测试原来那个 `full_title` 帮助方法，参见 [5.6 节](#sec-5-6)中的练习。
 
 RSpec 会自动加载 `spec/support` 目录中的文件，所以我们就可以按照如下的方式编写“首页”的测试：
 
-{% highlight ruby %}
+```ruby
   subject { page }
 
   describe "Home page" do
@@ -1513,13 +1513,13 @@ RSpec 会自动加载 `spec/support` 目录中的文件，所以我们就可以�
     it { should have_selector('h1',    text: 'Sample App') }
     it { should have_selector('title', text: full_title('')) }
   end
-{% endhighlight %}
+```
 
 下面我们用类似“首页”的方法来简化“帮助”页面、“关于”页面和“联系”页面的测试了，结果如代码 5.27 所示。
 
 **代码 5.27** 简化后的静态页面测试 <br />`spec/requests/static_pages_spec.rb`
 
-{% highlight ruby %}
+```ruby
 require 'spec_helper'
 
 describe "Static pages" do
@@ -1555,13 +1555,13 @@ describe "Static pages" do
     it { should have_selector('title', text: full_title('Contact')) }
   end
 end
-{% endhighlight %}
+```
 
 现在应该验证一下测试代码是否还可以通过：
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/requests/static_pages_spec.rb
-{% endhighlight %}
+```
 
 代码 5.27 中的 RSpec 测试比代码 5.20 简化多了，其实，还可以变得更简洁，详见 [5.6 节](#sec-5-6)。在示例程序接下来的开发过程中，只要可以，我们都会使用这种简洁的方式。
 
@@ -1575,7 +1575,7 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
 
 **代码 5.28** 生成 User 控制器（包含 `new` 动作）
 
-{% highlight sh %}
+```sh
 $ rails generate controller Users new --no-test-framework
       create  app/controllers/users_controller.rb
        route  get "users/new"
@@ -1589,40 +1589,40 @@ $ rails generate controller Users new --no-test-framework
       create      app/assets/javascripts/users.js.coffee
       invoke    scss
       create      app/assets/stylesheets/users.css.scss
-{% endhighlight %}
+```
 
 这个命令会创建 Users 控制器，还有其中的 `new` 动作（参见代码 5.29）和一个占位用的视图文件（参见代码 5.30）。
 
 **代码 5.29** 默认生成的 Users 控制器，包含 `new` 动作 <br />`app/controllers/users_controller.rb`
 
-{% highlight sh %}
+```sh
 class UsersController < ApplicationController
   def new
   end
 
 end
-{% endhighlight %}
+```
 
 **代码 5.30** 默认生成的 `new` 动作视图 <br />`app/views/users/new.html.erb`
 
-{% highlight erb %}
+```erb
 <h1>Users#new</h1>
 <p>Find me in app/views/users/new.html.erb</p>
-{% endhighlight %}
+```
 
 <h3 id="sec-5-4-2">5.4.2 “注册”页面的 URI 地址</h3>
 
 [5.4.1 节](#sec-5-4-1)中生成的代码会在 /users/new 地址上对应了一个页面，不过如[表格 5.1](#table-5-1)所示，我们希望“注册”页面的地址是 /signup。为此，和 [5.3 节](#sec-5-3)一样，首先要编写集成测试，可以通过下面的命令生成：
 
-{% highlight sh %}
+```sh
 $ rails generate integration_test user_pages
-{% endhighlight %}
+```
 
 然后，按照代码 5.27 中静态页面测试代码的形式，我们要编写测试检测“注册”页面中是否有 `h1` 和 `title` 标签，如代码 5.31 所示。
 
 **代码 5.31** Users 控制器的测试代码，包含“注册”页面的测试用例 <br />`spec/requests/user_pages_spec.rb`
 
-{% highlight ruby %}
+```ruby
 require 'spec_helper'
 
 describe "User pages" do
@@ -1636,31 +1636,31 @@ describe "User pages" do
     it { should have_selector('title', text: full_title('Sign up')) }
   end
 end
-{% endhighlight %}
+```
 
 和之前一样，可以执行 `rspec` 命令运行测试：
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/requests/user_pages_spec.rb
-{% endhighlight %}
+```
 
 不过有一点你要知道，你还可以指定整个目录来运行所有的 request 测试：
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/requests/
-{% endhighlight %}
+```
 
 同理，你可能还想知道怎么运行全部测试：
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/
-{% endhighlight %}
+```
 
 为了测试全面，在本书后续内容中，我们一般都会使用这个命令运行所有的测试。顺便说一下，你要知道，你也可以使用 Rake 的 `spec` 任务运行测试（你可能见过其他人使用）：
 
-{% highlight sh %}
+```sh
 $ bundle exec rake spec
-{% endhighlight %}
+```
 
 （事实上，你可以只输入 `rake`，因为 `rake` 的默认任务就是运行测试。）
 
@@ -1668,7 +1668,7 @@ $ bundle exec rake spec
 
 **代码 5.32** “注册”页面的路由设置 <br />`config/routes.rb`
 
-{% highlight ruby %}
+```ruby
 SampleApp::Application.routes.draw do
   get "users/new"
 
@@ -1683,7 +1683,7 @@ SampleApp::Application.routes.draw do
   .
   .
 end
-{% endhighlight %}
+```
 
 注意，我们保留了 `get "users/new"` 设置，这是控制器生成命令（代码 5.28）自动添加的路由，如要路由可用，这个设置还不能删除，不过这不符合 REST 约定（[表格 2.2](chapter2.html#table-2-2)），会在 [7.1.2 节](chapter7.html#sec-7-1-2)删除。
 
@@ -1691,17 +1691,17 @@ end
 
 **代码 5.33** “注册”页面视图 <br />`app/views/users/new.html.erb`
 
-{% highlight erb %}
+```erb
 <% provide(:title, 'Sign up') %>
 <h1>Sign up</h1>
 <p>Find me in app/views/users/new.html.erb</p>
-{% endhighlight %}
+```
 
 现在，代码 5.31 中“注册”页面的测试应该可以通过了。下面要做的就是为“首页”中的注册按钮加上链接。和其他的具名路由一样，`match '/signup'` 会生成 `signup_path` 方法，代码 5.34 用来链接到“注册”页面。
 
 **代码 5.34** 把按钮链接到“注册”页面 <br />`app/views/static_pages/home.html.erb`
 
-{% highlight erb %}
+```erb
 <div class="center hero-unit">
   <h1>Welcome to the Sample App</h1>
 
@@ -1715,7 +1715,7 @@ end
 </div>
 
 <%= link_to image_tag("rails.png", alt: "Rails"), 'http://rubyonrails.org/' %>
-{% endhighlight %}
+```
 
 至此，除了没有设置“登录/退出”路由之外（[第八章](chapter)会实现），我们已经完成了添加链接和设置路由的任务。注册用户的页面（[/signup](http://localhost:3000/signup)）如图 5.9 所示。
 
@@ -1725,9 +1725,9 @@ end
 
 现在测试应该可以通过了：
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/
-{% endhighlight %}
+```
 
 <h2 id="sec-5-5">5.5 小结</h2>
 
@@ -1735,36 +1735,36 @@ $ bundle exec rspec spec/
 
 如果使用 Git 的话，现在你应该把本章所做的改动合并到主分支中：
 
-{% highlight sh %}
+```sh
 $ git add .
 $ git commit -m "Finish layout and routes"
 $ git checkout master
 $ git merge filling-in-layout
-{% endhighlight %}
+```
 
 还可以把代码推送到 GitHub 上：
 
-{% highlight sh %}
+```sh
 $ git push
-{% endhighlight %}
+```
 
 最后，你可以把应用程序部署到 Heroku：
 
-{% highlight sh %}
+```sh
 $ git push heroku
-{% endhighlight %}
+```
 
 然后在生成环境中就得到了一个可以运行的示例程序：
 
-{% highlight sh %}
+```sh
 $ heroku open
-{% endhighlight %}
+```
 
 如果遇到问题，运行
 
-{% highlight sh %}
+```sh
 $ heroku logs
-{% endhighlight %}
+```
 
 试着使用 Heroku 的日志文件排错。
 
@@ -1776,7 +1776,7 @@ $ heroku logs
 
 **代码 5.35** 用 RSpec “共享用例”来消除重复 <br />`spec/requests/static_pages_spec.rb`
 
-{% highlight ruby %}
+```ruby
 require 'spec_helper'
 
 describe "Static pages" do
@@ -1815,11 +1815,11 @@ describe "Static pages" do
     .
   end
 end
-{% endhighlight %}
+```
 
 **代码 5.36** 测试布局中的链接 <br />`spec/requests/static_pages_spec.rb`
 
-{% highlight ruby %}
+```ruby
 require 'spec_helper'
 
 describe "Static pages" do
@@ -1841,11 +1841,11 @@ describe "Static pages" do
     page.should # fill in
   end
 end
-{% endhighlight %}
+```
 
 **代码 5.37** 对 `full_title` 帮助方法的测试 <br />`spec/helpers/application_helper_spec.rb`
 
-{% highlight ruby %}
+```ruby
 require 'spec_helper'
 
 describe ApplicationHelper do
@@ -1864,13 +1864,13 @@ describe ApplicationHelper do
     end
   end
 end
-{% endhighlight %}
+```
 
 **代码 5.38** 使用一个简单的引用代替测试中的 `full_title` 方法 <br />`spec/support/utilities.rb`
 
-{% highlight ruby %}
+```ruby
 include ApplicationHelper
-{% endhighlight %}
+```
 
 <div class="navigation">
   <a class="prev_page" href="chapter4.html">&laquo; 第四章 Rails 背后的 Ruby</a>

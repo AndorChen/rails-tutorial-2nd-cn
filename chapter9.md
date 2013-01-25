@@ -7,9 +7,9 @@ title: 第九章 更新、显示和删除用户
 
 在开始之前，我们要新建 `updating-users` 分支：
 
-{% highlight sh %}
+```sh
 $ git checkout -b updating-users
-{% endhighlight %}
+```
 
 <h2 id="sec-9-1">9.1 更新用户</h2>
 
@@ -27,7 +27,7 @@ $ git checkout -b updating-users
 
 **代码 9.1** 用户编辑页面的测试<br />`spec/requests/user_pages_spec.rb`
 
-{% highlight ruby %}
+```ruby
 require 'spec_helper'
 
 describe "User pages" do
@@ -50,13 +50,13 @@ describe "User pages" do
     end
   end
 end
-{% endhighlight %}
+```
 
 程序所需的代码要放在 `edit` 动作中，我们在[表格 7.1](chapter7.html#table-7-1)中列出了，用户编辑页面的地址是 /users/1/edit（假设用户的 id 是 1）。我们介绍过用户的 id 是保存在 `params[:id]` 中的，所以我们可以按照代码 9.2 所示的方法查找用户。
 
 **代码 9.2** Users 控制器的 `edit` 方法<br />`app/controllers/users_controller.rb`
 
-{% highlight ruby %}
+```ruby
 class UsersController < ApplicationController
   .
   .
@@ -65,13 +65,13 @@ class UsersController < ApplicationController
     @user = User.find(params[:id])
   end
 end
-{% endhighlight %}
+```
 
 要让测试通过，我们就要编写编辑用户页面的视图，如代码 9.3 所示。仔细观察一下视图代码，它和代码 7.17 中创建新用户页面的视图代码很相似，这就暗示我们要进行重构，把重复的代码移入局部视图了。重构的过程会留作练习，详情参见 [9.6 节](#sec-9-6)。
 
 **代码 9.6** 编辑用户页面的视图<br />`app/views/users/edit.html.erb`
 
-{% highlight erb %}
+```erb
 <% provide(:title, "Edit user") %>
 <h1>Update your profile</h1>
 
@@ -99,15 +99,15 @@ end
     <a href="http://gravatar.com/emails">change</a>
   </div>
 </div>
-{% endhighlight %}
+```
 
 在这段代码中我们再次使用了 [7.3.2 节](chapter7.html#sec-7-3-2)中创建的 `error_messages` 局部视图。
 
 添加了视图代码，再加上代码 9.2 中定义的 `@user` 变量，代码 9.1 中的测试应该就可以通过了：
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/requests/user_pages_spec.rb -e "edit page"
-{% endhighlight %}
+```
 
 编辑用户页面如图 9.2 所示，我们看到 Rails 会自动读取 `@user` 变量，预先填好了名字和 Email 地址字段。
 
@@ -119,32 +119,32 @@ $ bundle exec rspec spec/requests/user_pages_spec.rb -e "edit page"
 
 **代码 9.4** 编辑表单的 HTML
 
-{% highlight html %}
+```html
 <form action="/users/1" class="edit_user" id="edit_user_1" method="post">
     <input name="_method" type="hidden" value="put" />
     .
     .
     .
 </form>
-{% endhighlight %}
+```
 
 留意一下其中的一个隐藏字段：
 
-{% highlight html %}
+```html
 <input name="_method" type="hidden" value="put" />
-{% endhighlight %}
+```
 
 因为浏览器本身并不支持发送 `PUT` 请求（[表格 7.1](chapter7.html#table-7-1)中列出的 REST 结构要用），所以 Rails 就在 `POST` 请求中使用这个隐藏字段伪造了一个 `PUT` 请求。<sup>[3](#fn-3)</sup>
 
 还有一个细节需要注意一下，代码 9.3 和代码 7.17 都使用了相同的 `form_for(@user)` 来构建表单，那么 Rails 是怎么知道创建新用户要发送 `POST` 请求，而编辑用户时要发送 `PUT` 请求的呢？这个问题的答案是，通过 Active Record 提供的 `new_record?` 方法可以检测用户是新创建的还是已经存在于数据库中的：
 
-{% highlight sh %}
+```sh
 $ rails console
 >> User.new.new_record?
 => true
 >> User.first.new_record?
 => false
-{% endhighlight %}
+```
 
 所以在使用 `form_for(@user)` 构建表单时，如果 `@user.new_record?` 返回 `true` 则发送 `POST` 请求，否则就发送 `PUT` 请求。
 
@@ -152,7 +152,7 @@ $ rails console
 
 **代码 9.5** 添加检测“设置”链接的测试<br />`spec/requests/authentication_pages_spec.rb`
 
-{% highlight ruby %}
+```ruby
 require 'spec_helper'
 
 describe "Authentication" do
@@ -174,13 +174,13 @@ describe "Authentication" do
     end
   end
 end
-{% endhighlight %}
+```
 
 为了简化，代码 9.5 中使用 `sing_in` 帮助方法，这个方法的作用是访问登录页面，提交合法的表单数据，如代码 9.6 所示。
 
 **代码 9.6** 用户登录帮助方法<br />`spec/support/utilities.rb`
 
-{% highlight ruby %}
+```ruby
 .
 .
 .
@@ -192,28 +192,28 @@ def sign_in(user)
   # Sign in when not using Capybara as well.
   cookies[:remember_token] = user.remember_token
 end
-{% endhighlight %}
+```
 
 如上述代码中的注释所说，如果没有使用 Capybara 的话，填写表单的操作是无效的，所以我们就添加了一行，在不使用 Capybara 时把用户的记忆权标添加到 cookies 中：
 
-{% highlight ruby %}
+```ruby
 # Sign in when not using Capybara as well.
 cookies[:remember_token] = user.remember_token
-{% endhighlight %}
+```
 
 如果直接使用 HTTP 请求方法就必须要有上面这行代码，具体的用法在代码 9.47 中有介绍。（注意，测试中使用的 `cookies` 对象和真实的 cookies 对象是有点不一样的，代码 8.19 中使用的 `cookies.permanent` 方法不能在测试中使用。）你可能已经猜到了，`sing_in` 在后续的测试中还会用到，而且还可以用来去除重复代码（参见 [9.6 节](#sec-9-6)）。
 
 在程序中添加“设置”链接很简单，我们就直接使用[表格 7.1](chapter7.html#table-7-1) 中列出的 `edit_user_path` 具名路由，其参数设为代码 8.22 中定义的 `current_user` 帮助方法：
 
-{% highlight erb %}
+```erb
 <%= link_to "Settings", edit_user_path(current_user) %>
-{% endhighlight %}
+```
 
 完整的代码如代码 9.7 所示。
 
 **代码 9.7** 添加“设置”链接<br />`app/views/layouts/_header.html.erb`
 
-{% highlight erb %}
+```erb
 <header class="navbar navbar-fixed-top">
   <div class="navbar-inner">
     <div class="container">
@@ -245,7 +245,7 @@ cookies[:remember_token] = user.remember_token
     </div>
   </div>
 </header>
-{% endhighlight %}
+```
 
 <h3 id="sec-9-1-2">9.1.2 编辑失败</h3>
 
@@ -253,7 +253,7 @@ cookies[:remember_token] = user.remember_token
 
 **代码 9.8** 还不完整的 `update` 动作<br />`app/controllers/users_controller.rb`
 
-{% highlight ruby %}
+```ruby
 class UsersController < ApplicationController
   .
   .
@@ -271,13 +271,13 @@ class UsersController < ApplicationController
     end
   end
 end
-{% endhighlight %}
+```
 
 提交不合法信息后显示了错误提示信息（如图 9.3），测试就可以通过了，你可以运行测试组件验证一下：
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/
-{% endhighlight %}
+```
 
 ![edit_with_invalid_information_bootstrap](assets/images/figures/edit_with_invalid_information_bootstrap.png)
 
@@ -295,7 +295,7 @@ $ bundle exec rspec spec/
 
 **代码 9.9** 测试 Users 控制器的 `update` 动作<br />`spec/requests/user_pages_spec.rb`
 
-{% highlight ruby %}
+```ruby
 require 'spec_helper'
 
 describe "User pages" do
@@ -327,30 +327,30 @@ describe "User pages" do
     end
   end
 end
-{% endhighlight %}
+```
 
 上述代码中出现了一个新的方法 `reload`，出现在检测用户的属性是否已经更新的测试中：
 
-{% highlight ruby %}
+```ruby
 specify { user.reload.name.should == new_name }
 specify { user.reload.email.should == new_email }
-{% endhighlight %}
+```
 
 这两行代码使用 `user.reload` 从测试数据库中重新加载 `user` 的数据，然后检测用户的名字和 Email 地址是否更新成了新的值。
 
 要让代码 9.9 中的测试通过，我们可以参照最终版本的 `create` 动作（代码 8.27）来编写 `update` 动作，如代码 9.10 所示。我们在代码 9.8  的基础上加入了下面这三行。
 
-{% highlight ruby %}
+```ruby
 flash[:success] = "Profile updated"
 sign_in @user
 redirect_to @user
-{% endhighlight %}
+```
 
 注意，用户资料更新成功之后我们再次登入了用户，因为保存用户时，重设了记忆权标（代码 8.18），之前的 session 就失效了（代码 8.22）。这也是一项安全措施，因为如果用户更新了资料，任何会话劫持都会自动失效。
 
 **代码 9.10** Users 控制器的 `update` 动作<br />`app/controllers/users_controller.rb`
 
-{% highlight ruby %}
+```ruby
 class UsersController < ApplicationController
   .
   .
@@ -366,15 +366,15 @@ class UsersController < ApplicationController
     end
   end
 end
-{% endhighlight %}
+```
 
 注意，现在这种实现方式，每次更新数据都要提供密码（填写图 9.2 中那两个空的字段），虽然有点烦人，不过却保证了安全。
 
 添加了本小节的代码之后，编辑用户页面应该可以正常使用了，你可以运行测试组件再确认一下，测试应该是可以通过的：
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/
-{% endhighlight %}
+```
 
 <h2 id="sec-9-2">9.2 权限限制</h2>
 
@@ -392,7 +392,7 @@ $ bundle exec rspec spec/
 
 **代码 9.11** 测试 `edit` 和 `update` 动作是否处于被保护状态<br />`spec/requests/authentication_pages_spec.rb`
 
-{% highlight ruby %}
+```ruby
 require 'spec_helper'
 
 
@@ -421,30 +421,30 @@ describe "Authentication" do
     end
   end
 end
-{% endhighlight %}
+```
 
 代码 9.11 除了使用 Capybara 的 `visit` 方法之外，还第一次使用了另一种访问控制器动作的方法：如果需要直接发起某种 HTTP 请求，则直接使用 HTTP 动词对应的方法即可，例如本例中的 `put` 发起的就是 `PUT` 请求：
 
-{% highlight ruby %}
+```ruby
 describe "submitting to the update action" do
   before { put user_path(user) }
   specify { response.should redirect_to(signin_path) }
 end
-{% endhighlight %}
+```
 
 上述代码会向 /users/1 地址发送 `PUT` 请求，由 Users 控制器的 `update` 动作处理（参见[表格 7.1](chapter7.html#table-7-1)）。我们必须这么做，因为浏览器无法直接访问 `update` 动作，必须先提交编辑表单，所以 Capybara 也做不到。访问编辑资料页面只能测试 `edit` 动作是否有权限继续操作，而不能测试 `update` 动作的授权情况。所以，如果要测试 `update` 动作是否有权限进行操作只能直接发送 `PUT` 请求。（你可能已经猜到了，除了 `put` 方法之外，Rails 中的测试还支持 `get`、`post` 和 `delete` 方法。）
 
 直接发送某种 HTTP 请求时，我们需要处理更底层的 `response` 对象。和 Capybara 提供的 `page` 对象不同，我们可以使用 `response` 测试服务器的响应。本例我们检测了 `update` 动作的响应是否转向了登录页面：
 
-{% highlight ruby %}
+```ruby
 specify { response.should redirect_to(signin_path) }
-{% endhighlight %}
+```
 
 我们要使用 `before_filter` 方法实现权限限制，这个方法会在指定的动作执行之前，先运行指定的方法。为了实现要求用户先登录的限制，我们要定义一个名为 `signed_in_user` 的方法，然后调用 `before_filter :signed_in_user`，如代码 9.12 所示。
 
 **代码 9.12** 添加 `signed_in_user` 事前过滤器<br />`app/controllers/users_controller.rb`
 
-{% highlight ruby %}
+```ruby
 class UsersController < ApplicationController
   before_filter :signed_in_user, only: [:edit, :update]
   .
@@ -457,16 +457,16 @@ class UsersController < ApplicationController
     end
 
 end
-{% endhighlight %}
+```
 
 默认情况下，事前过滤器会应用于控制器中的所有动作，所以在上述代码中我们传入了 `:only` 参数指定只应用在 `edit` 和 `update` 动作上。
 
 注意，在代码 9.12 中我们使用了设定 `flash[:notice]` 的简便方式，把 `redirect_to` 方法的第二个参数指定为一个 Hash。这段代码等同于：
 
-{% highlight ruby %}
+```ruby
 flash[:notice] = "Please sign in."
 redirect_to signin_path
-{% endhighlight %}
+```
 
 （`flash[:error]` 也可以使用上述的简便方式，但 `flash[:success]` 却不可以。）
 
@@ -478,20 +478,20 @@ redirect_to signin_path
 
 在尝试让代码 9.11 中检测权限限制的测试通过的过程中，我们却破坏了代码 9.1 中的测试。如下的代码
 
-{% highlight ruby %}
+```ruby
 describe "edit" do
   let(:user) { FactoryGirl.create(:user) }
   before { visit edit_user_path(user) }
   .
   .
   .
-{% endhighlight %}
+```
 
 现在会失败，因为必须先登录才能正常访问编辑用户资料页面。解决这个问题的办法是，使用代码 9.6 中定义的 `sign_in` 方法登入用户，如代码 9.13 所示。
 
 **代码 9.13** 为 `edit` 和 `update` 测试加入登录所需的代码<br />`spec/requests/user_pages_spec.rb`
 
-{% highlight ruby %}
+```ruby
 require 'spec_helper'
 
 describe "User pages" do
@@ -509,13 +509,13 @@ describe "User pages" do
     .
   end
 end
-{% endhighlight %}
+```
 
 现在所有的测试应该都可以通过了：
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/
-{% endhighlight %}
+```
 
 <h3 id="sec-9-2-2">9.2.2 用户只能编辑自己的资料</h3>
 
@@ -523,7 +523,7 @@ $ bundle exec rspec spec/
 
 **代码 9.14** 测试只有自己才能访问 `edit` 和 `update` 动作<br />`spec/requests/authentication_pages_spec.rb`
 
-{% highlight ruby %}
+```ruby
 require 'spec_helper'
 
 describe "Authentication" do
@@ -551,13 +551,13 @@ describe "Authentication" do
     end
   end
 end
-{% endhighlight %}
+```
 
 注意，创建预构件的方法还可以接受第二个参数：
 
-{% highlight ruby %}
+```ruby
 FactoryGirl.create(:user, email: "wrong@example.com")
-{% endhighlight %}
+```
 
 上述代码会用指定的 Email 替换默认值，然后创建用户。我们的测试要确保其他的用户不能访问原来那个用户的 `edit` 和 `update` 动作。
 
@@ -565,7 +565,7 @@ FactoryGirl.create(:user, email: "wrong@example.com")
 
 **代码 9.15** 保护 `edit` 和 `update` 动作的 `correct_user` 事前过滤器<br />`app/controllers/users_controller.rb`
 
-{% highlight ruby %}
+```ruby
 class UsersController < ApplicationController
   before_filter :signed_in_user, only: [:edit, :update]
   before_filter :correct_user, only: [:edit, :update]
@@ -599,13 +599,13 @@ class UsersController < ApplicationController
     end
 
 end
-{% endhighlight %}
+```
 
 上述代码中的 `correct_user` 方法使用了 `current_user?` 方法，我们要在 Sessions 帮助方法模块中定义一下，如代码 9.16。
 
 **代码 9.16** 定义 `current_user?` 方法<br />`app/helpers/sessions_helper.rb`
 
-{% highlight ruby %}
+```ruby
 module SessionsHelper
   .
   .
@@ -621,23 +621,23 @@ module SessionsHelper
   .
   .
 end
-{% endhighlight %}
+```
 
 代码 9.15 同时也更新了 `edit` 和 `update` 动作的代码。之前在代码 9.2 中，我们是这样写的：
 
-{% highlight ruby %}
+```ruby
 def edit
   @user = User.find(params[:id])
 end
-{% endhighlight %}
+```
 
 `update` 代码类似。既然 `correct_user` 事前过滤器中已经定义了 `@user`，这两个动作中就不再需要再定义 `@user` 变量了。
 
 在继续阅读之前，你应该验证一下测试是否可以通过：
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/
-{% endhighlight %}
+```
 
 <h3 id="sec-9-2-3">9.2.3 更友好的转向</h3>
 
@@ -647,7 +647,7 @@ $ bundle exec rspec spec/
 
 **代码 9.17** 测试更友好的转向<br />`spec/requests/authentication_pages_spec.rb`
 
-{% highlight ruby %}
+```ruby
 require 'spec_helper'
 
 describe "Authentication" do
@@ -679,13 +679,13 @@ describe "Authentication" do
     .
   end
 end
-{% endhighlight %}
+```
 
 下面我们来实现这个设想。<sup>[4](#fn-4)</sup>要转向用户真正想访问的页面，我们要在某个地方存储这个页面的地址，登录后再转向这个页面。我们要通过两个方法来实现这个过程，`store_location` 和 `redirect_back_or`，都在 Sessions 帮助方法模块中定义，如代码 9.18。
 
 **代码 9.18** 实现更友好的转向所需的代码<br />`app/helpers/sessions_helper.rb`
 
-{% highlight ruby %}
+```ruby
 module SessionsHelper
   .
   .
@@ -699,7 +699,7 @@ module SessionsHelper
     session[:return_to] = request.fullpath
   end
 end
-{% endhighlight %}
+```
 
 地址的存储使用了 Rails 提供的 `session`，`session` 可以理解成和 [8.2.1 节](chapter8.html#sec-8-2-1)中介绍的 `cookies` 是类似的东西，会在浏览器关闭后自动失效。（在 [8.5 节](chapter8.html#sec-8-5)中介绍过，其实 `session` 的实现方法正是如此。）我们还使用了 `request` 对象的 `fullpath` 方法获取了所请求页面的完整地址。在 `store_locations` 方法中，把完整的请求地址存储在 `session[:return_to]` 中。
 
@@ -707,7 +707,7 @@ end
 
 **代码 9.19** 把 `store_location` 加入 `signed_in_user` 事前过滤器<br />`app/controllers/users_controller.rb`
 
-{% highlight ruby %}
+```ruby
 class UsersController < ApplicationController
   before_filter :signed_in_user, only: [:edit, :update]
   before_filter :correct_user, only: [:edit, :update]
@@ -733,13 +733,13 @@ class UsersController < ApplicationController
       redirect_to(root_path) unless current_user?(@user)
     end
 end
-{% endhighlight %}
+```
 
 实现转向操作，要在 Sessions 控制器的 `create` 动作中加入 `redirect_back_or` 方法，在用户登录后转到适当的页面，如代码 9.20 所示。如果存储了之前请求的地址，`redirect_back_or` 方法就会转向这个地址，否则会转向参数中指定的地址。
 
 **代码 9.20** 加入友好转向后的 `create` 动作<br />`app/controllers/sessions_controller.rb`
 
-{% highlight ruby %}
+```ruby
 class SessionsController < ApplicationController
   .
   .
@@ -758,21 +758,21 @@ class SessionsController < ApplicationController
   .
   .
 end
-{% endhighlight %}
+```
 
 `redirect_back_or` 方法在下面这行代码中使用了“或”操作符 `||`：
 
-{% highlight ruby %}
+```ruby
 session[:return_to] || default
-{% endhighlight %}
+```
 
 如果 `session[:return_to]` 的值不是 `nil`，上面这行代码就会返回 `session[:return_to]` 的值，否则会返回 `default`。注意，在代码 9.18 中，成功转向后就会删除存储在 session 中的转向地址。如果不删除的话，在关闭浏览器之前，每次登录后都会转到存储的地址上。（对这一过程的测试留作练习，参见 [9.6 节](#sec-9-6)。）
 
 加入上述代码之后，代码 9.17 中对友好转向的集成测试应该可以通过了。至此，我们也就完成了基本的用户身份验证和页面保护机制。和之前一样，在继续阅读之前，最好确认一下所有的测试是否都可以通过：
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/
-{% endhighlight %}
+```
 
 <h2 id="sec-9-3">9.3 列出所用用户</h2>
 
@@ -788,7 +788,7 @@ $ bundle exec rspec spec/
 
 **代码 9.21** 测试 `index` 动作是否是被保护的<br />`spec/requests/authentication_pages_spec.rb`
 
-{% highlight ruby %}
+```ruby
 require 'spec_helper'
 
 describe "Authentication" do
@@ -816,13 +816,13 @@ describe "Authentication" do
     end
   end
 end
-{% endhighlight %}
+```
 
 若要这个测试通过，我们要把 `index` 动作加入 `signed_in_user` 事前过滤器，如代码 9.22 所示。
 
 **代码 9.22** 访问 `index` 动作必须先登录<br />`app/controllers/users_controller.rb`
 
-{% highlight ruby %}
+```ruby
 class UsersController < ApplicationController
   before_filter :signed_in_user, only: [:index, :edit, :update]
   .
@@ -834,13 +834,13 @@ class UsersController < ApplicationController
   .
   .
 end
-{% endhighlight %}
+```
 
 接下来，我们要测试用户登录后，用户列表页面要有特定的标题和标头，还要列出网站中所有的用户。为此，我们要创建三个用户预构件，以第一个用户的身份登录，然后检测用户列表页面中是否有一个列表，各用户的名字都包含在一个单独的 `li` 标签中。注意，我们要为每个用户分配不同的名字，这样列表中的用户才是不一样的，如代码 9.23 所示。
 
 **代码 9.23** 用户列表页面的测试<br />`spec/requests/user_pages_spec.rb`
 
-{% highlight ruby %}
+```ruby
 require 'spec_helper'
 
 describe "User pages" do
@@ -867,13 +867,13 @@ describe "User pages" do
   .
   .
 end
-{% endhighlight %}
+```
 
 你可能还记得，我们在演示程序的相关代码中介绍过（参见代码 2.4），在程序中我们可以使用 `User.all` 从数据库中取回所有的用户，赋值给实例变量 `@users` 在视图中使用，如代码 9.24 所示。（你可能会觉得一次列出所有的用户不太好，你是对的，我们会在 [9.3.3 节](#sec-9-3-3)中改进。）
 
 **代码 9.24** Users 控制器的 `index` 动作<br />`app/controllers/users_controller.rb`
 
-{% highlight ruby %}
+```ruby
 class UsersController < ApplicationController
   before_filter :signed_in_user, only: [:index, :edit, :update]
   .
@@ -886,13 +886,13 @@ class UsersController < ApplicationController
   .
   .
 end
-{% endhighlight %}
+```
 
 要显示用户列表页面，我们要创建一个视图，遍历所有的用户，把单个用户包含在 `li` 标签中。我们要使用 `each` 方法遍历所有用户，显示用户的 Gravatar 头像和名字，然后把所有的用户包含在无序列表 `ul` 标签中，如代码 9.25 所示。在代码 9.25 中，我们用到了 [7.6 节](chapter7.html#sec-7-6)练习中代码 7.29 的成果，允许向 Gravatar 帮助方法传入第二个参数，指定头像的大小。如果你之前没有做这个练习题，在继续阅读之前请参照代码 7.29 更新 Users 控制器的帮助方法文件。
 
 **代码 9.25** 用户列表页面的视图<br />`app/views/users/index.html.erb`
 
-{% highlight erb %}
+```erb
 <% provide(:title, 'All users') %>
 <h1>All users</h1>
 
@@ -904,13 +904,13 @@ end
     </li>
   <% end %>
 </ul>
-{% endhighlight %}
+```
 
 我们再添加一些 CSS（更确切的说是 SCSS）美化一下，如代码 9.26。
 
 **代码 9.26** 用户列表页面的 CSS<br />`app/assets/stylesheets/custom.css.scss`
 
-{% highlight scss %}
+```scss
 .
 .
 .
@@ -928,13 +928,13 @@ end
     }
   }
 }
-{% endhighlight %}
+```
 
 最后，我们还要在头部的导航中加入到用户列表页面的链接，链接的地址为 `users_path`，这是[表格 7.1](chapter7.html#table-7-1)中还没介绍的最后一个具名路由了。相应的测试（代码 9.27）和程序所需的代码（代码 9.28）都很简单。
 
 **代码 9.27** 检测“Users”链接的测试<br />`spec/requests/authentication_pages_spec.rb`
 
-{% highlight ruby %}
+```ruby
 require 'spec_helper'
 
 describe "Authentication" do
@@ -959,11 +959,11 @@ describe "Authentication" do
     end
   end
 end
-{% endhighlight %}
+```
 
 **代码 9.28** 添加“Users”链接<br />`app/views/layouts/_header.html.erb`
 
-{% highlight erb %}
+```erb
 <header class="navbar navbar-fixed-top">
   <div class="navbar-inner">
     <div class="container">
@@ -995,13 +995,13 @@ end
     </div>
   </div>
 </header>
-{% endhighlight %}
+```
 
 至此，用户列表页面的功能就实现了，所有的测试也都可以通过了：
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/
-{% endhighlight %}
+```
 
 不过，如图 9.8 所示，页面中只显示了一个用户，有点孤单单。下面，让我们来改变一下这种悲惨状况。
 
@@ -1017,7 +1017,7 @@ $ bundle exec rspec spec/
 
 **代码 9.29** 把 `faker` 加入 `Gemfile`
 
-{% highlight ruby %}
+```ruby
 source 'https://rubygems.org'
 
 gem 'rails', '3.2.3'
@@ -1027,19 +1027,19 @@ gem 'faker', '1.0.1'
 .
 .
 .
-{% endhighlight %}
+```
 
 然后和之前一样，运行下面的命令安装：
 
-{% highlight sh %}
+```sh
 $ bundle install
-{% endhighlight %}
+```
 
 接下来我们要添加一个 Rake 任务来创建示例用户。这个 Rake 任务保存在 `lib/tasks` 文件夹中，而且在 `:db` 命名空间中定义，如代码 9.30 所示。（代码中涉及到一些高级知识，现在不必深入了解。）
 
 **代码 9.30** 在数据库中生成示例用户的 Rake 任务<br />`lib/tasks/sample_data.rake`
 
-{% highlight ruby %}
+```ruby
 namespace :db do
   desc "Fill database with sample data"
   task populate: :environment do
@@ -1058,23 +1058,23 @@ namespace :db do
     end
   end
 end
-{% endhighlight %}
+```
 
 上述代码定义了一个名为 `db:populate` 的 Rake 任务，先创建一个用户替代之前存在的那个用户，然后还创建了 99 个用户。下面这行代码
 
-{% highlight ruby %}
+```ruby
 task populate: :environment do
-{% endhighlight %}
+```
 
 确保这个 Rake 任务可以获取 Rails 环境的信息，包括 User 模型，所以才能使用 `User.create!` 方法。`create!` 方法和 `create` 方法的作用一样，只不过如果提供的信息不合法不会返回 `false` 而是会抛出异常（参见 [6.1.4 节](chapter6.html#sec-6-1-4)），这样如果出错的话就很容易找到错误发生的地方。
 
 这个任务是定义在 `:db` 命名空间中的，所以我们要按照如下的方式来执行：
 
-{% highlight sh %}
+```sh
 $ bundle exec rake db:reset
 $ bundle exec rake db:populate
 $ bundle exec rake db:test:prepare
-{% endhighlight %}
+```
 
 执行这三个任务之后，我们的应用程序就有 100 个用户了，如图 9.9 所示。（我牺牲了一点个人时间为前几个用户上传了头像，这样就不都会显示默认的 Gravatar 头像了。）
 
@@ -1090,7 +1090,7 @@ $ bundle exec rake db:test:prepare
 
 **代码 9.31** 在 `Gemfile` 中加入 will_paginate
 
-{% highlight ruby %}
+```ruby
 source 'https://rubygems.org'
 
 gem 'rails', '3.2.3'
@@ -1102,13 +1102,13 @@ gem 'bootstrap-will_paginate', '0.0.6'
 .
 .
 .
-{% endhighlight %}
+```
 
 然后执行下面的命令安装：
 
-{% highlight sh %}
+```sh
 $ bundle install
-{% endhighlight %}
+```
 
 安装后你还要重启 Web 服务器，确保成功加载这两个新 gem。
 
@@ -1116,7 +1116,7 @@ $ bundle install
 
 和之前一样，我们要使用 Factory Girl 生成用户，但是我们立马就会遇到一个问题：因为用户的 Email 地址必须是唯一的，那么我们就要手动生成 30 个用户，这可是一件很费事的活儿。而且，在测试用户列表时，用户的名字最好也不一样。幸好 Factory Girl 料事如神，提供了 `sequence` 方法来解决这种问题。在代码 7.8 中，我们是直接出入名字和 Email 地址来创建预构件的：
 
-{% highlight ruby %}
+```ruby
 FactoryGirl.define do
   factory :user do
     name "Michael Hartl"
@@ -1125,24 +1125,24 @@ FactoryGirl.define do
     password_confirmation "foobar"
   end
 end
-{% endhighlight %}
+```
 
 现在我们要使用 `sequence` 方法自动创建一系列的名字和 Email 地址：
 
-{% highlight ruby %}
+```ruby
 factory :user do
   sequence(:name) { |n| "Person #{n}" }
   sequence(:email) { |n| "person_#{n}@example.com"}
   .
   .
   .
-{% endhighlight %}
+```
 
 `sequence` 方法可以接受一个 Symbol 类型的参数，对应到属性上（例如 `:name`），其后还可以跟着块，有一个块参数，我们将其命名为 `n`。`FactoryGirl.create(:user)` 方法执行成功后，块参数会自动增加 1。因此，创建的第一个用户名字为“Person 1”，Email 地址为“person_1@example.com”；第二个用户的名字为 `Person 2`，Email 地址为“person_2@example.com”；依此类推。完整的代码如代码 9.32 所示。
 
 **代码 9.32** 定义 Factory Girl 序列<br />`spec/factories.rb`
 
-{% highlight ruby %}
+```ruby
 FactoryGirl.define do
   factory :user do
     sequence(:name) { |n| "Person #{n}" }
@@ -1151,15 +1151,15 @@ FactoryGirl.define do
     password_confirmation "foobar"
   end
 end
-{% endhighlight %}
+```
 
 创建了预构件序列后，在测试中就可以生成 30 个用户了，这 30 个用户就可以产生分页了：
 
 
-{% highlight ruby %}
+```ruby
 before(:all) { 30.times { FactoryGirl.create(:user) } }
 after(:all) { User.delete_all }
-{% endhighlight %}
+```
 
 注意，上述代码我们使用 `before(:all)` 确保在块中的所有执行之前，一次性创建 30 个示例用户。这是对速度做的优化，因为在某些系统中每个测试都创建 30 个用户会很慢。对应的，我们调用 `after(:all)` 方法，在测试结束后一次性删除所有的用户。
 
@@ -1167,7 +1167,7 @@ after(:all) { User.delete_all }
 
 **代码 9.33** 测试分页<br />`spec/requests/user_pages_spec.rb`
 
-{% highlight ruby %}
+```ruby
 require 'spec_helper'
 
 describe "User pages" do
@@ -1197,13 +1197,13 @@ describe "User pages" do
   .
   .
 end
-{% endhighlight %}
+```
 
 要实现分页，我们要在用户列表页面的视图中加入一些代码，告诉 Rails 要分页显示用户，而且要把 `index` 动作中的 `User.all` 换成知道如何分页的方法。我们先在视图中加入特殊的 `will_paginate` 方法，如代码 9.34 所示。稍后我们看到为什么要在用户列表的前后都加入分页代码。
 
 **代码 9.34** 在用户列表视图中加入分页<br />`app/views/users/index.html.erb`
 
-{% highlight erb %}
+```erb
 <% provide(:title, 'All users') %>
 <h1>All users</h1>
 
@@ -1219,17 +1219,17 @@ end
 </ul>
 
 <%= will_paginate %>
-{% endhighlight %}
+```
 
 `will_paginate` 方法有点小神奇，在 Users 控制器的视图中，它会自动寻找名为 `@users` 的对象，然后显示一个分页导航链接。代码 9.34 所示的视图现在还不能正确显示分页，因为现在 `@users` 的值是通过 `User.all` 方法获取的，是个数组；而 `will_paginate` 方法需要的是 `ActiveRecored::Relation` 类对象。will_paginate 提供的 `paginate` 方法正好可以返回 `ActiveRecored::Relation` 类对象：
 
-{% highlight sh %}
+```sh
 $ rails console
 >> User.all.class
 => Array
 >> User.paginate(page: 1).class
 => ActiveRecord::Relation
-{% endhighlight %}
+```
 
 `paginate` 方法可以接受一个 Hash 类型的参数，键 `:page` 的值指定第几页。`User.paginate` 方法根据 `:page` 的值，一次取回一系列的用户（默认为 30 个）。所以，第一页显示的是第 1-30 个用户，第二页显示的是第 31-60 个，等。如果指定的页数不存在，`paginate` 会显示第一页。
 
@@ -1237,7 +1237,7 @@ $ rails console
 
 **代码 9.35** 在 `index` 动作中按分页取回用户<br />`app/controllers/users_controller.rb`
 
-{% highlight ruby %}
+```ruby
 class UsersController < ApplicationController
   before_filter :signed_in_user, only: [:index, :edit, :update]
   .
@@ -1250,7 +1250,7 @@ class UsersController < ApplicationController
   .
   .
 end
-{% endhighlight %}
+```
 
 现在，用户列表页面应该可以显示分页了，如图 9.10 所示。（在某些系统中，可能需要重启 Rails 服务器。）因为我们在用户列表前后都加入了 `will_paginate` 方法，所以这两个地方都会显示分页链接。
 
@@ -1266,9 +1266,9 @@ end
 
 你还应该验证一下测试是否可以通过：
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/
-{% endhighlight %}
+```
 
 <h3 id="sec-9-3-4">9.3.4 视图重构</h3>
 
@@ -1278,7 +1278,7 @@ $ bundle exec rspec spec/
 
 **代码 9.36** 重构用户列表视图的第一步<br />`app/views/users/index.html.erb`
 
-{% highlight erb %}
+```erb
 <% provide(:title, 'All users') %>
 <h1>All users</h1>
 
@@ -1291,24 +1291,24 @@ $ bundle exec rspec spec/
 </ul>
 
 <%= will_paginate %>
-{% endhighlight %}
+```
 
 在上述代码中，`render` 的参数不再是指定局部试图的字符串，而是代表 `User` 类的 `user` 变量。<sup>[6](#fn-6)</sup>Rails 会自定寻找一个名为 `_user.html.erb` 的局部试图，我们要手动创建这个视图，然后写入代码 9.37 中的内容。
 
 **代码 9.37** 显示单一用户的局部视图<br />`app/views/users/_user.html.erb`
 
-{% highlight erb %}
+```erb
 <li>
   <%= gravatar_for user, size: 52 %>
   <%= link_to user.name, user %>
 </li>
-{% endhighlight %}
+```
 
 这个改进很不错，不过我们还可以做的跟好。我们可以直接把 `@users` 变量传递给 `render` 方法，如代码 9.38 所示。
 
 **代码 9.38** 完全重构后的用户列表视图<br />`app/views/users/index.html.erb`
 
-{% highlight erb %}
+```erb
 <% provide(:title, 'All users') %>
 <h1>All users</h1>
 
@@ -1319,13 +1319,13 @@ $ bundle exec rspec spec/
 </ul>
 
 <%= will_paginate %>
-{% endhighlight %}
+```
 
 Rails 会把 `@users` 当作一系列的 `User` 对象，遍历这些对象，然后使用 `_user.html.erb` 渲染每个对象。所以我们就得到了代码 9.38 这样简洁的代码。每次重构后，你都应该验证一下测试组件是否还是可以通过的：
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/
-{% endhighlight %}
+```
 
 <h2 id="sec-9-4">9.4 删除用户</h2>
 
@@ -1341,7 +1341,7 @@ $ bundle exec rspec spec/
 
 **代码 9.39** 测试 `admin` 属性<br />`spec/models/user_spec.rb`
 
-{% highlight ruby %}
+```ruby
 require 'spec_helper'
 
 describe User do
@@ -1363,15 +1363,15 @@ describe User do
   .
   .
 end
-{% endhighlight %}
+```
 
 在上述代码中我们使用 `toggle!` 方法把 `admin` 属性的值从 `false` 转变成 `true`。`it { should be_admin }` 这行代码说明用户对象应该可以响应 `admin?` 方法（这是 RSpec 对布尔值属性的一个约定）。
 
 和之前一样，我们要使用迁移添加 `admin` 属性，在命令行中指定其类型为 `boolean`：
 
-{% highlight sh %}
+```sh
 $ rails generate migration add_admin_to_users admin:boolean
-{% endhighlight %}
+```
 
 这个名声生成的迁移文件（如代码 9.40 所示）会在 users 表中添加 `admin` 这一列，得到的数据模型如图 9.13 所示。
 
@@ -1381,26 +1381,26 @@ $ rails generate migration add_admin_to_users admin:boolean
 
 **代码 9.40** 为 User 模型添加 `admin` 属性所用的迁移文件<br />`db/migrate/[timestamp]_add_admin_to_users.rb`
 
-{% highlight ruby %}
+```ruby
 class AddAdminToUsers < ActiveRecord::Migration
   def change
     add_column :users, :admin, :boolean, default: false
   end
 end
-{% endhighlight %}
+```
 
 注意，在代码 9.40 中，我们为 `add_column` 方法指定了 `default: false` 参数，添加了这个参数用户默认情况下就不是管理员。（如果没有指定 `default: false`，`admin` 的默认值是 `nil`，也是“假值”，所以严格来说，这个参数不是必须的。不过，指定这个参数，可以更明确地向 Rails 以及代码的阅读者表明这段代码的意图。）
 
 然后，我们要在“开发数据库”中执行迁移操作，还要准备好“测试数据库”：
 
-{% highlight sh %}
+```sh
 $ bundle exec rake db:migrate
 $ bundle exec rake db:test:prepare
-{% endhighlight %}
+```
 
 和预想的一样，Rails 可以自动识别 `admin` 属性的类型为布尔值，而且自动生成了 `admin?` 方法：
 
-{% highlight sh %}
+```sh
 $ rails console --sandbox
 >> user = User.first
 >> user.admin?
@@ -1409,19 +1409,19 @@ $ rails console --sandbox
 => true
 >> user.admin?
 => true
-{% endhighlight %}
+```
 
 执行迁移操作后，针对 `admin` 属性的测试应该可以通过了：
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/models/user_spec.rb
-{% endhighlight %}
+```
 
 最后，我们要修改一下生成示例用户的代码，把第一个用户设为管理员，如代码 9.41 所示。
 
 **代码 9.41** 生成示例用户的代码，把第一个用户设为管理员<br />`lib/tasks/sample_data.rake`
 
-{% highlight ruby %}
+```ruby
 namespace :db do
   desc "Fill database with sample data"
   task populate: :environment do
@@ -1435,15 +1435,15 @@ namespace :db do
     .
   end
 end
-{% endhighlight %}
+```
 
 之后还要还原数据库，并且重新生成示例用户：
 
-{% highlight sh %}
+```sh
 $ bundle exec rake db:reset
 $ bundle exec rake db:populate
 $ bundle exec rake db:test:prepare
-{% endhighlight %}
+```
 
 #### `attr_accessible` 再探
 
@@ -1451,20 +1451,20 @@ $ bundle exec rake db:test:prepare
 
 **代码 9.42** User 模型中通过 `attr_accessible` 指定的可访问的属性，其中没有 `:admin` 属性<br />`app/models/user.rb`
 
-{% highlight ruby %}
+```ruby
 class User < ActiveRecord::Base
   attr_accessible :name, :email, :password, :password_confirmation
   .
   .
   .
 end
-{% endhighlight %}
+```
 
 明确指定可访问的属性对网站的安全是很重要的，如果你没有指定，或者傻傻的把 `:admin` 也加进去了，那么心怀不轨的用户就可以发送下面这个 `PUT` 请求：<sup>[7](#fn-7)</sup>
 
-{% highlight text %}
+```text
 put /users/17?admin=1
-{% endhighlight %}
+```
 
 这个请求会把 id 为 17 的用户设为管理员，这可是一个很严重的安全隐患。鉴于此，最佳的方法是在每个数据模型中都指定可访问的属性列表。其实，最好再测试一下各属性是否是可访问的，对 `:admin` 属性的可访问性测试留作练习，参见 [9.6 节](#sec-9-6)。
 
@@ -1476,7 +1476,7 @@ put /users/17?admin=1
 
 **代码 9.43** 添加一个创建管理员的工厂方法<br />`spec/factories.rb`
 
-{% highlight ruby %}
+```ruby
 FactoryGirl.define do
   factory :user do
     sequence(:name) { |n| "Person #{n}" }
@@ -1488,31 +1488,31 @@ FactoryGirl.define do
     end
   end
 end
-{% endhighlight %}
+```
 
 添加了以上代码之后，我们就可以在测试中调用 `FactoryGirl.create(:admin)` 创建管理员用户了。
 
 基于安全考虑，普通用户是看不到删除用户链接的，所以：
 
-{% highlight ruby %}
+```ruby
 it { should_not have_link('delete') }
-{% endhighlight %}
+```
 
 只有管理员才能看到删除用户链接，如果管理员点击了删除用户链接，该用户会被删除，用户的数量就会减少 1 个：
 
-{% highlight ruby %}
+```ruby
 it { should have_link('delete', href: user_path(User.first)) }
 it "should be able to delete another user" do
   expect { click_link('delete') }.to change(User, :count).by(-1)
 end
 it { should_not have_link('delete', href: user_path(admin)) }
-{% endhighlight %}
+```
 
 注意，我们还添加了一个测试，确保管理员不会看到删除自己的链接。针对删除用户的完整测试如代码 9.44 所示。
 
 **代码 9.44** 测试删除用户功能<br />`spec/requests/user_pages_spec.rb`
 
-{% highlight ruby %}
+```ruby
 require 'spec_helper'
 
 describe "User pages" do
@@ -1557,13 +1557,13 @@ describe "User pages" do
     end
   end
 end
-{% endhighlight %}
+```
 
 然后在视图中加入代码 9.45。注意链接中的 `method: delete` 参数，它指明点击链接后发送的是 `DELETE` 请求。我们还把各链接放在了 `if` 语句中，这样就只有管理员才能看到删除用户链接。管理员看到的页面如图 9.14 所示。
 
 **代码 9.45** 删除用户的链接（只有管理员才能看到）<br />`app/views/users/_user.html.erb`
 
-{% highlight erb %}
+```erb
 <li>
   <%= gravatar_for user, size: 52 %>
   <%= link_to user.name, user %>
@@ -1571,7 +1571,7 @@ end
     | <%= link_to "delete", user, method: :delete, confirm: "You sure?" %>
   <% end %>
 </li>
-{% endhighlight %}
+```
 
 ![index_delete_links_rails_3_bootstrap](assets/images/figures/index_delete_links_rails_3_bootstrap.png)
 
@@ -1583,7 +1583,7 @@ end
 
 **代码 9.46** 加入 `destroy` 动作<br />`app/controllers/users_controller.rb`
 
-{% highlight ruby %}
+```ruby
 class UsersController < ApplicationController
   before_filter :signed_in_user, only: [:index, :edit, :update, :destroy]
   before_filter :correct_user, only: [:edit, :update]
@@ -1599,19 +1599,19 @@ class UsersController < ApplicationController
   .
   .
 end
-{% endhighlight %}
+```
 
 注意上述 `destroy` 动作中，把 `find` 方法和 `destroy` 方法链在一起使用了：
 
-{% highlight ruby %}
+```ruby
 User.find(params[:id]).destroy
-{% endhighlight %}
+```
 
 理论上，只有管理员才能看到删除用户链接，所以只有管理员才能删除用户。但实际上，还是存在一个严重的安全隐患：只要攻击者有足够的经验，就可以在命令行中发送 `DELETE` 请求，删除网站中的用户。为了保证网站的安全，我们还要限制对 `destroy` 动作的访问，因此我们在测试中不仅要确保只有管理员才能删除用户，还要保证其他用户不能执行删除操作，如代码 9.47 所示。注意，和代码 9.11 中的 `put` 方法类似，在这段代码中我们使用 `delete` 方法向指定的地址（`user_path`，参见[表格 7.1](chapter7.html#table-7-1)）发送了一个 `DELETE` 请求。
 
 **代码 9.47** 测试访问受限的 `destroy` 动作<br />`spec/requests/authentication_pages_spec.rb`
 
-{% highlight ruby %}
+```ruby
 require 'spec_helper'
 
 describe "Authentication" do
@@ -1635,7 +1635,7 @@ describe "Authentication" do
     end
   end
 end
-{% endhighlight %}
+```
 
 理论上来说，网站中还是有一个安全漏洞，管理员可以发送 `DELETE` 请求删除自己。有些人可能会想，这样的管理员是自作自受。不过作为开发人员，我们最好还是要避免这种情况的发生，具体的实现留作练习，参见 [9.6 节](#sec-9-6)。
 
@@ -1643,7 +1643,7 @@ end
 
 **代码 9.48** 限制只有管理员才能访问 `destroy` 动作的事前过滤器<br />`app/controllers/users_controller.rb`
 
-{% highlight ruby %}
+```ruby
 class UsersController < ApplicationController
   before_filter :signed_in_user, only: [:index, :edit, :update, :destroy]
   before_filter :correct_user, only: [:edit, :update]
@@ -1659,13 +1659,13 @@ class UsersController < ApplicationController
       redirect_to(root_path) unless current_user.admin?
     end
 end
-{% endhighlight %}
+```
 
 至此，所有的测试应该都可以通过了，而且 Users 相关的资源，包括控制器、模型和视图，都已经实现了。
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/
-{% endhighlight %}
+```
 
 <h2 id="sec-9-5">9.5 小结</h2>
 
@@ -1675,21 +1675,21 @@ $ bundle exec rspec spec/
 
 在继续阅读之前，先把本章所做的改动合并到主分支：
 
-{% highlight sh %}
+```sh
 $ git add .
 $ git commit -m "Finish user edit, update, index, and destroy actions"
 $ git checkout master
 $ git merge updating-users
-{% endhighlight %}
+```
 
 你还可以将程序部署到“生产环境”，再生成示例用户（在此之前要使用 `pg:reset` 命令还原“生产数据库”）：
 
-{% highlight sh %}
+```sh
 $ git push heroku
 $ heroku pg:reset SHARED_DATABASE --confirm <name-heroku-gave-to-your-app>
 $ heroku run rake db:migrate
 $ heroku run rake db:populate
-{% endhighlight %}
+```
 
 （如果你忘了 Heroku 程序的名字，可以直接运行 `heroku pg:reset SHARED_DATABASE`，Heroku 会告诉你程序的名字。）
 
@@ -1697,7 +1697,7 @@ $ heroku run rake db:populate
 
 **代码 9.49** 示例程序所需 `Gemfile` 的最终版本
 
-{% highlight ruby %}
+```ruby
 source 'https://rubygems.org'
 
 gem 'rails', '3.2.3'
@@ -1739,7 +1739,7 @@ end
 group :production do
   gem 'pg', '0.12.2'
 end
-{% endhighlight %}
+```
 
 <h2 id="sec-9-6">9.6 练习</h2>
 
@@ -1755,7 +1755,7 @@ end
 
 **代码 9.50** 注册和编辑表单字段的局部视图<br />`app/views/users/_fields.html.erb`
 
-{% highlight erb %}
+```erb
 <%= render 'shared/error_messages' %>
 
 <%= f.label :name %>
@@ -1769,11 +1769,11 @@ end
 
 <%= f.label :password_confirmation, "Confirm Password" %>
 <%= f.password_field :password_confirmation %>
-{% endhighlight %}
+```
 
 **代码 9.51** 使用局部视图后的注册页面视图<br />`app/views/users/new.html.erb`
 
-{% highlight erb %}
+```erb
 <% provide(:title, 'Sign up') %>
 <h1>Sign up</h1>
 
@@ -1785,11 +1785,11 @@ end
     <% end %>
   </div>
 </div>
-{% endhighlight %}
+```
 
 **代码 9.52** 测试友好的转向后，只能转向到默认的页面<br />`spec/requests/authentication_pages_spec.rb`
 
-{% highlight ruby %}
+```ruby
 require 'spec_helper'
 
 describe "Authentication" do
@@ -1836,7 +1836,7 @@ describe "Authentication" do
     .
   end
 end
-{% endhighlight %}
+```
 
 <div class="navigation">
   <a class="prev_page" href="chapter8.html">&laquo; 第八章 登录和退出</a>

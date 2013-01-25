@@ -79,65 +79,65 @@ Rails 还会快速跟进 Web 领域最新的技术和框架架构技术。例如
 
 本书中很多例子都用到了命令行命令，为了行文方便，所有的命令行示例都使用了 Unix 风格的命令行提示符（美元符号），例如：
 
-{% highlight sh %}
+```sh
 $ echo "hello, world"
 hello, world
-{% endhighlight %}
+```
 
 Windows 用户要知道在 Windows 中命令行的提示符是 `>`：
 
-{% highlight sh %}
+```sh
 C:\Sites> echo "hello, world"
 hello, world
-{% endhighlight %}
+```
 
 在 Unix 系统中，一些命令要使用 `sudo`（超级用户的工作，“substitute user do”）执行。默认情况下，使用 `sudo` 执行的命令是以管理员的身份执行的，这样就能访问普通用户无法访问的文件和文件夹了。例如 [1.2.2 节](#sec-1-2-2)中的一个例子：
 
-{% highlight sh %}
+```sh
 sudo ruby setup.rb
-{% endhighlight %}
+```
 
 在多数的 Unix/Linux/OS X 系统中默认需要使用 `sudo`，但是如果使用下面介绍的 Ruby 版本管理工具就没必要使用了，直接使用以下命令即可：
 
-{% highlight sh %}
+```sh
 ruby setup.rb
-{% endhighlight %}
+```
 
 Rails 附带了很多可以在命令行中运行的命令。例如，在 [1.2.5 节](#sec-1-2-5)中将使用下面的命令在本地运行一个开发服务器：
 
-{% highlight sh %}
+```sh
 $ rails server
-{% endhighlight %}
+```
 
 和命令提示符一样，本书也使用了 Unix 中使用的文件夹分隔符（例如，一个斜线 /）。例如，我的示例程序存放在：
 
-{% highlight sh %}
+```sh
 /Users/mhartl/rails_projects/sample_app
-{% endhighlight %}
+```
 
 在 Windows 中等价的文件夹可能是：
 
-{% highlight sh %}
+```sh
 C:\Sites\sample_app
-{% endhighlight %}
+```
 
 一个程序的根目录称为“Rails 根目录”，但是这个称呼很容易让一些人产生困惑，他们以为“Rails 根目录”是指 Rails 框架的根目录。为了避免歧义，本书将使用“程序根目录”替代“Rails 根目录”的称呼，程序中所有文件夹都是相对该目录的。例如，示例程序的 `config` 目录是：
 
-{% highlight sh %}
+```sh
 /Users/mhartl/rails_projects/sample_app/config
-{% endhighlight %}
+```
 
 这个程序的根目录就是 `config` 之前的部分：
 
-{% highlight sh %}
+```sh
 /Users/mhartl/rails_projects/sample_app
-{% endhighlight %}
+```
 
 为了方便，如果需要指向下面这个文件
 
-{% highlight sh %}
+```sh
 /Users/mhartl/rails_projects/sample_app/config/routes.rb
-{% endhighlight %}
+```
 
 我会省略前面的程序根目录，直接写成 `config/routes.rb`。
 
@@ -206,10 +206,10 @@ Rails 社区中的人多少都会使用一个叫 Git（[1.3 节](#sec-1-3)中会
 
 接下来要安装 Ruby 了。很有可能你使用的系统已经自带了 Ruby，你可以执行下面的命令来看一下：
 
-{% highlight sh %}
+```sh
 $ ruby -v
 ruby 1.9.3
-{% endhighlight %}
+```
 
 这个命令会显示 Ruby 的版本。Rails 3 需要使用 Ruby 1.8.7 或以上的版本，但最好是 1.9.x 系列。本教程假设多数的读者使用的是 Ruby 1.9.2 或 1.9.3，不过 Ruby 1.8.7 应该也可以用（[第四章](chapter4.html)中会介绍，这个版本和最新版之间有个语法差异，而且也会导致输出有细微的差别）。
 
@@ -217,71 +217,71 @@ ruby 1.9.3
 
 [安装 RVM](http://rvm.io/rvm/install/) 后，你可以按照下面的方式安装 Ruby：<sup>[11](#fn-11)</sup>
 
-{% highlight sh %}
+```sh
 $ rvm get head && rvm reload
 $ rvm install 1.9.3
 <等一会儿>
-{% endhighlight %}
+```
 
 命令的第一行会更新并重新加载 RVM，这是个好习惯，因为 RVM 经常会更新。第二行命令安装 Ruby 1.9.3。然后会用花一些时间下载和编译，所以如果看似没反应了也不要担心。
 
 一些 OS X 用户可能会因为没有 `autoconf` 执行文件而麻烦一些，不过你可以安装 [Homebrew](http://mxcl.github.com/homebrew/) <sup>[12](#fn-12)</sup>（OS X 系统中的包管理程序），然后执行以下命令：
 
-{% highlight sh %}
+```sh
 $ brew install automake
 $ rvm install 1.9.3
-{% endhighlight %}
+```
 
 有些 Linux 用户反馈说要包含 OpenSSL 代码库的路径：
 
-{% highlight sh %}
+```sh
 $ rvm install 1.9.3 --with-openssl-dir=$HOME/.rvm/
-{% endhighlight %}
+```
 
 在一些较旧的 OS X 系统中，你或许要包含 `readline` 代码库的路径：
 
-{% highlight sh %}
+```sh
 $ rvm install 1.9.3 --with-readline-dir=/opt/local
-{% endhighlight %}
+```
 
 （就像我说过的，很多地方都可能会出错，唯一的解决办法就是网络搜索，然后自己解决。）
 
 安装 Ruby 之后，你要配置一下你的系统，这样其他程序才能运行 Rails。这个过程会涉及到 gem 的安装，gem 是 Ruby 代码的打包系统。因为不同版本的 gem 会有差异，我们经常要创建一个额外的 gem 集（gemset），包含一系列的 gem。针对本教程，我推荐你创建一个名为 `rails3tutorila2ndEd` 的 gemset：
 
-{% highlight sh %}
+```sh
 $ rvm use 1.9.3@rails3tutorial2ndEd --create --default
 Using /Users/mhartl/.rvm/gems/ruby-1.9.3 with gemset rails3tutorial2ndEd
-{% endhighlight %}
+```
 
 上面的命令会使用 Ruby 1.9.3 创建（`--create`）一个名为 `rails3tutorial2ndEd` 的 gemset，然后立马就开始使用（`use`） 这个 gemset，并将其设为默认的（`--default`） gemset，这样每次打开新的终端就会自动使用 `1.9.3@rails3tutorial2ndEd` 这个 Ruby 和 gemset 的组合。RVM 提供了大量的命令用来处理 gemset，更多内容可以查看其文档（<http://rvm.io/gemsets/>）。如果你在使用 RVM 时遇到了问题，可以运行以下的命令显示帮助信息：
 
-{% highlight sh %}
+```sh
 $ rvm --help
 $ rvm gemset --help
-{% endhighlight %}
+```
 
 <h4>安装 RubyGems</h4>
 
 RubyGems 是 Ruby 项目的包管理程序，有很多有用的代码库（包括 Rails）都可以通过包（或叫做 gem）的形式获取。安装 Ruby 后再安装 RubyGems 就很简单了。如果你安装了 RVM 就已经安装 RubyGems 了，因为 RVM 已经自动将其安装了：
 
-{% highlight sh %}
+```sh
 $ which gem
 /Users/mhartl/.rvm/rubies/ruby-1.9.3-p0/bin/gem
-{% endhighlight %}
+```
 
 如果你还没有安装 RubyGems，你可以[下载 RubyGems](http://rubyforge.org/frs/?group_id=126)，解压文件，然后进入 `rubygems` 目录运行安装程序：
 
-{% highlight sh %}
+```sh
 ruby setup.rb
-{% endhighlight %}
+```
 
 （如果你遇到了权限错误的提示，参照 [1.1.3](#sec-1-1-3) 节所说的，你要使用 `sudo`。）
 
 安装 RubyGems 之后，你要确保你使用的版本和本书一致：
 
-{% highlight sh %}
+```sh
 gem update --system 1.8.24
-{% endhighlight %}
+```
 
 将你的系统定格在这个版本可以避免以后因为 RubyGems 升级而产生的差异。
 
@@ -289,43 +289,43 @@ gem update --system 1.8.24
 
 **代码 1.1** 创建 gem 配置文件
 
-{% highlight sh %}
+```sh
 $ subl ~/.gemrc
-{% endhighlight %}
+```
 
 这里的 `subl` 是 OS X 中启动 Sublime Text 的命令，你可以参照 Sublime Text 2 文档中的 “[OS X 命令](http://www.sublimetext.com/docs/2/osx_command_line.html)”一文进行设置。如果你使用的是其他系统，或者你使用的是其他的编辑器，只需换用其他相应的命令（例如，你可以直接双击来启动程序，或者使用其他的命令，如 `mate`、`vim`、`gvim` 或 `mvim`）。为了行文简洁，在本书后续的内容中当我说使用 `subl` 时，我的意思是“使用你喜好的文本编辑器打开”。
 
 **代码 1.2** 在 `.gemrc` 中配置不生成 ri 和 rdoc 文档
 
-{% highlight sh %}
+```sh
 install: --no-rdoc --no-ri
 update: --no-rdoc --no-ri
-{% endhighlight %}
+```
 
 <h4>安装 Rails</h4>
 
 安装玩 RubyGems 后安装 Rails 也就简单了。本教程使用 Rails 3.2，通过以下命令安装：
 
-{% highlight sh %}
+```sh
 $ gem install rails -v 3.2.8
-{% endhighlight %}
+```
 
 译者注：鉴于国内的“社会主义特色”，你可能无法正常下载 gem，这时你可以使用 [VPN](http://en.wikipedia.org/wiki/Vpn) 或者使用 [RubyGems 在国内的镜像](http://ruby.taobao.com)。
 
 检查 Rails 是否安装成功，执行以下命令显示 Rails 的版本号：
 
-{% highlight sh %}
+```sh
 $ rails -v
 Rails 3.2.8
-{% endhighlight %}
+```
 
 注意：如果你是通过上述的 Rails Installer 安装的 Rails，你所得到的版本号可能会有些不同。在写这本书的时候，这些不同还不会带来大的问题，但是如果 Rails 升级到了更高的版本，问题可能就很严重了。我目前正在和 Engine Yard 一起工作来创建一个 Rails Installer 版本列表。
 
 如果你使用的是 Linux，现在或许你还需要安装一些其他的代码包：
 
-{% highlight sh %}
+```sh
 $ sudo apt-get install libxslt-dev libxml2-dev libsqlite3-dev # 只针对 Linux
-{% endhighlight %}
+```
 
 <h3 id="sec-1-2-3">1.2.3 第一个程序</h3>
 
@@ -333,7 +333,7 @@ Rails 程序一般都是从 `rails` 命令开始的，这个命令会在你指�
 
 **代码 1.3** 运行 `rails` 生成一个新程序
 
-{% highlight sh %}
+```sh
 $ mkdir rails_projects
 $ cd rails_projects
 $ rails new first_app
@@ -370,7 +370,7 @@ Fetching source index for https://rubygems.org/
 .
 Your bundle is complete! Use `bundle show [gemname]` to see where a bundled
 gem is installed.
-{% endhighlight %}
+```
 
 
 如代码 1.3 所示，运行 `rails` 命令会在文件创建完之后自动执行 `bundle install`。如果这一步没有正确执行，先不要担心，按照 [1.2.4 节](#sec-1-2-4)中的步骤来做应该就可以了。
@@ -476,16 +476,16 @@ gem is installed.
 
 创建完一个新的 Rails 程序后，你可以使用 Bundler 来安装和包含该程序所需的 gem。在 [1.2.3 节](#sec-1-2-3) 中提到过，Bundler 会被 `rails` 命令自动执行（通过 `bundle install`），不过本节将对程序默认包含的 gem 做些修改，然后再运行 Bundler。首先在你喜好的文本编辑器中打开 `Gemfile` 文件：
 
-{% highlight sh %}
+```sh
 $ cd first_app/
 $ subl Gemfile
-{% endhighlight %}
+```
 
 该文件内容如代码 1.4。这些代码就是常规的 Ruby 代码，现在无需关注句法，第四章将会详细的介绍 Ruby。
 
 **代码 1.4** `first_app` 默认的 `Gemfile` 文件
 
-{% highlight ruby %}
+```ruby
 source 'https://rubygems.org'
 
 gem 'rails', '3.2.8'
@@ -521,7 +521,7 @@ gem 'jquery-rails'
 
 # To use debugger
 # gem 'ruby-debug19', :require => 'ruby-debug'
-{% endhighlight %}
+```
 
 其中很多行代码都用 `#` 注释掉了，这些代码放在这是告诉你一些常用的 gem，也展示了 Bundler 的句法。现在，除了默认的 gem 我们还不需要其他的 gem：Rails，一些 asset pipeline 相关的 gem（[5.2.1 节](chapter5.html/#sec-5-2-1)）—— jQuery 库 gem，[SQLite 数据库](http://www.sqlite.org/)的 Ruby 接口 gem。
 
@@ -529,7 +529,7 @@ gem 'jquery-rails'
 
 **代码 1.5** 指定了 gem 版本号的 `Gemfile` 文件
 
-{% highlight ruby %}
+```ruby
 source 'https://rubygems.org'
 
 gem 'rails', '3.2.8'
@@ -549,86 +549,86 @@ group :assets do
 end
 
 gem 'jquery-rails', '2.0.2'
-{% endhighlight %}
+```
 
 代码 1.5 将 Rails 默认使用的 JavaScript 库 jQuery 的 gem 从
 
-{% highlight ruby %}
+```ruby
 gem 'jquery-rails'
-{% endhighlight %}
+```
 
 改为
 
-{% highlight ruby %}
+```ruby
 gem 'jquery-rails', '2.0.2'
-{% endhighlight %}
+```
 
 同时也将
 
-{% highlight ruby %}
+```ruby
 gem 'sqlite3'
-{% endhighlight %}
+```
 
 修改成
 
-{% highlight ruby %}
+```ruby
 group :development do
   gem 'sqlite3', '1.3.5'
 end
-{% endhighlight %}
+```
 
 强制 Bundler 安装 `sqlite3` gem 的 `1.3.5` 版。注意，我们仅把 SQLite 放到了开发环境中（[7.1.1 节](chapter7.html/#sec-7-1-1)），这样可以避免和 Heroku（[1.4 节](#sec-1-4)）的数据库冲突。
 
 代码 1.5 也修改了其他几行，将
 
-{% highlight ruby %}
+```ruby
 group :assets do
   gem 'sass-rails',   '~> 3.2.3'
   gem 'coffee-rails', '~> 3.2.2'
   gem 'uglifier', '>= 1.2.3'
 end
-{% endhighlight %}
+```
 
 改成了
 
-{% highlight ruby %}
+```ruby
 group :assets do
   gem 'sass-rails',   '3.2.5'
   gem 'coffee-rails', '3.2.2'
   gem 'uglifier', '1.2.3'
 end
-{% endhighlight %}
+```
 
 如下的代码
 
-{% highlight ruby %}
+```ruby
 gem 'uglifier', '>=1.2.3'
-{% endhighlight %}
+```
 
 会安装 `1.2.3` 版以上的最新版 `uglifier` gem（在 asset pipeline 中处理文件的压缩），当然也可以安装 `7.2` 版。而下面的代码
 
-{% highlight ruby %}
+```ruby
 gem 'coffee-rails', '~> 3.2.2'
-{% endhighlight %}
+```
 
 只会安装低于 `3.3` 版的 `coffee-rails`（也是 asset pipeline 用到的）。换句话说，`>=` 总会升级到最新版；`~> 3.2.2` 只会升级补丁版本的更新（例如从 `3.1.1` 到 `3.1.2`），而不会升级到次版本或主版本的更新（例如从 `3.1` 到 `3.2`）。不过，经验告诉我们，即使是补丁版本的升级也可能会产生错误，所以在本教程中我们基本上会为所有的 gem 指定明确的版本号。（在写作本书时处于 RC 或 Beta 测试阶段的 gem 是个例外，这些 gem 会使用 `~>` 以便正式发布后包含正式版。）
 
 修改完 `Gemfile` 后，运行 `bundle install` 安装所需的 gem：
 
-{% highlight sh %}
+```sh
 $ bundle install
 Fetching source index for https://rubygems.org/
 .
 .
 .
-{% endhighlight %}
+```
 
 如果你使用的是 OS X，得到一个错误信息提示缺少 Ruby 头文件（例如 `ruby.h`），那么你需要安装 Xcode。Xcode 是 OS X 安装盘中附带的开发者工具包，相对于安装整个工具包我更推荐你安装较小的 [Xcode 命令行工具包](https://developer.apple.com/downloads/) <sup>[13](#fn-13)</sup>。如果在安装 Nokogiri gem 时提示 libxslt 错误，重新安装 Ruby 试一下：
 
-{% highlight sh %}
+```sh
 $ rvm reinstall 1.9.3
 $ bundle install
-{% endhighlight %}
+```
 
 `bundle install` 命令会花费一点时间，一旦结束我们的程序就可以运行了。注意：这里只是对我们的第一个应用做个演示，这是理想的情况。[第三章](chapter3.html)会介绍使用 Bundler 安装 Ruby gem 更强大的方法。
 
@@ -636,13 +636,13 @@ $ bundle install
 
 运行完 [1.2.3 节](#sec-1-2-3)中介绍的 `rails new` 和 [1.2.4 节](#sec-1-2-4) 中介绍的 `bundle install` 后我们的程序就可以运行了，但怎么运行呢？Rails 自带了一个命令行程序可以在开发电脑上运行一个本地服务器：<sup>[14](#fn-14)</sup>
 
-{% highlight sh %}
+```sh
 $ rails server
 => Booting WEBrick
 => Rails application starting on http://0.0.0.0:3000
 => Call with -d to detach
 => Ctrl-C to shutdown server
-{% endhighlight %}
+```
 
 （如果系统提示缺少 JavaScript 运行时，浏览 [execjs 位于 github 的页面](https://github.com/sstephenson/execjs)查看一些可选的运行时，我建议安装 [Node.js](http://nodejs.org/)。）上述代码的提示信息告诉我们这个应用程序在 `0.0.0.0` 地址的 3000<sup>[15](#fn-15)</sup> 端口运行。这个地址告诉系统监听那台电脑上的每一个可用的 IP 地址。一般来说，我们可以通过一个特殊的地址 `127.0.0.1` 来查看应用程序，或者也可以使用 `localhost`。通过 <http://localhost:3000> 查看结果，如图 1.3。
 
@@ -684,24 +684,24 @@ $ rails server
 
 安装 git 后，你应该做一些只需做一次的事情：系统设置——这样的设置在每台电脑上只需做一次：
 
-{% highlight sh %}
+```sh
 $ git config --global user.name "Your Name"
 $ git config --global user.email your.email@example.com
-{% endhighlight %}
+```
 
 我还想用 `co` 代替字数较多的 `checkout` 命令，做如下设置：
 
-{% highlight sh %}
+```sh
 $ git config --global alias.co checkout
-{% endhighlight %}
+```
 
 本书中我基本上都会使用完整的 `checkout` 命令，防止你没有做以上的设置，但我自己是都是使用 `git co`。
 
 最后，你还可以设置 git 提交信息使用的编辑器。如果你使用的是图形界面的编辑器，例如 Sublime Text、TextMate、gVim 或 MacVim，你要加上一个旗标确保编辑器会在终端中保持状态还不是立马结束命令：<sup>[16](#fn-16)</sup>
 
-{% highlight sh %}
+```sh
 $ git config --global core.editor "subl -w"
-{% endhighlight %}
+```
 
 如果使用其他编辑器，请使用以下代码替换 `subl -w`：TextMate 用 `mate -w`，gVim 用 `gvim -f`，MacVim 用 `mvim -f`。
 
@@ -709,10 +709,10 @@ $ git config --global core.editor "subl -w"
 
 下面的步骤你每次新建一个仓库时都要执行。首先进入刚创建的应用程序的根目录，然后初始化一个新仓库：
 
-{% highlight sh%}
+```sh
 $ git init
 Initialized empty Git repository in /Users/mhartl/rails_projects/first_app/.git/
-{% endhighlight %}
+```
 
 接下来要将项目的文件添加到仓库中。不过有一点要说明一下：git 默认会跟踪所有文件的变化，但是有些文件我们并不想跟踪。例如，Rails 会创建一些日志文件记录应用程序的动作，这些文件经常变化，我们并不需要版本控制系统跟踪这些文件。git 有忽略文件的机制：在应用程序的根目录创建一个名为 `.gitignore` 的文件，然后写入一些规则告诉 git 要忽略哪些文件即可。<sup>[17](#fn-17)</sup>
 
@@ -720,7 +720,7 @@ Initialized empty Git repository in /Users/mhartl/rails_projects/first_app/.git/
 
 **代码 1.6** `rails` 命令默认创建的 `.gitignore` 文件
 
-{% highlight text %}
+```text
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 #
 # If you find yourself ignoring temporary files generated by your text editor
@@ -736,7 +736,7 @@ Initialized empty Git repository in /Users/mhartl/rails_projects/first_app/.git/
 # Ignore all logfiles and tempfiles.
 /log/*.log
 /tmp
-{% endhighlight %}
+```
 
 代码 1.6 中的代码会让 git 忽略日志文件，Rails 的临时文件（`tmp/`）和 SQLite 数据库。（为了忽略 `log/` 文件夹中的日志文件，我们用 `log/*.log` 来忽略所有以 `.log` 结尾的文件）大部分被忽略的文件都是变动频繁，而且是自动创建的，将这些文件纳入版本控制不符合常规做法。而且，当和他人协作时这些文件还可能会导致冲突。
 
@@ -744,7 +744,7 @@ Initialized empty Git repository in /Users/mhartl/rails_projects/first_app/.git/
 
 **代码 1.7** 加强版 `.gitignore` 文件
 
-{% highlight text %}
+```text
 # Ignore bundler config
 /.bundle
 
@@ -762,19 +762,19 @@ doc/
 .project
 .DS_Store
 .idea
-{% endhighlight %}
+```
 
 <h3 id="sec-1-3-2">1.3.2 添加文件并提交</h3>
 
 最后我们要把 Rails 项目中的文件添加到 git 中，然后提交结果。你可以使用下述命令添加所有的文件（除了 `.gitignore` 中忽略的文件）：
 
-{% highlight sh %}
+```sh
 $ git add .
-{% endhighlight %}
+```
 
 这里的点号（.）代表当前目录，git 会自动的将所有的文件，包括子目录中的文件添加到 git 中。这个命令会将项目的文件添加到暂存区域（staging area），这个区域包含未提交的改动。你可以使用 `status` 命令查看暂存区域有哪些文件：<sup>[18](#fn-18)</sup>
 
-{% highlight sh %}
+```sh
 $ git status
 # On branch master
 #
@@ -788,13 +788,13 @@ $ git status
 .
 .
 .
-{% endhighlight %}
+```
 
 （显示的结果很长，所以我用点号代替了。）
 
 用 `commit` 命令告诉 git 你想保存这些改动：
 
-{% highlight sh %}
+```sh
 $ git commit -m "Initial commit"
 [master (root-commit) df0a62f] Initial commit
 42 files changed, 8461 insertions(+), 0 deletions(-)
@@ -803,7 +803,7 @@ create mode 100644 Rakefile
 .
 .
 .
-{% endhighlight %}
+```
 
 旗标 `-m` 允许你为这次提交添加一个信息，如果没有提供 `-m`，git 会打开你在 [1.3.1 节](#sec-1-3-1)中设置的编辑器，你需要在编辑器中填写信息。
 
@@ -811,14 +811,14 @@ create mode 100644 Rakefile
 
 顺便说一下，你可以使用 `log` 命令查看提交的历史信息：
 
-{% highlight sh %}
+```sh
 $ git log
 commit df0a62f3f091e53ffa799309b3e32c27b0b38eb4
 Author: Michael Hartl <michael@michaelhartl.com>
 Date:   Thu Oct 15 11:36:21 2009 -0700
 
   Initial commit
-{% endhighlight %}
+```
 
 如果要退出 `git log`，输入 `q`。
 
@@ -826,19 +826,19 @@ Date:   Thu Oct 15 11:36:21 2009 -0700
 
 现在你可能还不是完全清楚将源码纳入版本控制系统有什么好处，那我就举个例子来说明一下吧。（后续章节中还有很多例子）假设你不小心做了一些改动，比如说删除了 `app/controllers/` 文件夹：
 
-{% highlight sh %}
+```sh
 $ ls app/controllers/
 application_controller.rb
 $ rm -rf app/controllers/
 $ ls app/controllers/
 ls: app/controllers/: No such file or directory
-{% endhighlight %}
+```
 
 我们用 Unix 中的 `ls` 命令列出 `app/controllers/` 文件夹中的内容，用 `rm` 命令删除这个文件夹。旗标 `-rf` 的意思是“强制递归”，无需得到确认就递归的删除所有文件、文件夹、子文件夹等。
 
 查看一下状态看看发生了什么：
 
-{% highlight sh %}
+```sh
 $ git status
 # On branch master
 # Changed but not updated:
@@ -848,18 +848,18 @@ $ git status
 #       deleted:    app/controllers/application_controller.rb
 #
 no changes added to commit (use "git add" and/or "git commit -a")
-{% endhighlight %}
+```
 
 可以看到一个文件被删除了，但是这个改动只发生在工作区，还没有提交。这样我们就可以使用 `checkout` 命令切换到前一个提交记录来撤销这次改动（其中旗标 `-f` 意思是覆盖当前的改动）：
 
-{% highlight sh %}
+```sh
 $ git checkout -f
 $ git status
 # On branch master
 nothing to commit (working directory clean)
 $ ls app/controllers/
 application_controller.rb
-{% endhighlight %}
+```
 
 删除的文件夹和文件又回来了，这下放心了！
 
@@ -873,16 +873,16 @@ application_controller.rb
 
 GitHub 有一些收费的计划，但是对开源项目的代码是免费的，如果你还没有 GitHub 的账户就赶快注册一个[免费的账户](https://github.com/signup/free)吧。（或许你先要参考 GitHub 的“[创建 SSH 密匙](https://help.github.com/articles/generating-ssh-keys)”一文）注册后，点击创建仓库的链接（[New repository](https://github.com/repositories/new)），然后填入所需的信息，如图 1.6 所示。（注意，不要选择使用 `README` 文件初始化仓库（Initialize this repository with a README），因为 `rails new` 已经自动创建了这个文件。）提交表单后，按照下面的方法将你第一个应用程序推送上去：
 
-{% highlight sh %}
+```sh
 $ git remote add origin git@github.com:<username>/first_app.git
 $ git push -u origin master
-{% endhighlight %}
+```
 
 上面的代码告诉 Git 你要添加 GitHub 上面的仓库地址为代码的原本，代表本地的主分支（`master`），然后将本地的仓库推送到 GitHub 上。（先不要关心旗标 `-u` 的作用，如果你实在好奇可以搜索“git set upstream”。）当然你要把 `<username>` 换成你真正的用户名。例如，我用 `railstutorial` 这个用户名就要这么做：
 
-{% highlight sh %}
+```sh
 $ git remote add origin git@github.com:railstutorial/first_app.git
-{% endhighlight %}
+```
 
 然后在 GitHub 就有了这个应用程序仓库的页面，页面中有文件浏览功能，包含了完整的提交历史，还有一些其他好玩的功能（如图 1.7）。
 
@@ -904,13 +904,13 @@ GitHub 还提供了增强命令行界面的工具，如果你更喜欢使用 GUI
 
 Git 中的分支功能很强大，分支是对仓库的复制，在分支中所做的改动（或许是实验性质的）不会影响父级文件。大多数情况下，父级仓库是 `master` 分支。我们可以使用 `checkout` 命令，并指定 `-b` 旗标创建一个新分支：
 
-{% highlight sh %}
+```sh
 $ git checkout -b modify-README
 Switched to a new branch 'modify-README'
 $ git branch
 master
 * modify-README
-{% endhighlight %}
+```
 
 第二个命令，`git branch`，会将本地所有的分支列出来，分支名前面的星号（`*`）指明当前所在的分支。注意，`git checkout -b modify-README` 会创建一个新分支，然后切换到这个分支，`modify-README` 前面的星号证明了这一点。（如果你在 [1.3 节](#sec-1-3)中设置了别名 `co`，那么你就要使用 `git co -b modify-README` 了。）
 
@@ -922,26 +922,26 @@ master
 
 创建了从分支后，我们要编辑文件让其更好的描述我们的项目。较之默认的 RDoc 格式，我更喜欢 Markdown 标记语言，如果你的文件扩展名是 `.md`，GitHub 会自动为你排版。首先我们使用 Unix 命令 `mv`（移动，move）的 git 版本来修改文件名，然后写入代码 1.8 所示的内容：
 
-{% highlight sh %}
+```sh
 $ git mv README.rdoc README.md
 $ subl README.md
-{% endhighlight %}
+```
 
 **代码 1.8** 新的 `README` 文件，`README.md`
 
-{% highlight text %}
+```text
 # Ruby on Rails Tutorial: first application
 
 This is the first application for
 [*Ruby on Rails Tutorial: Learn Rails by Example*](http://railstutorial.org/)
 by [Michael Hartl](http://michaelhartl.com/).
-{% endhighlight %}
+```
 
 <h4>提交</h4>
 
 改动完毕后，查看一下本分支的状态：
 
-{% highlight sh %}
+```sh
 $ git status
 # On branch modify-README
 # Changes to be committed:
@@ -955,16 +955,16 @@ $ git status
 #
 #       modified:   README.md
 #
-{% endhighlight %}
+```
 
 这时，我们可以使用 [1.3.2 节](#sec-1-3-2)中用到的 `git add .`，但是 Git 提供了旗标 `-a`，它的意思是将现有文件的所有改动（包括使用 `git mv` 创建的文件，对 Git 来说这并不是新的文件）添加进来：
 
-{% highlight sh %}
+```sh
 $ git commit -a -m "Improve the README file"
 2 files changed, 5 insertions(+), 243 deletions(-)
 delete mode 100644 README.rdoc
 create mode 100644 README.md
-{% endhighlight %}
+```
 
 千万别误用了 `-a` 旗标。如果在上次提交之后你向项目添加了新文件的话，首先你要使用 `git add` 告诉 Git 你添加的文件。
 
@@ -974,7 +974,7 @@ create mode 100644 README.md
 
 我们已经修改完了，现在可以将其合并到主分支了：
 
-{% highlight sh %}
+```sh
 $ git checkout master
 Switched to branch 'master'
 $ git merge modify-README
@@ -985,22 +985,22 @@ README.md       |    5 +
 2 files changed, 5 insertions(+), 243 deletions(-)
 delete mode 100644 README.rdoc
 create mode 100644 README.md
-{% endhighlight %}
+```
 
 注意 Git 经常会显示类似 `34f06b7` 的字符，这是 Git 内部对仓库的指代。你得到的输出结果不会和我的一模一样，但大致相同。
 
 合并完后，我们可以清理一下分支了，使用 `git branch -d` 删除这个从分支：
 
-{% highlight sh %}
+```sh
 $ git branch -d modify-README
 Deleted branch modify-README (was 2c92bef).
-{% endhighlight %}
+```
 
 这一步是可选的，事实上一般我们都会留着这个从分支，这样你就可以在主、从分支之间来回切换，在合适的时候将改动合并到主分支中。
 
 如前面提到的，你可以使用 `git branch -D` 放弃对从分支所做的修改：
 
-{% highlight sh %}
+```sh
 # For illustration only; don't do this unless you mess up a branch
 $ git checkout -b topic-branch
 $ <really screw up the branch>
@@ -1008,7 +1008,7 @@ $ git add .
 $ git commit -a -m "Major screw up"
 $ git checkout master
 $ git branch -D topic-branch
-{% endhighlight %}
+```
 
 和旗标 `-d` 不同，即使还未合并 `-D` 也会删除分支。
 
@@ -1016,9 +1016,9 @@ $ git branch -D topic-branch
 
 我们已经更新了 `README` 文件，可以将改动推送到 GitHub 看看改动的结果。因为之前我们已经推送过一次了（[1.3.4 节](#sec-1-3-4)），在大多数系统中我们都可以省略 `origin master`，只要运行 `git push`：
 
-{% highlight sh %}
+```sh
 $ git push
-{% endhighlight %}
+```
 
 正像我们介绍的，GitHub 使用 Markdown 对文件进行了排版（如图 1.9）。
 
@@ -1038,26 +1038,26 @@ $ git push
 
 首先你要[注册一个 Heroku 账户](http://api.heroku.com/signup)，然后安装 Heroku 提供的 gem：
 
-{% highlight sh %}
+```sh
 $ gem install heroku
-{% endhighlight %}
+```
 
 和 Github 一样（[1.3.4 节](#sec-1-3-4)），使用 Heroku 需要你[创建 SSH 密匙](http://help.github.com/key-setup-redirect)，然后告诉 Heroku 你的“[公匙](http://en.wikipedia.org/wiki/Public-key_cryptography)”，这样你就可以使用 Git 将应用程序的仓库推送到 Heroku 的服务器了：
 
-{% highlight sh %}
+```sh
 $ heroku keys:add
-{% endhighlight %}
+```
 
 最后，使用 `heroku` 命令在 Heroku 的服务器上创建一个区域放置你的应用程序（参照代码 1.9）。
 
 **代码 1.9** 在 Heroku 上新建一个应用程序
 
-{% highlight sh %}
+```sh
 $ heroku create --stack cedar
 Created http://stormy-cloud-5881.herokuapp.com/ |
 git@heroku.com:stormy-cloud-5881.herokuapp.com
 Git remote heroku added
-{% endhighlight %}
+```
 
 （上面代码中 `--stack cedar` 的意思是使用 Heroku 的最新版，Heroku 将其称为“[Celadon Cedar Stack](http://devcenter.heroku.com/articles/cedar)”）。`heroku` 命令会为你的应用程序新建一个子域名，立马就可以生效。当然，现在还看不到内容，让我们开始部署吧。
 
@@ -1065,17 +1065,17 @@ Git remote heroku added
 
 要部署到 Heroku，第一步是通过 Git 将应用程序推动到 Heroku 中：
 
-{% highlight sh %}
+```sh
 $ git push heroku master
-{% endhighlight %}
+```
 
 <h3 id="sec-1-4-3">1.4.3 Heroku 部署步骤二</h3>
 
 事实上没有第二步了。我们已经完成部署了（如图 1.10）。你可以通过 `heroku create` 命令给出的地址（参照代码 1.9，但那里的地址是我的应用程序的）查看你刚刚部署的应用程序了。你可以向 `heroku` 命令传递一个参数来让其自动启动浏览器并打开你的地址：
 
-{% highlight sh %}
+```sh
 $ heroku open
-{% endhighlight %}
+```
 
 因为 Heroku 做了特殊设置，“About your application's environment”这个链接是没用的。不过不用担心，这是正常的。在 [5.3.2 节](chapter5.html#sec-5-3-2)中我们会移除这个默认的页面，然后这个错误就不存在了。
 
@@ -1093,23 +1093,23 @@ $ heroku open
 
 Heroku 提供了很多[命令](http://devcenter.heroku.com/heroku-command)，本书只介绍了几个基本的。下面再介绍一个命令，用来重命名应用程序：
 
-{% highlight sh %}
+```sh
 $ heroku rename railstutorial
-{% endhighlight %}
+```
 
 你不要再使用这个名字了，我已经使用了。事实上，现在你无需做这样的修改，使用 Heroku 提供的默认值就行。不过如果你真的想重命名你的应用程序，你可以基于安全的考虑使用一些随机或难猜测到的名字，例如：
 
-{% highlight text %}
+```text
 hwpcbmze.heroku.com
 seyjhflo.heroku.com
 jhyicevg.heroku.com
-{% endhighlight %}
+```
 
 使用这样随机的域名，只有你将地址告诉别人他们才能访问你的网站。（顺便说一下，让你一窥 Ruby 的强大，以下是我用来生成随机域名的代码，很精妙吧。）
 
-{% highlight sh %}
+```sh
 ('a'..'z').to_a.shuffle[0..7].join
-{% endhighlight %}
+```
 
 
 除了支持子域名，Heroku 也支持自定义域名。（事实上[本书的网站](http://railstutorial.org/)（译者注：原网站在 Heroku，本中文版在 Github 上）就放在 Heroku 上。如果你阅读的是本书的在线版，你现在就正在浏览一个托管在 Heroku 上的网站。）在 [Heroku 文档](http://devcenter.heroku.com/) 中可以查看更多关于自定义域名的信息以及其他 Heroku 相关的话题。

@@ -11,17 +11,17 @@ title: 第二章 演示程序
 
 在这一节我们要规划一下这个演示程序。和 [1.2.3 节](chapter1.html#sec-1-2-3)类似，我们先使用 `rails` 命令生成程序的骨架。
 
-{% highlight sh %}
+```sh
 $ cd ~/rails_projects
 $ rails new demo_app
 $ cd demo_app
-{% endhighlight %}
+```
 
 然后我们用一个文本编辑器修改 `Gemfile`，写入代码 2.1 所示的代码。
 
 **代码 2.1** 演示程序的 `Gemfile`
 
-{% highlight ruby %}
+```ruby
 source 'https://rubygems.org'
 
 gem 'rails', '3.2.8'
@@ -45,39 +45,39 @@ gem 'jquery-rails', '2.0.2'
 group :production do
   gem 'pg', '0.12.2'
 end
-{% endhighlight %}
+```
 
 代码 2.1 除了增加 Heroku 生产环境需要的 gem 外，其他的内容和代码 1.5 是一样的：
 
-{% highlight ruby %}
+```ruby
 group :production do
   gem 'pg', '0.12.2'
 end
-{% endhighlight %}
+```
 
 `pg` 是用来连接 [PostgreSQL](http://www.postgresql.org/) 数据库的，Heroku 使用这个数据库。
 
 然后使用 `bundle install` 命令安装并包含这些 gem：
 
-{% highlight sh %}
+```sh
 $ bundle install --without production
-{% endhighlight %}
+```
 
 `--without production` 选项指明不安装生产环境所需的 gem，这里只有 `pg` 是生成环境所需的。（如果 Bundler 提示：
 
-{% highlight text %}
+```text
 no such file to load -- readline (LoadError)
-{% endhighlight %}
+```
 
 试一下把 `gem 'rb-readline'` 加入 `Gemfile`。）
 
 最后我们还要把演示程序纳入版本控制。提醒一下，`rails` 命令会生成一个默认的 `.gitignore` 文件，不过对于你所使用的系统而言代码 1.7 中的代码似乎更有用。然后初始化一个 Git 仓库，做第一次提交：
 
-{% highlight sh %}
+```sh
 $ git init
 $ git add .
 $ git commit -m "Initial commit"
-{% endhighlight %}
+```
 
 ![create_demo_repo_new](assets/images/figures/create_demo_repo_new.png)
 
@@ -85,10 +85,10 @@ $ git commit -m "Initial commit"
 
 你可以重新创建一个仓库然后将代码推送到 GitHub：
 
-{% highlight sh %}
+```sh
 $ git remote add origin git@github.com:<username>/demo_app.git
 $ git push -u origin master
-{% endhighlight %}
+```
 
 （和第一章中的程序一样，注意不要使用 GitHub 自动生成的 `README` 文件初始化仓库。）
 
@@ -120,7 +120,7 @@ $ git push -u origin master
 
 将 `scaffold` 传递给 `rails generate` 就可以使用 Rails 的脚手架功能了。传给 `scaffold` 的参数是资源名的单数形式（本例中就是 `User`），后面可以再跟着指定数据模型的字段：<sup>[2](#fn-2)</sup>
 
-{% highlight sh %}
+```sh
 $ rails generate scaffold User name:string email:string
       invoke  active_record
       create    db/migrate/20111123225336_create_users.rb
@@ -151,27 +151,27 @@ $ rails generate scaffold User name:string email:string
       create      app/assets/stylesheets/users.css.scss
       invoke  scss
       create    app/assets/stylesheets/scaffolds.css.scss
-{% endhighlight %}
+```
 
 上面代码中的命令加入了 `name:string` 和 `email:string`，这样我们就可以实现如图 2.2 所示的用户模型了。（注意没必要指定 `id`，Rails 会自动创建并将其作为表的主键（primary key）。）
 
 接下来我们要用 Rake（参见[旁注 2.1](#box-2-1)）来迁移（migrate）数据库：
 
-{% highlight sh %}
+```sh
 $ bundle exec rake db:migrate
 ==  CreateUsers: migrating ====================================================
 -- create_table(:users)
    -> 0.0017s
 ==  CreateUsers: migrated (0.0018s) ===========================================
-{% endhighlight %}
+```
 
 上面的命令会使用新定义的 `users` 数据模型更新数据库。（在 [6.1.1 节](chapter6.html#sec-6-1-1)中将详细介绍数据库迁移）注意，为了使用 `Gemfile` 中指定的 Rake 版本，我们通过 `bundle exec` 来执行 `rake`。
 
 然后我们可以使用 `rails s`（`rails server` 的缩略形式）来启动本地服务器：
 
-{% highlight sh %}
+```sh
 $ rails s
-{% endhighlight %}
+```
 
 现在演示程序应该已经可以通过 <http://localhost:3000/> 查看了。
 
@@ -284,20 +284,20 @@ $ rails s
 
 **代码 2.2** Rails 的路由设置，包含一条用户资源的规则 <br />`config/routes.rb`
 
-{% highlight ruby %}
+```ruby
 DemoApp::Application.routes.draw do
   resources :users
   .
   .
   .
 end
-{% endhighlight %}
+```
 
 [2.2.1 节](#sec-2-2-1)中浏览的页面就对应了 Users 控制器中不同的动作。脚手架生成的控制器代码大致如代码 2.3 所示。注意一下 `class UsersController < ApplicationController` 的用法，这是 Ruby 中类继承的写法。（[2.3.4 节](#sec-2-3-4)中将简要的介绍一下继承，[4.4 节](chapter4.html#sec-4-4)将详细介绍类和继承。）
 
 **代码 2.3** 用户控制器的代码概要 <br />`app/controllers/users_controller.rb`
 
-{% highlight ruby %}
+```ruby
 class UsersController < ApplicationController
 
   def index
@@ -342,7 +342,7 @@ class UsersController < ApplicationController
     .
   end
 end
-{% endhighlight %}
+```
 
 或许你发现了动作的数量比我们看过的页面数量要多，`index`、`show`、`new` 和 `edit` 对应了 [2.2.1 节](#sec-2-2-1)中介绍的页面。不过还有一些其他的动作，`create`、`update` 和 `destroy` 等，这些动作一般不会直接渲染页面（不过有时也会），它们只会修改数据库中保存的用户数据。表格 2.2 列出的是控制器的全部动作，这些动作就是 Rails 对 REST 架构（参见[旁注 2.2](#box-2-2)）的实现。REST 是由计算机科学家 [Roy Fielding](http://en.wikipedia.org/wiki/Roy_Fielding) 提出的概念，意思是表现层状态转化（Representational State Transfer）。<sup>[4](#fn-4)</sup> 注意表格 2.2 中的内容，有些部分是有重叠的。例如 `show` 和 `update` 两个动作都映射到 /users/1 这个地址上。二者的区别是它们所用的 [HTTP 请求方法](http://en.wikipedia.org/wiki/HTTP_request#Request_methods)。[3.2.1 节](chapter3.html#sec-3-2-1)将更详细的介绍 HTTP 请求方法。
 
@@ -411,7 +411,7 @@ end
 
 **代码 2.4** 演示程序中被简化了的用户 `index` 动作 <br />`app/controllers/users_controller.rb`
 
-{% highlight ruby %}
+```ruby
 class UsersController < ApplicationController
 
   def index
@@ -421,23 +421,23 @@ class UsersController < ApplicationController
   .
   .
 end
-{% endhighlight %}
+```
 
 `index` 动作有一行代码是 `@users = User.all`（图 2.11 中的第 3 步），它要求 User 模型从数据库中取出所有的用户（第 4 步），然后将结果赋值给 `@users` 变量（第 5 步）。User 模型的代码参见代码 2.5。代码看似简单，不过它通过继承具备了很多功能（[2.3.4 节](#sec-2-3-4) 和 [4.4 节](chapter4.html#sec-4-4)）。简单来说就是通过调用 Rails 中叫做 Active Record 的库，代码 2.5 中的 `User.all` 就会返回所有的用户。（我们会在 [6.1.2 节](chapter6.html#sec-6-1-2)中介绍 `attr_accessible`。注意这一行不会在 Rails 3.2.2 或之前的版本中出现。）
 
 **代码 2.5** 演示程序中的 User 模型 <br />`app/models/user.rb`
 
-{% highlight ruby %}
+```ruby
 class User < ActiveRecord::Base
   attr_accessible :email, :name
 end
-{% endhighlight %}
+```
 
 一旦定义了 `@users` 变量，控制器就会调用视图代码（第 6 步），其代码如代码 2.6。以 `@` 开头的变量是“实例变量（instance variable）”，在视图中自动可用。在本例中，`index.html.erb` 视图的代码会遍历 `@users`，为每个用户生成一行 HTML。（记住，你现在可能读不懂这些代码，这里只是让你看一下这些代码是什么样子。）
 
 **代码 2.6** 用户索引页面的视图代码 <br />`app/views/users/index.html.erb`
 
-{% highlight erb %}
+```erb
 <h1>Listing users</h1>
 
 <table>
@@ -464,7 +464,7 @@ end
 <br />
 
 <%= link_to 'New User', new_user_path %>
-{% endhighlight %}
+```
 
 视图会将代码转换成 HTML（第 7 步），然后控制器将其返回浏览器显示出来（第 8 步）。
 
@@ -486,7 +486,7 @@ end
 
 和用户资源一样，我们使用 `rails generate scaffold` 命令生成微博资源的代码，实现图 2.3 中所示的数据模型：<sup>[5](#fn-5)</sup>
 
-{% highlight sh %}
+```sh
 $ rails generate scaffold Micropost content:string user_id:integer
       invoke  active_record
       create    db/migrate/20111123225811_create_microposts.rb
@@ -517,23 +517,23 @@ $ rails generate scaffold Micropost content:string user_id:integer
       create      app/assets/stylesheets/microposts.css.scss
       invoke  scss
    identical    app/assets/stylesheets/scaffolds.css.scss
-{% endhighlight %}
+```
 
 然后要更新数据库使用最新的数据模型，我们要执行类似 [2.2 节](#sec-2-2)中用到的迁移命令：
 
-{% highlight sh %}
+```sh
 $ bundle exec rake db:migrate
 ==  CreateMicroposts: migrating ===============================================
 -- create_table(:microposts)
    -> 0.0023s
 ==  CreateMicroposts: migrated (0.0026s) ======================================
-{% endhighlight %}
+```
 
 现在我们就可以使用类似 [2.2.1 节](#sec-2-2-1)中介绍的方法来创建微博了。就像你猜测的，脚手架也会更新 Rails 的路由文件，为微博资源加入一条规则，如代码 2.7 所示。<sup>[6](#fn-6)</sup> 和用户资源一样，`resources :micropsts` 会将微博相关的 URI 地址映射到 Microposts 控制器，如[表格 2.3](#table-2-3) 所示。
 
 **代码 2.7** Rails 的路由配置，有一条针对微博资源的新规则 <br />`config/routes.rb`
 
-{% highlight ruby %}
+```ruby
 DemoApp::Application.routes.draw do
   resources :microposts
   resources :users
@@ -541,7 +541,7 @@ DemoApp::Application.routes.draw do
   .
   .
 end
-{% endhighlight %}
+```
 
 <table id="table-2-3" class="tabular">
 	<tbody>
@@ -602,7 +602,7 @@ Microposts 控制器的代码简化后如代码 2.8 所示。注意，除了将 
 
 **代码 2.8** Microposts 控制器的代码简化形式 <br />`app/controllers/microposts_controller.rb`
 
-{% highlight ruby %}
+```ruby
 class MicropostsController < ApplicationController
 
   def index
@@ -647,7 +647,7 @@ class MicropostsController < ApplicationController
     .
   end
 end
-{% endhighlight %}
+```
 
 我们在创建微博页面（[/microposts/new](http://localhost:3000/microposts/new)）输入一些内容来添加一个微博，如图 2.12 所示。
 
@@ -667,12 +667,12 @@ end
 
 **代码 2.9** 现在微博的长度最长为 140 个字符 <br />`app/models/micropost.rb`
 
-{% highlight ruby %}
+```ruby
 class Micropost < ActiveRecord::Base
   attr_accessible :content, :user_id
   validates :content, :length => { :maximum => 140 }
 end
-{% endhighlight %}
+```
 
 上面的代码看起来可能很神秘，我们会在 [6.2 节](chapter6.html#sec-6-2)中详细介绍验证功能。如果我们在创建微博页面输入超过 140 个字符的内容就会看到这个验证的样子了。如图 2.14 所示，Rails 会显示一个错误信息（error message）提示微博的内容太长了。（[7.3.2 节](chapter7.html#sec-7-3-2)将更详细的介绍错误信息）
 
@@ -686,16 +686,16 @@ Rails 强大的功能之一是可以为不同的数据模型之间创建关联�
 
 **代码 2.10** 一个用户有多篇微博 <br />`app/models/user.rb`
 
-{% highlight ruby %}
+```ruby
 class User < ActiveRecord::Base
   attr_accessible :email, :name
   has_many :microposts
 end
-{% endhighlight %}
+```
 
 **代码 2.11** 一篇微博只属于一个用户 <br />`app/models/micropost.rb`
 
-{% highlight ruby %}
+```ruby
 class Micropost < ActiveRecord::Base
   attr_accessible :content, :user_id
 
@@ -703,7 +703,7 @@ class Micropost < ActiveRecord::Base
 
   validates :content, :length => { :maximum => 140 }
 end
-{% endhighlight %}
+```
 
 我们可以将这种关联用图 2.15 所示的图形表现出来。因为 `microposts` 表中有 `user_id` 这一列，所以 Rails（通过 Active Record）就可以将微博和每个用户关联起来。
 
@@ -713,7 +713,7 @@ end
 
 在[第十章](chapter10.html)和[第十一章](chapter11.html)中，我们将使用用户和微博之间的关联来显示某一个用户的所有微博，并且生成一个和 Twitter 类似的微博 Feed。目前我们可以使用控制台（console）来检查一下用户与微博之间关联的实现，控制台是和 Rails 应用程序交互很有用的工具。在命令行中执行 `rails console` 来启动控制台，然后使用 `User.first` 从数据库中读取第一个用户（并将读取的数据赋值给 `first_user` 变量）：<sup>[7](#fn-7)</sup>
 
-{% highlight sh %}
+```sh
 $ rails console
 >> first_user = User.first
 => #<User id: 1, name: "Michael Hartl", email: "michael@example.org",
@@ -724,7 +724,7 @@ created_at: "2011-11-03 02:01:31", updated_at: "2011-11-03 02:01:31">
 content: "Second micropost", user_id: 1, created_at: "2011-11-03 02:38:54",
 updated_at: "2011-11-03 02:38:54">]
 >> exit
-{% endhighlight %}
+```
 
 （上面代码中我包含了最后一行用来演示如何退出控制台，在大多数系统中也可以使用 Ctrl-d 组合键。）然后使用 `first_user.microposts` 获取用户的微博：Active Record 会自动返回 `user_id` 和 `first_user` 的 ID 相同的（`1`）所有微博。我们将在[第十章](chapter10.html)和[第十一章](chapter11.html)更详细的学习 Active Record 中这种关联的实现。
 
@@ -736,23 +736,23 @@ updated_at: "2011-11-03 02:38:54">]
 
 **代码 2.12** `User` 类，包括继承关系 <br />`app/models/user.rb`
 
-{% highlight ruby %}
+```ruby
 class User < ActiveRecord::Base
   .
   .
   .
 end
-{% endhighlight %}
+```
 
 **代码 2.13** `Micropost` 类，包括继承关系 <br />`app/models/micropost.rb`
 
-{% highlight ruby %}
+```ruby
 class Micropost < ActiveRecord::Base
   .
   .
   .
 end
-{% endhighlight %}
+```
 
 ![demo_model_inheritance](assets/images/figures/demo_model_inheritance.png)
 
@@ -762,33 +762,33 @@ end
 
 **代码 2.14** `UsersController` 类，包含继承关系 <br />`app/controllers/users_controller.rb`
 
-{% highlight ruby %}
+```ruby
 class UsersController < ApplicationController
   .
   .
   .
 end
-{% endhighlight %}
+```
 
 **代码 2.15** `MicropostsController` 类，包含继承关系 <br />`app/controllers/microposts_controller.rb`
 
-{% highlight ruby %}
+```ruby
 class MicropostsController < ApplicationController
   .
   .
   .
 end
-{% endhighlight %}
+```
 
 **代码 2.16** `ApplicationController` 类，包含继承关系 <br />`app/controllers/application_controller.rb`
 
-{% highlight ruby %}
+```ruby
 class ApplicationController < ActionController::Base
   .
   .
   .
 end
-{% endhighlight %}
+```
 
 ![demo_controller_inheritance](assets/images/figures/demo_controller_inheritance.png)
 
@@ -800,26 +800,26 @@ end
 
 完成微博资源之后，是时候将代码推送到 GitHub 的仓库中了：
 
-{% highlight sh %}
+```sh
 $ git add .
 $ git commit -m "Finish demo app"
 $ git push
-{% endhighlight %}
+```
 
 通常情况下，你应该经常做一些很小的提交，不过对于本站来说最后做一次大的提交也可以。
 
 然后，你也可以按照 [1.4 节](chapter1.html#sec-1-4)中介绍的方法将演示程序部署到 Heroku：
 
-{% highlight sh %}
+```sh
 $ heroku create --stack cedar
 $ git push heroku master
-{% endhighlight %}
+```
 
 最后，迁移生成环境中的数据库（如果得到错误提示请参考下面的内容）
 
-{% highlight sh %}
+```sh
 $ heroku run rake db:migrate
-{% endhighlight %}
+```
 
 上面的代码会用用户和微博数据模型更新 Heroku 上的数据库。如果得到与 `vendor/plugins` 中资源（asset）相关的错误提示，暂且忽略它，因为我们还没使用插件。
 

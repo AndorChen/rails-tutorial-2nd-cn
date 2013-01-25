@@ -11,11 +11,11 @@ title: 第三章 基本静态的页面
 
 类似第二章，在开始之前我们要先创建一个新的 Rails 项目，这里我们叫它 `sample_app`：
 
-{% highlight sh %}
+```sh
 $ cd ~/rails_projects
 $ rails new sample_app --skip-test-unit
 $ cd sample_app
-{% endhighlight %}
+```
 
 上面代码中传递给 `rails` 命令的 `--skip-test-unit` 选项的意思是让 Rails 不生成默认使用的 `Test::Unit` 测试框架对应的 `test` 文件夹。这样做并不是说我们不用写测试，而是从 [3.2 节](#sec-3-2)开始我们会使用另一个测试框架 RSpec 来写整个的测试用例。
 
@@ -23,7 +23,7 @@ $ cd sample_app
 
 **代码 3.1** 示例程序的 `Gemfile`
 
-{% highlight ruby %}
+```ruby
 source 'https://rubygems.org'
 
 gem 'rails', '3.2.8'
@@ -50,60 +50,60 @@ end
 group :production do
   gem 'pg', '0.12.2'
 end
-{% endhighlight %}
+```
 
 上面的代码将 `rspec-rails` 放在了开发组中，这样我们就可以使用 RSpec 相关的生成器了，同样我们还把它放到了测试组中，这样才能在测试时使用它。我们没必要单独的安装 RSpec，因为它是 rspec-rails 的依赖件（dependency），会被自动安装。我们还加入了 [Capybara](https://github.com/jnicklas/capybara)，这个 gem允许我们使用类似英语中的句法编写模拟与应用程序交互的代码。<sup>[1](#fn-1)</sup> 和[第二章](chapter2.html)一样，我们还要把 PostgreSQL 所需的 gem 加入生产组，这样才能部署到 Heroku：
 
-{% highlight ruby %}
+```ruby
 group :production do
   gem 'pg', '0.12.2'
 end
-{% endhighlight %}
+```
 
 Heroku 建议在开发环境和生产环境使用不同的数据库，不过对我们的示例程序而言没什么影响，SQLite 比 PostgreSQL 更容易安装和配置。在你的电脑中安装和配置 PostgreSQL 会作为一个练习。（参见 [3.5 节](#sec-3-5)）
 
 要安装和包含这些新加的 gem，运行 `bundle install`：
 
-{% highlight sh %}
+```sh
 $ bundle install --without production
-{% endhighlight %}
+```
 
 和第二章一样，我们使用 `-without production` 禁止安装生产环境所需的 gem。这个选项会被记住，所以后续调用 Bundler 就不用再指定这个选项，直接运行 `bundle install` 就可以了。<sup>[2](#fn-2)</sup>
 
 接着我们要设置一下让 Rails 使用 RSpec 而不用 `Test::Unit`。这个设置可以通过 `rails generate rspec:install` 命令实现：
 
-{% highlight sh %}
+```sh
 $ rails generate rspec:install
-{% endhighlight %}
+```
 
 如果系统提示缺少 JavaScript 运行时，你可以访问 [execjs 在 GitHub 的页面](https://github.com/sstephenson/execjs)查看可以使用的运行时。 我一般都建议安装 [Node.js](http://nodejs.org/)。
 
 然后剩下的就是初始化 Git 仓库了：<sup>[3](#fn-3)</sup>
 
-{% highlight sh %}
+```sh
 $ git init
 $ git add .
 $ git commit -m "Initial commit"
-{% endhighlight %}
+```
 
 和第一个程序一样，我建议你更新一下 `README` 文件，更好的描述这个程序，还可以提供一些帮助信息，可参照代码 3.2。
 
 **代码 3.2** 示例程序改善后的 `README` 文件
 
-{% highlight text %}
+```text
 # Ruby on Rails Tutorial: sample application
 
 This is the sample application for
 [*Ruby on Rails Tutorial: Learn Rails by Example*](http://railstutorial.org/)
 by [Michael Hartl](http://michaelhartl.com/).
-{% endhighlight %}
+```
 
 然后添加 `.md` 后缀将其更改为 Markdown 格式，再提交所做的修改：
 
-{% highlight sh %}
+```sh
 $ git mv README.rdoc README.md
 $ git commit -a -m "Improve the README"
-{% endhighlight %}
+```
 
 ![create_repository_new](assets/images/figures/create_repository_new.png)
 
@@ -111,32 +111,32 @@ $ git commit -a -m "Improve the README"
 
 这个程序在本书的后续章节会一直使用，所以建议你在 GitHub 新建一个仓库（如图 3.1），然后将代码推动上去：
 
-{% highlight sh %}
+```sh
 $ git remote add origin git@github.com:<username>/sample_app.git
 $ git push -u origin master
-{% endhighlight %}
+```
 
 我自己也做了这一步，你可以在 GitHub 上找到[这个示例程序的代码](https://github.com/railstutorial/sample_app_2nd_ed)。（我用了一个稍微不同的名字）<sup>[4](#fn-4)</sup>
 
 当然我们也可以选择在这个早期阶段将程序部署到 Heroku：
 
-{% highlight sh %}
+```sh
 $ heroku create --stack cedar
 $ git push heroku master
-{% endhighlight %}
+```
 
 在阅读本书的过程中，我建议你经常地推送并部署这个程序：
 
-{% highlight sh %}
+```sh
 $ git push
 $ git push heroku
-{% endhighlight %}
+```
 
 这样你可在远端做个备份，也可以尽早的获知生成环境中出现的错误。如果你在 Heroku 遇到了问题，可以看一下生产环境的日志文件尝试解决这些问题：
 
-{% highlight sh %}
+```sh
 $ heroku logs
-{% endhighlight %}
+```
 
 所有的准备工作都结束了，下面要开始开发这个示例程序了。
 
@@ -148,16 +148,16 @@ Rails 中有两种方式创建静态页面。其一，Rails 可以处理真正�
 
 在这节你会第一次发现在文本编辑器或 IDE 中打开整个 Rails 目录是多么有用。不过怎么做却取决于你的系统，大多数情况下你可以在命令行中用你选择的浏览器命令打开当前应用程序所在的目录，在 Unix 中当前目录就是一个点号（`.`）：
 
-{% highlight sh %}
+```sh
 $ cd ~/rails_projects/sample_app
 $ <editor name> .
-{% endhighlight %}
+```
 
 例如，用 Sublime Text 打开示例程序，你可以输入：
 
-{% highlight sh %}
+```sh
 $ subl .
-{% endhighlight %}
+```
 
 对于 Vim 来说，针对你使用的不同变种，你可以输入 `vim .`、`gvim .` 或 `mvim .`。
 
@@ -173,13 +173,13 @@ $ subl .
 
 如你所想的，如果你需要的话也可以创建静态的 HTML 文件，并将其放在和 `index.html` 相同的目录 `public` 中。举个例子，我们要创建一个文件显示一个友好的欢迎信息（参见代码 3.3）：<sup>[6](#fn-6)</sup>
 
-{% highlight sh %}
+```sh
 $ subl public/hello.html
-{% endhighlight %}
+```
 
 **代码 3.3** 一个标准的 HTML 文件，包含一个友好的欢迎信息 <br />`public/hello.html`
 
-{% highlight html %}
+```html
 <!DOCTYPE html>
 <html>
   <head>
@@ -189,15 +189,15 @@ $ subl public/hello.html
     <p>Hello, world!</p>
   </body>
 </html>
-{% endhighlight %}
+```
 
 从代码 3.3 中我们可以看到 HTML 文件的标准结构：位于文件开头的文档类型（document type，简称 doctype）声明，告知浏览器我们所用的 HTML 版本（本例使用的是 HTML5）；<sup>[7](#fn-7)</sup> `head` 部分：本例包含一个 `title` 标签，其内容是“Greeting”；`body` 部分：本例包含一个 `p`（段落）标签，其内容是“Hello,world!”。（缩进是可选的，HTML 并不强制要求使用空格，它会忽略 Tab 和空格，但是缩进可以使文档的结构更清晰。）
 
 现在执行下述命令启动本地浏览器
 
-{% highlight sh %}
+```sh
 $ rails server
-{% endhighlight %}
+```
 
 然后访问 <http://localhost:3000/hello.html>。就像前面说过的，Rails 会直接渲染这个页面（如图 3.3）。注意图 3.3 浏览器窗口顶部显示的标题，它就是 `title` 标签的内容，“Greeting”。
 
@@ -207,9 +207,9 @@ $ rails server
 
 这个文件只是用来做演示的，我们的示例程序并不需要它，所以在体验了创建过程之后最好将其删掉：
 
-{% highlight sh %}
+```sh
 $ rm public/hello.html
-{% endhighlight %}
+```
 
 现在我们还要保留 `index.html` 文件，不过最后我们还是要将其删除的，因为我们不想把 Rails 默认的页面（如图 1.3）作为程序的首页。[5.3 节](chapter5.html#sec-5-3)会介绍如何将 <http://localhost:3000/> 指向 `public/index.html` 之外的地方。
 
@@ -219,21 +219,21 @@ $ rm public/hello.html
 
 开始之前，回想一下 [1.3.5 节](chapter1.html#sec-1-3-5)中的内容，使用 Git 时，在一个有别于主分支的独立从分支中工作是一个好习惯。如果你使用 Git 做版本控制，可以执行下面的命令：
 
-{% highlight sh %}
+```sh
 $ git checkout -b static-pages
-{% endhighlight %}
+```
 
 Rails 提供了一个脚本用来创建控制器，叫做 `generate`，只要提供控制器的名字就可以运行了。如果你想让 `generate` 同时生成 RSpec 测试用例，你要执行 RSpec 生成器命令，如果在阅读本章前面内容时没有执行这个命令的话，请执行下面的命令：
 
-{% highlight sh %}
+```sh
 $ rails generate rspec:install
-{% endhighlight %}
+```
 
 因为我们要创建一个控制器来处理静态页面，所有我们就叫它 StaticPages 吧。我们计划创建“首页”（Home）、“帮助”（Help）和“关于”（About）页面的动作。`generate` 可以接受一个可选的参数列表，指明要创建的动作，我们现在只通过命令行创建两个动作（参见代码 3.4）。
 
 **代码 3.4** 创建 StaticPages 控制器
 
-{% highlight sh %}
+```sh
 $ rails generate controller StaticPages home help --no-test-framework
       create  app/controllers/static_pages_controller.rb
        route  get "static_pages/help"
@@ -249,7 +249,7 @@ $ rails generate controller StaticPages home help --no-test-framework
       create      app/assets/javascripts/static_pages.js.coffee
       invoke    scss
       create      app/assets/stylesheets/static_pages.css.scss
-{% endhighlight %}
+```
 
 注意我们使用了 `--no-test-framework` 选项禁止生成 RSpec 测试代码，因为我们不想自动生成，在 [3.2 节](#sec-3-2)会手动创建测试。同时我们还故意从命令行参数中省去了 `about` 动作，稍后我们会看到如何通过 TDD 添加它（[3.2 节](#sec-3-2)）。
 
@@ -298,7 +298,7 @@ $ rails generate controller StaticPages home help --no-test-framework
 
 **代码 3.5** StaticPages 控制器中 `home` 和 `help` 动作的路由配置 <br />`config/routes.rb`
 
-{% highlight rb %}
+```rb
 SampleApp::Application.routes.draw do
   get "static_pages/home"
   get "static_pages/help"
@@ -306,13 +306,13 @@ SampleApp::Application.routes.draw do
   .
   .
 end
-{% endhighlight %}
+```
 
 如下的规则
 
-{% highlight rb %}
+```rb
 get "static_pages/home"
-{% endhighlight %}
+```
 
 将来自 /static_pages/home 的请求映射到 StaticPages 控制器的 `home` 动作上。另外，当使用 `get` 时会将其对应到 GET 请求方法上，GET 是 HTTP（超文本传输协议，Hypertext Transfer Protocol）支持的基本方法之一（参见[旁注 3.2](#box-3-2)）。在我们这个例子中，当我们在 StaticPages 控制器中生成 `home` 动作时，我们就自动的在 /static_pages/home 地址上获得一个页面了。访问 [/static_pages/home](http://localhost:3000/static_pages/home) 查看这个页面（如图 3.5）。
 
@@ -330,7 +330,7 @@ get "static_pages/home"
 
 **代码 3.6** 代码 3.4 生成的 StaticPages 控制器 <br />`app/controllers/static_pages_controller.rb`
 
-{% highlight ruby %}
+```ruby
 class StaticPagesController < ApplicationController
 
   def home
@@ -339,19 +339,19 @@ class StaticPagesController < ApplicationController
   def help
   end
 end
-{% endhighlight %}
+```
 
 从上面代码中的 `class` 可以看到 `static_pages_controller.rb` 文件定义了一个类（class），叫做 `StaticPagesController`。类是一种组织函数（也叫方法）的有效方式，例如 `home` 和 `action` 动作就是方法，使用 `def` 关键字定义。尖括号 `<` 说明 `StaticPagesController` 是继承自 Rails 的 `ApplicationController` 类，这就意味着我们定义的页面拥有了 Rails 提供的大量功能。（我们会在 [4.4 节](chapter4.html#sec-4-4)中更详细的介绍类和继承。）
 
 在本例中，StaticPages 控制器的两个方法默认都是空的：
 
-{% highlight ruby %}
+```ruby
 def home
 end
 
 def help
 end
-{% endhighlight %}
+```
 
 如果是普通的 Ruby 代码，这两个方法什么也做不了。不过在 Rails 中就不一样了，`StaticPagesController` 是一个 Ruby 类，因为它继承自 `ApplicationController`，它的方法对 Rails 来说就有特殊的意义了：访问 /static_pages/home 时，Rails 在 StaticPages 控制器中寻找 `home` 动作，然后执行该动作，再渲染相应的视图（[1.2.6 节](chapter1.html#sec-1-2-6)中介绍的 MVC 中的 V）。在本例中，`home` 动作是空的，所以访问 /static_pages/home 后只会渲染视图。那么，视图是什么样子，怎么才能找到它呢？
 
@@ -359,19 +359,19 @@ end
 
 **代码 3.7** 为“首页”生成的视图 <br />`app/views/static_pages/home.html.erb`
 
-{% highlight erb %}
+```erb
 <h1>StaticPages#home</h1>
 <p>Find me in app/views/static_pages/home.html.erb</p>
-{% endhighlight %}
+```
 
 `help` 动作的视图代码类似（参见代码 3.8）。
 
 **代码 3.8** 为“帮助”页面生成的视图 <br />`app/views/static_pages/help.html.erb`
 
-{% highlight erb %}
+```erb
 <h1>StaticPages#help</h1>
 <p>Find me in app/views/static_pages/help.html.erb</p>
-{% endhighlight %}
+```
 
 这两个视图只是站位用的，它们的内容都包含了一个一级标题（`h1` 标签）和一个显示视图文件完整的相对路径的段落（`p` 标签）。我们会在 [3.3 节](#sec-3-3)中添加一些简单的动态内容。这些静态内容的存在是为了强调一个很重要的事情：Rails 的视图可以只包含静态的 HTML。从浏览器的角度来看，[3.1.1 节](#sec-3-1-1)中的原始 HTML 文件和本节通过控制器和动作的方式渲染的页面没有什么差异，浏览器能看到的只有 HTML。
 
@@ -379,10 +379,10 @@ end
 
 在继续下面的内容之前，如果你使用 Git 的话最好将 StaticPages 控制器相关的文件加入仓库：
 
-{% highlight sh %}
+```sh
 $ git add .
 $ git commit -m "Add a StaticPages controller"
-{% endhighlight %}
+```
 
 <h2 id="sec-3-2">3.2 第一个测试</h2>
 
@@ -400,17 +400,17 @@ TDD 的好处在于测试优先，比编写应用程序的代码还早。刚接�
 
 我们先来使用 TDD 为“首页”增加一些内容，一个内容为 `Sample App` 的顶级标题（`<h1>`）。第一步要做的是为这些静态页面生成集成测试（request spec）：
 
-{% highlight sh %}
+```sh
 $ rails generate integration_test static_pages
       invoke  rspec
       create    spec/requests/static_pages_spec.rb
-{% endhighlight %}
+```
 
 上面的代码会在 `rspec/requests` 文件夹中生成 `static_pages_spec.rb` 文件。自动生成的代码不能满足我们的需求，用文本编辑器打开 `static_pages_spec.rb`，将其内容替换成代码 3.9 所示的代码。
 
 **代码 3.9** 测试“首页”内容的代码 <br />`spec/requests/static_pages_spec.rb`
 
-{% highlight ruby %}
+```ruby
 require 'spec_helper'
 
 describe "Static pages" do
@@ -423,13 +423,13 @@ describe "Static pages" do
     end
   end
 end
-{% endhighlight %}
+```
 
 代码 3.9 是纯粹的 Ruby，不过即使你以前学习过 Ruby 也看不太懂，这是因为 RSpec 利用了 Ruby 语言的延展性定义了一套“领域特殊语言”（Domain-Specifi Language, DSL）用来写测试代码。重要的是，如果你想使用 RSpec 不是一定要知道 RSpec 的句法。初看起来是有些神奇，RSpec 和 Capybara 就是这样设计的，读起来很像英语，如果你多看一些 `generate` 命令生成的测试或者本书中的示例，很快你就会熟练了。
 
 代码 3.9 包含了一个 `describe` 块以及其中的一个测试用例（sample），以 `it "..." do` 开头的代码块就是一个用例：
 
-{% highlight ruby %}
+```ruby
 describe "Home page" do
 
   it "should have the content 'Sample App'" do
@@ -437,27 +437,27 @@ describe "Home page" do
     page.should have_content('Sample App')
   end
 end
-{% endhighlight %}
+```
 
 第一行代码指明我们描绘的是“首页”，内容就是一个字符串，如果需要你可以使用任何的字符串，RSpec 不做强制要求，不过你以及其他的人类读者或许会关心你用的字符串。然后测试说，如果你访问地址为 `/static_pages/home` 的“首页”时，其内容应该包含“Sample App”这两个词。和第一行一样，这个双引号中的内容 RSpec 没做要求，只要能为人类读者提供足够的信息就行了。下面这一行：
 
-{% highlight ruby %}
+```ruby
 visit '/static_pages/home'
-{% endhighlight %}
+```
 
 使用了 Capybara 中的 `visit` 函数来模拟在浏览器中访问 `/static_pages/home` 的操作。下面这一行：
 
-{% highlight ruby %}
+```ruby
 page.should have_content('Sample App')
-{% endhighlight %}
+```
 
 使用了 `page` 变量（同样由 Capybara 提供）来测试页面中是否包含了正确的内容。
 
 我们有很多种方式来运行测试代码，[3.6 节](#sec-3-6)中还提供了一些便利且高级的方法。现在，我们在命令行中执行 `rspec` 命令（前面会加上 `bundle exec` 来保证 RSpec 运行在 `Gemfile` 指定的环境中）：<sup>[9](#fn-9)</sup>
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/requests/static_pages_spec.rb
-{% endhighlight %}
+```
 
 上述命令会输出一个失败测试。失败测试的具体样子取决于你的系统，在我的系统中它是红色的，如图 3.6。<sup>[10](#fn-10)</sup>（截图中显示了当前所在的 Git 分支，是 master 而不是 staticpages，这个问题你先不要在意。）
 
@@ -469,26 +469,26 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
 
 **代码 3.10** 让“首页”测试通过的代码 <br />`app/views/static_pages/home.html.erb`
 
-{% highlight erb %}
+```erb
 <h1>Sample App</h1>
 <p>
   This is the home page for the
   <a href="http://railstutorial.org/">Ruby on Rails Tutorial</a>
   sample application.
 </p>
-{% endhighlight %}
+```
 
 这段代码中一级标题（`<h1>`）的内容是 `Sample App` 了，会让测试通过。我们还加了一个锚记标签 `<a>`，链接到一个给定的地址（在锚记标签中地址由“href”（hypertext reference）指定）：
 
-{% highlight html %}
+```html
 <a href="http://railstutorial.org/">Ruby on Rails Tutorial</a>
-{% endhighlight %}
+```
 
 现在再运行测试看一下结果：
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/requests/static_pages_spec.rb
-{% endhighlight %}
+```
 
 在我的系统中，通过的测试显示如图 3.7 所示。
 
@@ -500,7 +500,7 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
 
 **代码 3.11** 添加测试“帮助”页面内容的代码 <br />`spec/requests/static_pages_spec.rb`
 
-{% highlight ruby %}
+```ruby
 require 'spec_helper'
 
 describe "Static pages" do
@@ -521,13 +521,13 @@ describe "Static pages" do
     end
   end
 end
-{% endhighlight %}
+```
 
 然后运行测试：
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/requests/static_pages_spec.rb
-{% endhighlight %}
+```
 
 有一个测试会失败。（因为系统的不同，而且统计每个阶段的测试数量很难，从现在开始我就不会再截图 RSpec 的输出结果了。）
 
@@ -535,7 +535,7 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
 
 **代码 3.12** 让“帮助”页面的测试通过的代码 <br />`app/views/static_pages/help.html.erb`
 
-{% highlight erb %}
+```erb
 <h1>Help</h1>
 <p>
   Get help on the Ruby on Rails Tutorial at the
@@ -543,13 +543,13 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
   To get help on this sample app, see the
   <a href="http://railstutorial.org/book">Rails Tutorial book</a>.
 </p>
-{% endhighlight %}
+```
 
 现在测试应该可以通过了：
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/requests/static_pages_spec.rb
-{% endhighlight %}
+```
 
 <h3 id="sec-3-2-2">3.2.2 添加页面</h3>
 
@@ -561,7 +561,7 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
 
 **代码 3.13** 添加测试“关于”页面内容的代码 <br />`spec/requests/static_pages_spec.rb`
 
-{% highlight ruby %}
+```ruby
 require 'spec_helper'
 
 describe "Static pages" do
@@ -590,7 +590,7 @@ describe "Static pages" do
     end
   end
 end
-{% endhighlight %}
+```
 
 <h4>变绿</h4>
 
@@ -598,21 +598,21 @@ end
 
 如果你运行 RSpec 测试：
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/requests/static_pages_spec.rb
-{% endhighlight %}
+```
 
 输出的结果会提示下面的错误：
 
-{% highlight sh %}
+```sh
 No route matches [GET] "/static_pages/about"
-{% endhighlight %}
+```
 
 这提醒我们要在路由文件中添加 `static_pages/about`，我们可以按照代码 3.5 所示的格式添加，结果如代码 3.14 所示。
 
 **代码 3.14** 添加 `about` 页面的路由 <br />`config/routes.rb`
 
-{% highlight ruby %}
+```ruby
 SampleApp::Application.routes.draw do
   get "static_pages/home"
   get "static_pages/help"
@@ -621,25 +621,25 @@ SampleApp::Application.routes.draw do
   .
   .
 end
-{% endhighlight %}
+```
 
 现在运行
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/requests/static_pages_spec.rb
-{% endhighlight %}
+```
 
 将提示如下错误
 
-{% highlight sh %}
+```sh
 The action 'about' could not be found for StaticPagesController
-{% endhighlight %}
+```
 
 为了解决这个问题，我们按照代码 3.6 中 `home` 和 `help` 的格式在 StaticPages 控制器中添加 `about` 动作的代码（如代码 3.15 所示）。
 
 **代码 3.15** 添加了 `about` 动作的 StaticPages 控制器 <br />`app/controllers/static_pages_controller.rb`
 
-{% highlight sh %}
+```sh
 class StaticPagesController < ApplicationController
 
   def home
@@ -651,26 +651,26 @@ class StaticPagesController < ApplicationController
   def about
   end
 end
-{% endhighlight %}
+```
 
 再运行
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/requests/static_pages_spec.rb
-{% endhighlight %}
+```
 
 会提示缺少模板（template，例如一个视图）：
 
-{% highlight sh %}
+```sh
 ActionView::MissingTemplate:
   Missing template static_pages/about
-{% endhighlight %}
+```
 
 要解决这个问题，我们要添加 `about` 相应的视图。我们需要在 `app/views/static_pages` 目录下创建一个名为 `about.html.erb` 的新文件，写入代码 3.16 所示的内容。
 
 **代码 3.16** “关于”页面的源码 <br />`app/views/static_pages/about.html.erb`
 
-{% highlight erb %}
+```erb
 <h1>About Us</h1>
 <p>
   The <a href="http://railstutorial.org/">Ruby on Rails Tutorial</a>
@@ -678,13 +678,13 @@ ActionView::MissingTemplate:
   with <a href="http://rubyonrails.org/">Ruby on Rails</a>. This
   is the sample application for the tutorial.
 </p>
-{% endhighlight %}
+```
 
 再运行 RSpec 就应该“变绿”了：
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/requests/static_pages_spec.rb
-{% endhighlight %}
+```
 
 当然，在浏览器中查看一下这个页面来确保测试没有失效也是个不错的主意。（如图 3.8）
 
@@ -710,9 +710,9 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
 
 你可能已经注意到了，`rails new` 命令已经创建了布局文件。稍后我们会介绍这个文件的作用，现在在继续之前先将其重命名：
 
-{% highlight sh %}
+```sh
 $ mv app/views/layouts/application.html.erb foobar   # 临时修改
-{% endhighlight %}
+```
 
 （`mv` 是 Unix 命令，在 Windows 中你可以在文件浏览器中重命名或者使用 `rename` 命令。）在真正的应用程序中你不需要这么做，不过没有了这个文件之后你就能更容易理解它的作用。
 
@@ -751,33 +751,33 @@ $ mv app/views/layouts/application.html.erb foobar   # 临时修改
 
 **代码 3.17** 标题测试
 
-{% highlight ruby %}
+```ruby
 it "should have the right title" do
   visit '/static_pages/home'
   page.should have_selector('title',
                     :text => "Ruby on Rails Tutorial Sample App | Home")
 end
-{% endhighlight %}
+```
 
 `have_selector` 方法会测试一个 HTML 元素（“selector”的意思）是否有指定的内容。换句话说，下面的代码：
 
-{% highlight ruby %}
+```ruby
 page.should have_selector('title',
                   :text => "Ruby on Rails Tutorial Sample App | Home")
-{% endhighlight %}
+```
 
 检查 `title` 标签的内容是否为
 
-{% highlight ruby %}
+```ruby
 "Ruby on Rails Tutorial Sample App | Home"
-{% endhighlight %}
+```
 
 （在 [4.3.3 节](chapter4.html#sec-4-3-3)中我们会介绍，`:text => "…"` 是一个以 Symbol 为键值的 Hash。）你要注意一下，检查的内容不一定要完全匹配，任何的子字符串都可以，所以
 
-{% highlight ruby %}
+```ruby
 page.should have_selector('title',
                   :text => " | Home")
-{% endhighlight %}
+```
 
 也会匹配完整形式的标题。
 
@@ -787,7 +787,7 @@ page.should have_selector('title',
 
 **代码 3.18** StaticPages 控制器的测试文件，包含标题测试 <br />`spec/requests/static_pages_spec.rb`
 
-{% highlight ruby %}
+```ruby
 require 'spec_helper'
 
 describe "Static pages" do
@@ -834,15 +834,15 @@ describe "Static pages" do
     end
   end
 end
-{% endhighlight %}
+```
 
 注意我们把 `have_content` 换成了更具体的 `have_selector('h1', ...)`。试试你能不能猜到原因。（提示：试想一下如果标题的内容是“Help”，但是 `h1` 标签中的内容是“Helf”会出现什么情况？）
 
 现在已经有了如代码 3.18 所示的测试，你应该运行
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/requests/static_pages_spec.rb
-{% endhighlight %}
+```
 
 确保得到的结果是红色的（失败的测试）。
 
@@ -852,7 +852,7 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
 
 **代码 3.19** “首页”的完整 HTML <br />`app/views/static_pages/home.html.erb`
 
-{% highlight erb %}
+```erb
 <!DOCTYPE html>
 <html>
   <head>
@@ -867,19 +867,19 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
     </p>
   </body>
 </html>
-{% endhighlight %}
+```
 
 代码 3.19 使用了代码 3.18 中测试用到的标题：
 
-{% highlight html %}
+```html
 <title>Ruby on Rails Tutorial Sample App | Home</title>
-{% endhighlight %}
+```
 
 所以，“首页”的测试现在应该可以通过了。你还会看到红色的错误提示是因为“帮助”页面和“关于”页面的测试还是失败的，我们使用代码 3.20 和代码 3.21 中的代码让它们也通过测试。
 
 **代码 3.20** “帮助”页面的完整 HTML <br />`app/views/static_pages/help.html.erb`
 
-{% highlight erb %}
+```erb
 <!DOCTYPE html>
 <html>
   <head>
@@ -895,11 +895,11 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
     </p>
   </body>
 </html>
-{% endhighlight %}
+```
 
 **代码 3.21** “关于”页面的完整 HTML <br />`app/views/static_pages/about.html.erb`
 
-{% highlight erb %}
+```erb
 <!DOCTYPE html>
 <html>
   <head>
@@ -915,7 +915,7 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
     </p>
   </body>
 </html>
-{% endhighlight %}
+```
 
 <h3 id="sec-3-3-3">3.3.3 嵌入式 Ruby</h3>
 
@@ -933,7 +933,7 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
 
 **代码 3.22** 标题中使用了嵌入式 Ruby 代码的“首页”视图 <br />`app/views/static_pages/home.html.erb`
 
-{% highlight erb %}
+```erb
 <% provide(:title, 'Home') %>
 <!DOCTYPE html>
 <html>
@@ -949,33 +949,33 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
     </p>
   </body>
 </html>
-{% endhighlight %}
+```
 
 代码 3.22 中我们第一次使用了嵌入式 Ruby，简称 ERb。（现在你应该知道为什么 HTML 视图文件的扩展名是 `.html.erb` 了。）ERb 是为网页添加动态内容使用的主要模板系统。<sup>[13](#fn-13)</sup> 下面的代码
 
-{% highlight erb %}
+```erb
 <% provide(:title, 'Home') %>
-{% endhighlight %}
+```
 
 通过 `<% ... %>` 调用 Rails 中的 `provide` 函数，然后将字符串 `'Home'` 赋给 `:title`。<sup>[14](#fn-14)</sup> 然后，在标题中，我们使用类似的符号 `<%= ... %>` 通过 Ruby 的 `yield` 函数将标题插入模板中：<sup>[15](#fn-15)</sup>
 
-{% highlight erb %}
+```erb
 <title>Ruby on Rails Tutorial Sample App | <%= yield(:title) %></title>
-{% endhighlight %}
+```
 
 （这两种嵌入 Ruby 代码的方式区别在于，`<% ... %>` **执行**其中的代码，`<%= ... %>` 也会执行其中的代码并将结果**插入**模板中。）最终得到的结果和以前是一样的，只不过标题中变动的部分现在是通过 ERb 动态生成的。
 
 我们可以运行 [3.3.1 节](#sec-3-3-1)中的测试来证实一下，测试还是会通过：
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/requests/static_pages_spec.rb
-{% endhighlight %}
+```
 
 然后我们要对“帮助”页面和“关于”页面做相应的修改了。（参见代码 3.23 和代码 3.24。）
 
 **代码 3.23** 标题中使用了嵌入式 Ruby 代码的“帮助”页面视图 <br />`app/views/static_pages/help.html.erb`
 
-{% highlight erb %}
+```erb
 <% provide(:title, 'Help') %>
 <!DOCTYPE html>
 <html>
@@ -992,11 +992,11 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
     </p>
   </body>
 </html>
-{% endhighlight %}
+```
 
 **代码 3.24** 标题中使用了嵌入式 Ruby 代码的“关于”页面视图 <br />`app/views/static_pages/about.html.erb`
 
-{% highlight erb %}
+```erb
 <% provide(:title, 'About Us') %>
 <!DOCTYPE html>
 <html>
@@ -1013,13 +1013,13 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
     </p>
   </body>
 </html>
-{% endhighlight %}
+```
 
 <h3 id="sec-3-3-4">3.3.4 使用布局文件来消除重复</h3>
 
 我们已经使用 ERb 将页面标题中变动的部分替换掉了，每一个页面的代码很类似：
 
-{% highlight erb %}
+```erb
 <% provide(:title, 'Foo') %>
 <!DOCTYPE html>
 <html>
@@ -1030,27 +1030,27 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
     <!--内容-->
   </body>
 </html>
-{% endhighlight %}
+```
 
 换句话说，所有的页面结构都是一致的，包括 `title` 标签中的内容，只有 `body` 标签中的内容有细微的差别。
 
 为了提取出相同的结构，Rails 提供了一个特别的布局文件，叫做 `application.html.erb`，我们在 [3.3.1 节](#sec-3-3-1)中将它重命名了，现在我们再改回来：
 
-{% highlight sh %}
+```sh
 $ mv foobar app/views/layouts/application.html.erb
-{% endhighlight %}
+```
 
 为了让布局正常的运行，我们要把默认的标题改为前几例代码中使用的嵌入式 Ruby 代码：
 
-{% highlight erb %}
+```erb
 <title>Ruby on Rails Tutorial Sample App | <%= yield(:title) %></title>
-{% endhighlight %}
+```
 
 最终的布局文件如代码 3.25 所示。
 
 **代码 3.25** 示例程序的网站布局 <br />`app/views/layouts/application.html.erb`
 
-{% highlight erb %}
+```erb
 <!DOCTYPE html>
 <html>
   <head>
@@ -1063,23 +1063,23 @@ $ mv foobar app/views/layouts/application.html.erb
     <%= yield %>
   </body>
 </html>
-{% endhighlight %}
+```
 
 注意一下比较特殊的一行
 
-{% highlight erb %}
+```erb
 <%= yield %>
-{% endhighlight %}
+```
 
 这行代码是用来将每一页的内容插入布局中的。没必要了解它的具体实现过程，我们只需要知道，在布局中使用它在访问 /static_pages/home 时会将 `home.html.erb` 中的内容转换成 HTML 然后插入 `<%= yield %>` 所在的位置。
 
 还要注意一下，默认的 Rails 布局文件包含几行特殊的代码：
 
-{% highlight erb %}
+```erb
 <%= stylesheet_link_tag    "application", :media => "all" %>
 <%= javascript_include_tag "application" %>
 <%= csrf_meta_tags %>
-{% endhighlight %}
+```
 
 这些代码会引入应用程序的样式表和 JavaScript 文件（asset pipeline 的一部分）；Rails 中的 `csrf_meta_tags` 方法是用来避免“跨站请求伪造”（cross-site request forgery，CSRF，一种网络攻击）的。
 
@@ -1087,7 +1087,7 @@ $ mv foobar app/views/layouts/application.html.erb
 
 **代码 3.26** 去除完整的 HTML 结构后的“首页” <br />`app/views/static_pages/home.html.erb`
 
-{% highlight erb %}
+```erb
 <% provide(:title, 'Home') %>
 <h1>Sample App</h1>
 <p>
@@ -1095,11 +1095,11 @@ $ mv foobar app/views/layouts/application.html.erb
   <a href="http://railstutorial.org/">Ruby on Rails Tutorial</a>
   sample application.
 </p>
-{% endhighlight %}
+```
 
 **代码 3.27** 去除完整的 HTML 结构后的“帮助”页面 <br />`app/views/static_pages/help.html.erb`
 
-{% highlight erb %}
+```erb
 <% provide(:title, 'Help') %>
 <h1>Help</h1>
 <p>
@@ -1108,11 +1108,11 @@ $ mv foobar app/views/layouts/application.html.erb
   To get help on this sample app, see the
   <a href="http://railstutorial.org/book">Rails Tutorial book</a>.
 </p>
-{% endhighlight %}
+```
 
 **代码 3.28** 去除完整的 HTML 结构后的“关于”页面 <br />`app/views/static_pages/about.html.erb`
 
-{% highlight erb %}
+```erb
 <% provide(:title, 'About Us') %>
 <h1>About Us</h1>
 <p>
@@ -1121,13 +1121,13 @@ $ mv foobar app/views/layouts/application.html.erb
   with <a href="http://rubyonrails.org/">Ruby on Rails</a>. This
   is the sample application for the tutorial.
 </p>
-{% endhighlight %}
+```
 
 修改这几个视图后，“首页”、“帮助”页面和“关于”页面显示的内容还和之前一样，但是却没有重复的内容了。运行一下测试看是否还会通过，通过了才能证实重构是成功的：
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/requests/static_pages_spec.rb
-{% endhighlight %}
+```
 
 <h2 id="sec-3-4">3.4 小节</h2>
 
@@ -1135,29 +1135,29 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
 
 在继续之前，让我们花一点时间提交这些改动，然后将其合并到主分支中。在 [3.1.2 节](#sec-3-1-2)中我们为静态页面的开发工作创建了一个 Git 新分支，在开发的过程中如果你还没有做提交，那么先来做一次提交吧，因为我们已经完成了一些工作：
 
-{% highlight sh %}
+```sh
 $ git add .
 $ git commit -m "Finish static pages"
-{% endhighlight %}
+```
 
 然后利用 [1.3.5 节](chapter1.html#sec-1-3-5)中介绍的技术将变动合并到主分支中：
 
-{% highlight sh %}
+```sh
 $ git checkout master
 $ git merge static-pages
-{% endhighlight %}
+```
 
 每次完成一些工作后，最好将代码推送到远端的仓库（如果你按照 [1.3.4 节](chapter1.html#sec-1-3-4)中的步骤做了，远端仓库就在 GitHub 上）中：
 
-{% highlight sh %}
+```sh
 $ git push
-{% endhighlight %}
+```
 
 如果你愿意，现在你还可以将改好的应用程序部署到 Heroku 上：
 
-{% highlight sh %}
+```sh
 $ git push heroku
-{% endhighlight %}
+```
 
 <h2 id="sec-3-5">3.5 练习</h2>
 
@@ -1167,18 +1167,18 @@ $ git push heroku
 
 **代码 3.29** “练习”页面的内容 <br />`app/views/static_pages/contact.html.erb`
 
-{% highlight erb %}
+```erb
 <% provide(:title, 'Contact') %>
 <h1>Contact</h1>
 <p>
   Contact Ruby on Rails Tutorial about the sample app at the
   <a href="http://railstutorial.org/contact">contact page</a>.
 </p>
-{% endhighlight %}
+```
 
 **代码 3.30** 使用了一个通用标题的 StaticPages 测试文件 <br />`spec/requests/static_pages_spec.rb`
 
-{% highlight ruby %}
+```ruby
 require 'spec_helper'
 
 describe "Static pages" do
@@ -1237,11 +1237,11 @@ describe "Static pages" do
     end
   end
 end
-{% endhighlight %}
+```
 
 **代码 3.31** 删除 SQLite 使用 PostgreSQL 数据库所需的 `Gemfile` 文件
 
-{% highlight ruby %}
+```ruby
 source 'https://rubygems.org'
 
 gem 'rails', '3.2.8'
@@ -1264,7 +1264,7 @@ gem 'jquery-rails', '2.0.2'
 group :test do
   gem 'capybara', '1.1.2'
 end
-{% endhighlight %}
+```
 
 <h2 id="sec-3-6">3.6 高级技术</h2>
 
@@ -1280,40 +1280,40 @@ end
 
 第一个，也是推荐的方法是使用 RVM，从 V1.11 开始它就集成了 Bundler。你可以运行下面的命令确保自己使用的是 RVM 最新版：
 
-{% highlight sh %}
+```sh
 $ rvm get head && rvm reload
 $ rvm -v
 
 rvm 1.15.6 (master)
-{% endhighlight %}
+```
 
 只要版本是 1.11.x 或以上，安装的 gem 就会在特定的 Bundler 环境中执行，所以你就可以直接运行
 
-{% highlight sh %}
+```sh
 $ rspec spec/
-{% endhighlight %}
+```
 
 而不用前面的 `bundle exec`。如果你成功了，那么就可以跳过本小节剩下的内容了。
 
 如果由于每种原因你无法使用较新版的 RVM，你还可以通过使用[集成 Bundler 所需的 gem](https://rvm.io/integration/bundler/)<sup>[16](#fn-16)</sup> 配置 RVM 让它在本地环境中自动包含相应的可执行文件，这也能去掉 `bundle exec`。如果你好奇的话，其实步骤很简单。首先，执行下面的两个命令：
 
-{% highlight sh %}
+```sh
 $ rvm get head && rvm reload
 $ chmod +x $rvm_path/hooks/after_cd_bundler
-{% endhighlight %}
+```
 
 然后执行：
 
-{% highlight sh %}
+```sh
 $ cd ~/rails_projects/sample_app
 $ bundle install --without production --binstubs=./bundler_stubs
-{% endhighlight %}
+```
 
 这些命令会通过某种神秘的力量将 RVM 和 Bundler 组合在一起，确保如 `rake` 和 `rspec` 等命令可以自动的在正确的环境中执行。因为这些文件是针对你本地环境的，你应该将 `bundler_stubs` 文件夹加入 `.gitignore` 文件（参见代码 3.32）。
 
 **代码 3.32** 把 `bundler_stubs` 加入 `.gitignore` 文件
 
-{% highlight text %}
+```text
 # Ignore bundler config
 /.bundle
 
@@ -1331,33 +1331,33 @@ doc/
 .project
 .DS_Store
 bundler_stubs/
-{% endhighlight %}
+```
 
 如果你添加了其他的可执行文件（例如在 [3.6.2 节](#sec-3-6-2)中加入了 `guard`），你要重新运行 `bundle install` 命令：
 
-{% highlight sh %}
+```sh
 $ bundle install --binstubs=./bundler_stubs
-{% endhighlight %}
+```
 
 <h4>binstubs</h4>
 
 如果你没使用 RVM 也可以避免输入 `bundle exec`。Bunlder 允许你通过下面的命令生成相关的可执行程序：
 
-{% highlight sh %}
+```sh
 $ bundle --binstubs
-{% endhighlight %}
+```
 
 （事实上，虽然这里用的是不同的目标目录，不过 RVM 也可以使用它。）这个命令会在应用程序中的 `bin/` 文件夹中生成所有必须的可执行文件，所以我们就可以通过下面的方式运行测试了：
 
-{% highlight sh %}
+```sh
 $ bin/rspec spec/
-{% endhighlight %}
+```
 
 对 `rake` 等来说是一样的：
 
-{% highlight sh %}
+```sh
 $ bin/rake db:migrate
-{% endhighlight %}
+```
 
 如果你添加了其他的可执行文件（例如 [3.6.2 节](#sec-3-6-2)中的 `guard`），你需要重新执行 `bundle --binstubs` 命令。
 
@@ -1371,7 +1371,7 @@ $ bin/rake db:migrate
 
 **代码 3.33** 示例程序的 `Gemfile`，包含 Guard
 
-{% highlight ruby %}
+```ruby
 source 'https://rubygems.org'
 
 gem 'rails', '3.2.8'
@@ -1400,29 +1400,29 @@ end
 group :production do
   gem 'pg', '0.12.2'
 end
-{% endhighlight %}
+```
 
 然后我们要把测试组末尾的注释替换成不同系统所需的一些 gem（OS X 用户可能还要安装 [Growl 和 growlnotify](http://growl.info/downloads#generaldownloads)）：
 
-{% highlight ruby %}
+```ruby
 # Mac OS X 中需要的测试组 gem
 group :test do
   gem 'capybara', '1.1.2'
   gem 'rb-fsevent', '0.9.1', :require => false
   gem 'growl', '1.0.3'
 end
-{% endhighlight %}
+```
 
-{% highlight ruby %}
+```ruby
 # Linux 中需要的测试组 gem
 group :test do
   gem 'capybara', '1.1.2'
   gem 'rb-inotify', '0.8.8'
   gem 'libnotify', '0.5.9'
 end
-{% endhighlight %}
+```
 
-{% highlight ruby %}
+```ruby
 # Windows 中需要的测试组 gem
 group :test do
   gem 'capybara', '1.1.2'
@@ -1430,27 +1430,27 @@ group :test do
   gem 'rb-notifu', '0.0.4'
   gem 'win32console', '1.3.0'
 end
-{% endhighlight %}
+```
 
 然后运行 `bundle install` 安装这些 gem：
 
-{% highlight sh %}
+```sh
 $ bundle install
-{% endhighlight %}
+```
 
 然后初始化 Guard，这样它才能和 RSpec 一起使用：
 
-{% highlight sh %}
+```sh
 $ bundle exec guard init rspec
 Writing new Guardfile to /Users/mhartl/rails_projects/sample_app/Guardfile
 rspec guard added to Guardfile, feel free to edit it
-{% endhighlight %}
+```
 
 然后再编辑 `Guardfile`，这样当集成测试和视图改变后 Guard 才能运行对应的测试。（参见代码 3.34）
 
 **代码 3.34** 加入默认 `Guardfile` 的代码
 
-{% highlight ruby %}
+```ruby
 require 'active_support/core_ext'
 
 guard 'rspec', :version => 2, :all_after_pass => false do
@@ -1472,29 +1472,29 @@ guard 'rspec', :version => 2, :all_after_pass => false do
   .
   .
 end
-{% endhighlight %}
+```
 
 下面这行
 
-{% highlight ruby %}
+```ruby
 guard 'rspec', :version => 2, :all_after_pass => false do
-{% endhighlight %}
+```
 
 确保失败的测试通过后 Guard 不会运行所有的测试（为了加快“遇红，变绿，重构”过程）。
 
 现在我们可以运行下面的命令启动 `guard` 了：
 
-{% highlight sh %}
+```sh
 $ bundle exec guard
-{% endhighlight %}
+```
 
 如果你不想输入命令前面的 `bundle exec`，需要按照 [3.6.1 节](#sec-3-6-1)中介绍的内容去做。
 
 顺便说一下，如果 Guard 提示缺少 `spec/routing` 目录，你可以创建一个空的文件夹来修正这个错误：
 
-{% highlight sh %}
+```sh
 $ mkdir spec/routing
-{% endhighlight %}
+```
 
 <h3 id="sec-3-6-3">3.6.3 使用 Spork 加速测试</h3>
 
@@ -1504,7 +1504,7 @@ $ mkdir spec/routing
 
 **代码 3.35** 示例程序的 `Gemfile`
 
-{% highlight ruby %}
+```ruby
 source 'https://rubygems.org'
 
 gem 'rails', '3.2.8'
@@ -1521,25 +1521,25 @@ end
 .
 .
 .
-{% endhighlight %}
+```
 
 然后运行 `bundle install` 安装 Spork：
 
-{% highlight sh %}
+```sh
 $ bundle install
-{% endhighlight %}
+```
 
 接下来导入 Spork 的设置：
 
-{% highlight sh %}
+```sh
 $ bundle exec spork --bootstrap
-{% endhighlight %}
+```
 
 现在我们要修改名为 `spec/spec_helper.rb` 的 RSpec 设置文件，让所需的环境在一个预派生（prefork）代码块中加载，这样才能保证环境只被加载一次。（参见代码 3.36）
 
 **代码 3.36** 将环境加载代码加入 `Spork.prefork` 代码块 <br />`spec/spec_helper.rb`
 
-{% highlight ruby %}
+```ruby
 require 'rubygems'
 require 'spork'
 
@@ -1586,11 +1586,11 @@ Spork.each_run do
   # This code will be run each time you run your specs.
 
 end
-{% endhighlight %}
+```
 
 运行 Spork 之前，我们可以运行下面的计时命令为测试时间的提高找一个基准：
 
-{% highlight sh %}
+```sh
 $ time bundle exec rspec spec/requests/static_pages_spec.rb
 ......
 
@@ -1599,20 +1599,20 @@ $ time bundle exec rspec spec/requests/static_pages_spec.rb
 real  0m8.633s
 user  0m7.240s
 sys   0m1.068s
-{% endhighlight %}
+```
 
 我们看到测试组件用了超过 7 秒的时间，测试本身也用了超过 0.1 秒。为了加速这个过程，我们可以打开一个专门的命令行窗口，进入应用程序的根目录，然后启动 Spork 服务器：
 
-{% highlight sh %}
+```sh
 $ bundle exec spork
 Using RSpec
 Loading Spork.prefork block...
 Spork is ready and listening on 8989!
-{% endhighlight %}
+```
 
 （如果不想输入命令前面的 `bundle exec`，请参照 [3.6.1 节](#sec-3-6-1)中的内容。）在另一个命令行窗口中，运行测试组件，并指定 `--drb`（distributed Ruby，分布式 Ruby）选项，验证一下环境的加载时间是否明显的减少了：
 
-{% highlight sh %}
+```sh
 $ time bundle exec rspec spec/requests/static_pages_spec.rb --drb
 ......
 
@@ -1621,41 +1621,41 @@ $ time bundle exec rspec spec/requests/static_pages_spec.rb --drb
 real  0m2.649s
 user  0m1.259s
 sys 0m0.258s
-{% endhighlight %}
+```
 
 每次运行 `rspec` 都要指定 `-drb` 选项有点麻烦，所以我建议将其加入应用程序根目录下的 `.rspec` 文件中，如代码 3.37 所示。
 
 **代码 3.37** 设置 RSpec 让其自动使用 Spork <br />`.rspec`
 
-{% highlight text %}
+```text
 --colour
 --drb
-{% endhighlight %}
+```
 
 使用 Spork 时的一点说明：修改完预派生代码块中包含的文件后（例如 `routes.rb`），你要重启 Spork 服务器让它重新加载 Rails 环境。如果你的测试失败了，而你觉得它应该是通过的，你可以使用 `Ctrl-C` 退出然后重启 Spork：
 
-{% highlight sh %}
+```sh
 $ bundle exec spork
 Using RSpec
 Loading Spork.prefork block...
 Spork is ready and listening on 8989!
 ^C
 $ bundle exec spork
-{% endhighlight %}
+```
 
 <h4>Guard 和 Spork 协作</h4>
 
 Spork 和 Guard 一起使用时会很强大，我们可以使用如下的命令设置：
 
-{% highlight sh %}
+```sh
 $ bundle exec guard init spork
-{% endhighlight %}
+```
 
 然后我们要按照代码 3.38 所示的内容修改 `Guardfile`。
 
 **代码 3.38** 为使用 Spork 而修改的 `Guardfile`
 
-{% highlight ruby %}
+```ruby
 require 'active_support/core_ext'
 
 guard 'spork', :rspec_env => { 'RAILS_ENV' => 'test' } do
@@ -1675,15 +1675,15 @@ guard 'rspec', :version => 2, :all_after_pass => false, :cli => '--drb' do
   .
   .
 end
-{% endhighlight %}
+```
 
 注意我们修改了 `guard` 的参数，包含了 `:cli => --drb`，这可以确保 Guard 是在 Spork 服务器的命令行界面（Command-line Interface, cli）中运行的。我们还加入了监视 `spec/support/` 目录的命令，这个目录会从[第五章](chapter5.html)开始监视。
 
 修改完之后，我们就可以通过 `guard` 命令同时启动 Guard 和 Spork 了：
 
-{% highlight sh %}
+```sh
 $ bundle exec guard
-{% endhighlight %}
+```
 
 Guard 会自动启动 Spork 服务器，大大减少了每次运行测试的时间。
 
@@ -1693,10 +1693,10 @@ Guard 会自动启动 Spork 服务器，大大减少了每次运行测试的时�
 
 如果你使用 Sublime Text 的话，它有一些强大的命令可以在编辑器中直接运行测试。如果要使用这个功能，你要参考 [Sublime Text 2 Ruby 测试](https://github.com/maltize/sublime-text-2-ruby-tests)<sup>[19](#fn-19)</sup>中针对你的系统的说明进行设置。在我的系统中（Mac OS X），我可以按照下面的方法安装所需的命令：
 
-{% highlight sh %}
+```sh
 $ cd ~/Library/Application\ Support/Sublime\ Text\ 2/Packages
 $ git clone https://github.com/maltize/sublime-text-2-ruby-tests.git RubyTest
-{% endhighlight %}
+```
 
 这时你或许也想按照 [Rails 教程 Sublime Text](https://github.com/mhartl/rails_tutorial_sublime_text) 的说明设置一下。<sup>[20](#fn-20)</sup>
 

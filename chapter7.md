@@ -9,10 +9,10 @@ User 模型可以正常使用了，接下来要实现的功能大多数网站都
 
 如果你一直坚持使用版本控制系统，现在要新建一个从分支了：
 
-{% highlight sh %}
+```sh
 $ git checkout master
 $ git checkout -b sign-up
-{% endhighlight %}
+```
 
 <h2 id="sec-7-1">7.1 显示用户信息</h2>
 
@@ -32,7 +32,7 @@ $ git checkout -b sign-up
 
 **代码 7.1** 把调试信息加入网站的布局中 <br />`app/views/layouts/application.html.erb`
 
-{% highlight erb %}
+```erb
 <!DOCTYPE html>
 <html>
   .
@@ -47,13 +47,13 @@ $ git checkout -b sign-up
     </div>
   </body>
 </html>
-{% endhighlight %}
+```
 
 我们要在[第五章](chapter5.html)中创建的自定义样式表文件中加入一些样式规则（参见代码 7.2），美化一下这些调试信息。
 
 **代码 7.2** 添加美化调试信息的样式，使用了一个 Sass mixin <br />`app/assets/stylesheets/custom.css.scss`
 
-{% highlight scss %}
+```scss
 @import "bootstrap";
 
 /* mixins, variables, etc. */
@@ -78,22 +78,22 @@ $grayMediumLight: #eaeaea;
   margin-top: 45px;
   @include box_sizing;
 }
-{% endhighlight %}
+```
 
 上面的代码用到了 Sass 的 mixin 功能，创建的这个 mixin 名为 `box-sizing`。mixin 可以打包一系列的样式规则，供多次使用。预处理器处理时，会把
 
-{% highlight scss %}
+```scss
 .debug_dump {
   .
   .
   .
   @include box_sizing;
 }
-{% endhighlight %}
+```
 
 转换成
 
-{% highlight scss %}
+```scss
 .debug_dump {
   .
   .
@@ -102,7 +102,7 @@ $grayMediumLight: #eaeaea;
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
-{% endhighlight %}
+```
 
 在 [7.2.2 节](#sec-7-2-2)中还会再次用到这个 mixin。美化后的调试信息如图 7.3 所示。
 
@@ -112,25 +112,25 @@ $grayMediumLight: #eaeaea;
 
 图 7.3 中显示的调试信息给出了当前页面的一些信息：
 
-{% highlight yaml %}
+```yaml
 ---
 controller: static_pages
 action: home
-{% endhighlight %}
+```
 
 这是 `params` 变量的 YAML<sup>[3](#fn-3)</sup> 形式，和 Hash 类似，显示了当前页面的控制器名和动作名。在 [7.1.2 节](#sec-7-1-2)中会介绍其他调试信息的意思。
 
 我们不想让部署后的示例程序显示这个调试信息，所以代码 7.1 中用如下的代码做了限制，只在“开发环境”中显示：
 
-{% highlight ruby %}
+```ruby
 if Rails.env.development?
-{% endhighlight %}
+```
 
 “开发环境”是 Rails 定义的三个环境之一（详细介绍参见[旁注 7.1](#box-7-1)）<sup>[4](#fn-4)</sup>，只有在“开发环境”中 `Rails.env.development?` 才会返回 `true`，所以下面的 ERb 代码
 
-{% highlight erb %}
+```erb
 <%= debug(params) if Rails.env.development? %>
-{% endhighlight %}
+```
 
 不会在“生产环境”和“测试环境”中执行。（在“测试环境”中显示调试信息虽然没有坏处，但也没什么好处，所以最好只在“开发环境”中显示。）
 
@@ -190,15 +190,15 @@ if Rails.env.development?
 
 我们只需在路由文件 `config/routes.rb` 中添加如下的一行代码就可以正常访问 REST 架构对应的 URI 地址了：
 
-{% highlight ruby %}
+```ruby
 resources :users
-{% endhighlight %}
+```
 
 修改后的路由文件如代码 7.3 所示。
 
 **代码 7.3** 在路由文件中添加用户资源设置 <br />`config/routes.rb`
 
-{% highlight ruby %}
+```ruby
 SampleApp::Application.routes.draw do
   resources :users
 
@@ -209,13 +209,13 @@ SampleApp::Application.routes.draw do
   .
   .
 end
-{% endhighlight %}
+```
 
 你可能发现了，我们把下面这行代码 5.23 中出现的代码删掉了：
 
-{% highlight ruby %}
+```ruby
 get "users/new"
-{% endhighlight %}
+```
 
 这是因为 `resources :users` 不仅使 /users/1 地址可以访问了，而且还为示例程序的 Users 资源提供了符合 REST 架构的一系列动作<sup>[5](#fn-5)</sup>，以及用来获取相应 URI 地址的具名路由（named route，参见 [5.3.3 节](chapter5.html#sec-5-3-3)）。最终得到的 URI、动作和具名路由的对应关系如[表格 7.1](#table-7-1) 所示（可以和[表格 2.2](chapter2.html#table-2-2) 对比一下）。接下来的三章会介绍 `show` 之外的所有动作，并不断完善，把 Users 打造成完全符合 REST 架构的资源。
 
@@ -292,9 +292,9 @@ get "users/new"
 
 **代码 7.4** 用户资料页面的临时视图 <br />`app/views/users/show.html.erb`
 
-{% highlight erb %}
+```erb
 <%= @user.name %>, <%= @user.email %>
-{% endhighlight %}
+```
 
 在上面的代码中，我们假设 `@user` 变量是存在的，使用 ERb 代码显示用户的名字和 Email 地址。这和最终实现的视图有点不一样，在最终的视图中不会公开显示用户的 Email 地址。
 
@@ -302,7 +302,7 @@ get "users/new"
 
 **代码 7.5** 含有 `show` 动作的 Users 控制器<br />`app/controllers/users_controller.rb`
 
-{% highlight ruby %}
+```ruby
 class UsersController < ApplicationController
 
   def show
@@ -312,18 +312,18 @@ class UsersController < ApplicationController
   def new
   end
 end
-{% endhighlight %}
+```
 
 在上面的代码中，我们使用 `params` 获取用户的 id。当我们向 Users 控制器发送请求时，`params[:id]` 会返回用户的 id，即 1，所以这就和 [6.1.4 节](chapter6.html#sec-6-1-4)中直接调用 `User.find(1)` 的效果一样。（严格来说，`params[:id]` 返回的是字符串 `"1"`，`find` 方法会自动将其转换成整数形式。）
 
 定义了视图和动作之后，/users/1 地址就可以正常显示了（如图 7.6）。留意一下调试信息，其内容证实了 `params[:id]` 的值和前面分析的一样：
 
-{% highlight yaml %}
+```yaml
 ---
 action: show
 controller: users
 id: '1'
-{% endhighlight %}
+```
 
 所以，代码 7.5 中的 `User.find(params[:id])` 才会取回 id 为 1 的用户记录。
 
@@ -340,7 +340,7 @@ id: '1'
 
 **代码 7.6** 补充用户相关页面的测试<br />`spec/requests/user_pages_spec.rb`
 
-{% highlight ruby %}
+```ruby
 require 'spec_helper'
 
 describe "User pages" do
@@ -354,11 +354,11 @@ describe "User pages" do
     it { should have_selector('title', text: 'Sign up') }
   end
 end
-{% endhighlight %}
+```
 
 为了测试用户资料页面，先要有一个 User 模型对象，代码 7.5 中的 `show` 动作才能执行查询操作：
 
-{% highlight ruby %}
+```ruby
 describe "profile page" do
   # Code to make a user variable
   before { visit user_path(user) }
@@ -366,7 +366,7 @@ describe "profile page" do
   it { should have_selector('h1',    text: user.name) }
   it { should have_selector('title', text: user.name) }
 end
-{% endhighlight %}
+```
 
 我们要把上面代码中的注释换成相关的代码才行。在注释后面，调用 `user_path` 具名路由（参见[表格 7.1](#table-7-1)）访问用户资源页面的地址，然后检测页面中 `h1` 和 `title` 标签是否都包含用户的名字。
 
@@ -378,7 +378,7 @@ end
 
 **代码 7.7** 把 Factory Girl 加入 `Gemfile`
 
-{% highlight ruby %}
+```ruby
 source 'https://rubygems.org'
   .
   .
@@ -393,19 +393,19 @@ source 'https://rubygems.org'
   .
   .
 end
-{% endhighlight %}
+```
 
 然后和往常一样，运行以下命令安装：
 
-{% highlight sh %}
+```sh
 $ bundle install
-{% endhighlight %}
+```
 
 Factory Girl 生成的预构件都保存在 `spec/factories.rb` 中，RSpec 会自动加载这个文件。用户相关的预构件如代码 7.8 所示。
 
 **代码 7.8** 模拟 User 模型对象的预构件<br />`spec/factories.rb`
 
-{% highlight ruby %}
+```ruby
 FactoryGirl.define do
   factory :user do
     name     "Michael Hartl"
@@ -414,21 +414,21 @@ FactoryGirl.define do
     password_confirmation "foobar"
   end
 end
-{% endhighlight %}
+```
 
 `factory` 方法的 `:user` 参数说明，块中的代码定义了一个 User 模型对象。
 
 加入代码 7.8 之后，就可以在测试中使用 `let` 方法（参见[旁注 6.3](chapter6.html#box-6-3)）和 Factory Girl 提供的 `FactoryGirl` 方法来生成 User 对象：
 
-{% highlight ruby %}
+```ruby
 let(:user) { FactoryGirl.create(:user) }
-{% endhighlight %}
+```
 
 修改后的测试如代码 7.9 所示。
 
 **代码 7.9** 用户资料页面的测试<br />`spec/requests/user_pages_spec.rb`
 
-{% highlight ruby %}
+```ruby
 require 'spec_helper'
 
 describe "User pages" do
@@ -446,34 +446,34 @@ describe "User pages" do
   .
   .
 end
-{% endhighlight %}
+```
 
 现在你应该看一下测试是否是失败的（红色）：
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/
-{% endhighlight %}
+```
 
 加入代码 7.10 之后，测试就可以通过了（绿色）。
 
 **代码 7.10** 在用户资料页面视图中加入标题和标头<br />`app/views/users/show.html.erb`
 
-{% highlight erb %}
+```erb
 <% provide(:title, @user.name) %>
 <h1><%= @user.name %></h1>
-{% endhighlight %}
+```
 
 再次运行 RSpec，确认代码 7.9 中的测试是否可以通过：
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/
-{% endhighlight %}
+```
 
 使用 Factory Girl 后，明显可以察觉测试变慢了，这不是 Factory Girl 导致的，而是有意为之，并不是 bug。变慢的原因在于 [6.3.1 节](chapter6.html#sec-6-3-1)中用来加密密码的 BCrypt，其加密算法设计如此，因为慢速加密的密码很难破解。慢速加密的过程会延长测试的运行时间，不过我们可以做个简单的设置改变这种情况。BCrypt 使用耗时因子（cost factor）设定加密过程的耗时，耗时因子的默认值倾向于安全性而不是速度，在生产环境这种设置很好，但测试时的关注点却有所不同：测试追求的是速度，而不用在意测试数据库中用户的密码强度。我们可以在测试配置文件 `config/environments/test.rb` 中加入几行代码来解决速度慢的问题：把耗时因子的默认值修改为最小值，提升加密的速度，如代码 7.11 所示。即使测试量很少，修改设置之后速度的提升也是很明显的，所以我建议每个读者都在 `test.rb` 文件中加入代码 7.11 的内容。
 
 **代码 7.11** 为测试环境重新设置 BCrypt 耗时因子<br />`config/environments/test.rb`
 
-{% highlight ruby %}
+```ruby
 SampleApp::Application.configure do
   .
   .
@@ -484,7 +484,7 @@ SampleApp::Application.configure do
     BCrypt::Engine::DEFAULT_COST = BCrypt::Engine::MIN_COST
   end
 end
-{% endhighlight %}
+```
 
 <h3 id="sec-7-1-4">7.1.4 添加 Gravatar 头像和侧边栏</h3>
 
@@ -496,35 +496,35 @@ end
 
 **代码 7.12** 显示用户名字和 Gravatar 头像的用户资料页面视图<br />`app/views/users/show.html.erb`
 
-{% highlight erb %}
+```erb
 <% provide(:title, @user.name) %>
 <h1>
   <%= gravatar_for @user %>
   <%= @user.name %>
 </h1>
-{% endhighlight %}
+```
 
 现在看一下测试是不是失败的：
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/
-{% endhighlight %}
+```
 
 因为还没定义 `gravatar_for` 方法，所以用户资料页面会显示错误提示。（测试视图最大的作用大概就是可以捕获这种错误，所以一定要掌握视图测试的量。）
 
 默认情况下，所有帮助方法文件中定义的方法都可以直接用在任意的视图中，不过为了便于管理，我们会把 `gravatar_for` 放在 Users 控制器对应的帮助文件中。Gravatar 的首页中有介绍说，头像的 URI 地址要使用 MD5 加密的 Email 地址。在 Ruby 中，MD5 加密算法由 `Digest` 库的 `hexdigest` 方法实现：
 
-{% highlight sh %}
+```sh
 >> email = "MHARTL@example.COM".
 >> Digest::MD5::hexdigest(email.downcase)
 => "1fda4469bcbec3badf5418269ffc5968"
-{% endhighlight %}
+```
 
 Email 地址不区分大小写，而 MD5 加密算法却区分，所以，我们要先调用 `downcase` 方法把 Email 地址转换成小写形式，然后再传递给 `hexdigest` 方法。我们定义的 `gravatar_for` 方法如代码 7.13 所示。
 
 **代码 7.13** 定义 `gravatar_for` 帮助方法<br />`app/helpers/users_helper.rb`
 
-{% highlight ruby %}
+```ruby
 module UsersHelper
 
   # Returns the Gravatar (http://gravatar.com/) for the given user.
@@ -534,13 +534,13 @@ module UsersHelper
     image_tag(gravatar_url, alt: user.name, class: "gravatar")
   end
 end
-{% endhighlight %}
+```
 
 `gravatar_for` 方法的返回值是 Gravatar 头像的 `img` 元素，`img` 标签的 class 设为 `gravatar`，`alt` 属性值是用户的名字（对视觉障碍人士使用的屏幕阅读器很友好）。现在你可以验证一下测试是否可以通过：
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/
-{% endhighlight %}
+```
 
 用户资料页面的效果如图 7.7 所示，页面中显示的头像是 Gravatar 的默认图片，因为 `user@example.com` 不是真的 Email 地址（example.com 这个域名是专门用来举例的）。
 
@@ -550,7 +550,7 @@ $ bundle exec rspec spec/
 
 我们调用 `update_attributes` 方法（参见 [6.1.5 节](chapter6.html#sec-6-1-5)）更新一下数据库中的用户记录，然后就可以显示用户真正的头像了：
 
-{% highlight sh %}
+```sh
 $ rails console
 >> user = User.first
 >> user.update_attributes(name: "Example User",
@@ -558,7 +558,7 @@ $ rails console
 ?>                        password: "foobar",
 ?>                        password_confirmation: "foobar")
 => true
-{% endhighlight %}
+```
 
 上面的代码，把用户的 Email 地址设为 `example@railstutorial.org`，我已经把这个 Email 地址的头像设为了本书网站的 LOGO。修改后的结果如图 7.8 所示。
 
@@ -570,7 +570,7 @@ $ rails console
 
 **代码 7.14** 为用户资料页面添加侧边栏<br />`app/views/users/show.html.erb`
 
-{% highlight erb %}
+```erb
 <% provide(:title, @user.name) %>
 <div class="row">
   <aside class="span4">
@@ -582,13 +582,13 @@ $ rails console
     </section>
   </aside>
 </div>
-{% endhighlight %}
+```
 
 添加了 HTML 结构和 CSS class 后，我们再用 SCSS 为资料页面定义样式，如代码 7.15 所示。（注意：因为 asset pipeline 使用了 Sass 预处理器，所以样式中才可以使用嵌套。）最终的效果如图 7.9 所示。
 
 **代码 7.15** 用户资料页面的样式，包括侧边栏的样式<br />`app/assets/stylesheets/custom.css.scss`
 
-{% highlight scss %}
+```scss
 .
 .
 .
@@ -621,7 +621,7 @@ aside {
   float: left;
   margin-right: 10px;
 }
-{% endhighlight %}
+```
 
 ![user_show_sidebar_css_bootstrap](assets/images/figures/user_show_sidebar_css_bootstrap.png)
 
@@ -641,15 +641,15 @@ aside {
 
 因为我们要实现通过网页创建用户的功能，现在就把 [6.3.5 节](chapter6.html#sec-6-3-5)在控制台中创建的用户删除吧。最简单的方法是使用 `db:reset` 命令：
 
-{% highlight sh %}
+```sh
 $ bundle exec rake db:reset
-{% endhighlight %}
+```
 
 还原数据库后，在有些系统中还要重新准备测试数据库：
 
-{% highlight sh %}
+```sh
 $ bundle exec rake db:test:prepare
-{% endhighlight %}
+```
 
 在某些系统中还要重启 Web 服务器，还原数据库的操作才能生效。<sup>[8](#fn-8)</sup>
 
@@ -659,88 +659,88 @@ $ bundle exec rake db:test:prepare
 
 前面的章节已经介绍过 Capybara 访问网页时使用的很直观的句法，其中用的最多的就是访问某个页面的 `visit` 方法。Capybara 的功能可不仅限于此，它还可以填写如图 7.11 所示的表单字段，然后点击提交按钮，句法如下：
 
-{% highlight ruby %}
+```ruby
 visit signup_path
 fill_in "Name", with: "Example User"
 .
 .
 .
 click_button "Create my account"
-{% endhighlight %}
+```
 
 现在我们要分别提交不合法的和合法的注册数据，验证注册功能是否可以正常使用。我们要用到的测试相对高级一些，所以我们会慢慢地分析。如果你想查看最终的测试代码（以及测试文件的位置），可以直接跳到代码 7.16。先来测试没有正确填写信息的注册表单，我们访问“注册”页面，什么也不填，直接点击注册按钮（调用 `click_button` 方法），这个操作模拟的就是提交不合法数据的情况：
 
-{% highlight ruby %}
+```ruby
 visit signup_path
 click_button "Create my account"
-{% endhighlight %}
+```
 
 上面的代码，等同于手动访问注册页面，然后提交空白的不合法注册信息。相对的，我们要调用 `fill_in` 方法填写合法信息，以此来模拟提交合法数据的情况：
 
-{% highlight ruby %}
+```ruby
 visit signup_path
 fill_in "Name",         with: "Example User"
 fill_in "Email",        with: "user@example.com"
 fill_in "Password",     with: "foobar"
 fill_in "Confirmation", with: "foobar"
 click_button "Create my account"
-{% endhighlight %}
+```
 
 我们测试的最终目的，是要检测点击“Create my account”按钮之后，程序的表现是否正常，即当提交合法的数据时，创建新用户；当提交不合法的数据时，不创建新用户。检测是是否创建了新用户，我们要看用户的数量是否发生了变化，在测试中，我们使用每个 Active Record 对象都可以响应的 `count` 方法来获取对象的数量，以用户为例，即：
 
-{% highlight sh %}
+```sh
 $ rails console
 >> User.count
 => 0
-{% endhighlight %}
+```
 
 现在 `User.count` 的返回值是 0，因为本节开头我们还原了数据库。提交不合法数据时，我们希望用户的数量是不变的；提交合法数据时，我们希望用户的数量增加 1 个。在 RSpec 中，上面的设想要结合 `expect` 和 `to`，或者和 `not_to` 方法来表述。我们先从不合法的数据开始，因为这种情况比较简单。我们先访问“注册”页面，然后点击提交按钮，希望用户的数量不变：
 
-{% highlight sh %}
+```sh
 visit signup_path
 expect { click_button "Create my account" }.not_to change(User, :count)
-{% endhighlight %}
+```
 
 注意，通过花括号我们可以看出，`expect` 把 `click_button` 包含在一个块中（参见 [4.3.2 节](chapter4,html#sec-4-3-2)），这是为 `change` 方法做的特殊处理。`change` 方法可接受两个参数，第一个参数是对象名，第二个是 Symbol。`change` 方法会在 `expect` 块中的代码执行前后，分别计算在第一个参数上调用第二参数代表的方法返回的结果。也就是说，如下的代码
 
-{% highlight ruby %}
+```ruby
 expect { click_button "Create my account" }.not_to change(User, :count)
-{% endhighlight %}
+```
 
 会在执行
 
-{% highlight ruby %}
+```ruby
 click_button "Create my account"
-{% endhighlight %}
+```
 
 前后，两次计算
 
-{% highlight ruby %}
+```ruby
 User.count
-{% endhighlight %}
+```
 
 的结果。
 
 本例，我们用 `not_to` 方法表示不愿看到用户数量发生变化。把点击按钮的代码放入块中，相当于把
 
-{% highlight ruby %}
+```ruby
 initial = User.count
 click_button "Create my account"
 final = User.count
 initial.should == final
-{% endhighlight %}
+```
 
 替换成简单的一行代码
 
-{% highlight ruby %}
+```ruby
 expect { click_button "Create my account" }.not_to change(User, :count)
-{% endhighlight %}
+```
 
 这样读起来更顺口，代码也更简洁。
 
 提交合法数据的情况和上述不合法数据的情况类似，不过用户数量不是不变，而是增加了 1 个：
 
-{% highlight ruby %}
+```ruby
 visit_signup path
 fill_in "Name", with: "Example User"
 fill_in "Email", with: "user@example.com"
@@ -749,13 +749,13 @@ fill_in "Confirmation", with: "foobar"
 expect do
   click_button "Create my account"
 end.to change(User, :count).by(1)
-{% endhighlight %}
+```
 
 这里使用了 `to` 方法，我们希望点击提交按钮后，这些合法的数据可以用来创建一个新用户。我们把上面两种情况放入一个 `describe` 块中，再把共用的代码放入 `before` 块中，最终得到的注册功能测试代码如代码 7.16 所示。我们还做了一项重构，用 `let` 方法定义了 `submit` 变量，表示注册按钮的文本。
 
 **代码 7.16** 测试用户注册功能的代码 <br />`spec/requests/user_pages_spec.rb`
 
-{% highlight ruby %}
+```ruby
 require 'spec_helper'
 
 describe "User pages" do
@@ -790,15 +790,15 @@ describe "User pages" do
     end
   end
 end
-{% endhighlight %}
+```
 
 后续几节还会添加更多的测试，不过现在这个测试已经可以检测相当多的功能表现是否正常了。若要使这个测试通过，先得创建包含正确元素的注册页面，提交注册信息后页面要转向正确的地址，而且如果数据是合法的，还要创建一个新用户，并存入数据库中。
 
 当然了，现在测试还是失败的：
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/
-{% endhighlight %}
+```
 
 <h3 id="sec-7-2-2">7.2.2 使用 <code>form_for</code></h3>
 
@@ -806,7 +806,7 @@ $ bundle exec rspec spec/
 
 **代码 7.17** 用户注册表单 <br />`app/views/users/new.html.erb`
 
-{% highlight erb %}
+```erb
 <% provide(:title, 'Sign up') %>
 <h1>Sign up</h1>
 
@@ -830,30 +830,30 @@ $ bundle exec rspec spec/
     <% end %>
   </div>
 </div>
-{% endhighlight %}
+```
 
 我们来分析一下这些代码。在上面的代码中，我们使用了关键词 `do`，说明 `form_for` 后面可以跟着块，而且可以传入一个块参数 `f`，代表这个表单：
 
-{% highlight erb %}
+```erb
 <%= form_for(@user) do |f| %>
   .
   .
   .
 <% end %>
-{% endhighlight %}
+```
 
 我们一般无需了解 Rails 帮助方法的内部实现，但是对于 `form_for` 来说，我们要知道 `f` 对象的作用是什么：调用表单字段（例如，文本字段、单选按钮、密码字段）对应的方法时，生成的表单字段元素可以用来设定 `@user` 对象的属性。也就是说：
 
-{% highlight erb %}
+```erb
 <%= f.label :name %>
 <%= f.text_field :name %>
-{% endhighlight %}
+```
 
 生成的 HTML 是一个有标号（label）的文本字段，可以用来设定 User 模型的 `name` 属性。（[7.2.3 节](#sec-7-2-3)会看到生成的 HTML）看过生成的 HTML 才能理解为什么字段可以设定属性。在此之前，还有个问题要解决，因为没有定义 `@user` 变量，页面无法显示。和其他未定义的实例变量一样，`@user` 的值现在是 `nil`。所以如果运行测试的话，会看到针对注册页面结构的测试（检测 `h1` 和 `title` 的内容）是失败的：
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/requests/user pages spec.rb -e "signup page"
-{% endhighlight %}
+```
 
 （上述命令中的 `-e` 参数指定只运行描述文本包含“signup page”字符串的测试用例。如果改成“signup”，则会运行代码 7.16 中的所有测试。）
 
@@ -861,7 +861,7 @@ $ bundle exec rspec spec/requests/user pages spec.rb -e "signup page"
 
 **代码 7.18** 在 `new` 动作中定义 `@user` 变量<br />`app/controllers/users_controller.rb`
 
-{% highlight ruby %}
+```ruby
 class UsersController < ApplicationController
   .
   .
@@ -870,19 +870,19 @@ class UsersController < ApplicationController
     @user = User.new
   end
 end
-{% endhighlight %}
+```
 
 定义 `@user` 变量后，注册页面的测试就可以通过了：
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/requests/user pages spec.rb -e "signup page"
-{% endhighlight %}
+```
 
 再添加代码 7.19 中的样式，表单的效果如图 7.12 所示。注意，我们再次用到了代码 7.2 中的 `box-sizing` 这个 mixin。
 
 **代码 7.19** 注册表单的样式 <br />`app/assets/stylesheets/custom.css.scss`
 
-{% highlight scss %}
+```scss
 .
 .
 .
@@ -897,7 +897,7 @@ input, textarea, select, .uneditable-input {
   margin-bottom: 15px;
   @include box_sizing;
 }
-{% endhighlight %}
+```
 
 ![signup_form_bootstrap](assets/images/figures/signup_form_bootstrap.png)
 
@@ -909,7 +909,7 @@ input, textarea, select, .uneditable-input {
 
 **代码 7.20** 图 7.12 中表单的 HTML
 
-{% highlight html %}
+```html
 <form accept-charset="UTF-8" action="/users" class="new_user"
       id="new_user" method="post">
 
@@ -930,37 +930,37 @@ input, textarea, select, .uneditable-input {
   <input class="btn btn-large btn-primary" name="commit" type="submit"
          value="Create my account" />
 </form>
-{% endhighlight %}
+```
 
 （上面的代码省略了“鉴别权标（authenticity token）”相关的 HTML。Rails 使用鉴别权标来防止跨站请求伪造（cross-site request forgery, CSRF）攻击。如果你对鉴别权标感兴趣，可以阅读一下 Stack Overflow 网站中的《[Understand Rails Authenticity Token!](http://stackoverflow.com/questions/941594/understand-rails-authenticity-token)》一文，这篇文章介绍了鉴别权标的工作原理及重要意义。）
 
 下面看一下表单的字段。比较代码 7.17 和代码 7.20 之后，我们可以看到，如下的 ERb 代码
 
-{% highlight erb %}
+```erb
 <%= f.label :name %>
 <%= f.text_field :name %>
-{% endhighlight %}
+```
 
 生成的 HTML 是
 
-{% highlight html %}
+```html
 <label for="user_name">Name</label>
 <input id="user_name" name="user[name]" size="30" type="text" />
-{% endhighlight %}
+```
 
 下面的 ERb 代码
 
-{% highlight erb %}
+```erb
 <%= f.label :password %>
 <%= f.password_field :password %>
-{% endhighlight %}
+```
 
 生成的 HTML 是
 
-{% highlight html %}
+```html
 <label for="user_password">Password</label><br />
 <input id="user_password" name="user[password]" size="30" type="password" />
-{% endhighlight %}
+```
 
 如图 7.13 所示，文本字段（`type="text"`）会直接显示填写的内容，而密码字段（`type="password"`）基于安全考虑会遮盖输入的内容。
 
@@ -970,19 +970,19 @@ input, textarea, select, .uneditable-input {
 
 在 [7.4 节](#sec-7-4)中我们会介绍，之所以可以创建用户，全赖于 `input` 元素的 `name` 属性：
 
-{% highlight html %}
+```html
 <input id="user_name" name="user[name]" - - - />
 .
 .
 .
 <input id="user_password" name="user[password]" - - - />
-{% endhighlight %}
+```
 
 Rails 会以 `name` 属性的值为键，用户输入的内容为值，构成一个名为 `params` 的 Hash，用来创建用户。另外一个重要的标签是 `form`。我们使用 `@user` 对象来创建 `form`元素，因为每个 Ruby 对象都知道它所属的类（参见 [4.4.1 节](chapter4.html#sec-4-4-1)），所以 Rails 知道 `@user` 所属的类是 `User`；而且，`@user` 代表的是新创建的用户，Rails 知道要使用 `POST` 请求方法，这正是创建新对象所需的 HTTP 请求（参见[旁注 3.2](chapter3.html#box-3-2)）：
 
-{% highlight html %}
+```html
 <form action="/users" class="new_user" id="new_user" method="post">
-{% endhighlight %}
+```
 
 先不看 `class` 和 `id` 属性，我们现在关注的是 `action="/users"` 和 `method="post"`。设定这两个属性后，Rails 就会向 /users 地址发送一个 `POST` 请求。接下来的两节会介绍这个请求产生的效果。
 
@@ -998,16 +998,16 @@ Rails 会以 `name` 属性的值为键，用户输入的内容为值，构成一
 
 首先，要确保当前的注册表单可以正常使用。我们可以直接在浏览器中提交表单试试，也可以运行提交不合法数据的测试检测：
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/requests/user_pages_spec.rb \
 -e "signup with invalid information"
-{% endhighlight %}
+```
 
 回顾一下 [7.1.2 节](#sec-7-1-2)中的内容，在 `routes.rb` 中设置 `resources :users` 之后（参见代码 7.3），Rails 应用程序就可以响应[表格 7.1](#table-7-1)中符合 REST 架构的 URI 地址了。一般来说，发送到 /users 地址的 `POST` 请求是由 `create` 动作处理的。在 `create` 动作中，我们可以调用 `User.new` 方法，使用提交的数据创建一个新用户对象，尝试存入数据库，失败后再重新渲染“注册”页面，允许访客重新填写注册信息。我们先来看一下生成的 `form` 元素：
 
-{% highlight html %}
+```html
 <form action="/users" class="new_user" id="new_user" method="post">
-{% endhighlight %}
+```
 
 在 [7.2.3 节](#sec-7-2-3)中介绍过，这个表单会向 /users 地址发送 `POST` 请求。
 
@@ -1015,7 +1015,7 @@ $ bundle exec rspec spec/requests/user_pages_spec.rb \
 
 **代码 7.21** 处理存储失败的 `create` 动作（还不能处理存储成功的情况） <br />`app/controllers/users_controller.rb`
 
-{% highlight ruby %}
+```ruby
 class UsersController < ApplicationController
   .
   .
@@ -1029,7 +1029,7 @@ class UsersController < ApplicationController
     end
   end
 end
-{% endhighlight %}
+```
 
 我们要实际的操作一下，提交一些不合法的注册数据，这样才能更好的理解代码 7.21 的作用，结果如图 7.15 所示，底部完整的调试信息如图 7.16 所示。
 
@@ -1043,7 +1043,7 @@ end
 
 下面我们来分析一下调试信息的 `params` Hash，以便对 Rails 处理表单的过程有个更清晰地认识：
 
-{% highlight yaml %}
+```yaml
 ---
 user:
   name: Foo Bar
@@ -1053,41 +1053,41 @@ user:
 commit: Create my account
 action: create
 controller: users
-{% endhighlight %}
+```
 
 在 [7.1.2 节](#sec-7-1-2)中就说过，`params` Hash 中包含了每次请求的信息，例如向 /users/1 发送的请求，`params[:id]` 的值就是用户的 id，即 1。提交表单发送 `POST` 请求时，`params` 则是一个嵌套的 Hash。嵌套 Hash 在 [4.3.3 节](chapter4.html#sec-4-3-3)中使用控制台介绍 `params` 时用过。上面的调试信息说明，提交表单后，Rails 会构建一个名为 `user` 的 Hash，其键是 `input` 标签的 `name` 属性值（参见代码 7.17），键对应的值是用户填写的字段文本。例如，
 
-{% highlight html %}
+```html
 <input id="user_email" name="user[email]" size="30" type="text" />
-{% endhighlight %}
+```
 
 该字段的 `name` 属性的值是 `user[email]`，它代表的就是 `user` Hash 的 `email` 元素。虽然调试信息中的键是字符串形式，不过在内部，Rails 使用的却是 Symbol 形式。`params[:user]` 这个嵌套的 Hash，实际上就是 `User.new` 方法创建用户所需的参数值。（我们在 [4.4.5 节](chapter4.html#sec-4-4-5)中介绍过 `User.new` 的用法，代码 7.21 再次用到了这个方法。）也就是说，如下的代码
 
-{% highlight ruby %}
+```ruby
 @user = User.new(params[:user])
-{% endhighlight %}
+```
 
 等同于
 
-{% highlight ruby %}
+```ruby
 @user = User.new(name: "Foo Bar", email: "foo@invalid",
                  password: "foo", password confirmation: "bar")
-{% endhighlight %}
+```
 
 在 [7.4 节](#sec-7-4)中会介绍，注册成功时也是这样构建 `User.new` 所需参数的。定义 `@user` 变量后，只需调用 `@user.save` 就可以完成整个注册过程了。注册失败时，`@user` 也有它的作用，注意一下图 7.15，其中一些表单字段已经预先填好了，这是因为 `form_for` 使用 `@user` 的属性自动填写了相应的字段。例如，`@user.name` 的值是 `"foo"`，那么
 
-{% highlight erb %}
+```erb
 <%= form_for(@user) do |f| %>
   <%= f.label :name %>
   <%= f.text_field :name %>
   .
   .
   .
-{% endhighlight %}
+```
 
 生成的 HTML 就会是
 
-{% highlight html %}
+```html
 <form action="/users" class="new_user" id="new_user" method="post">
 
   <label for="user_name">Name</label><br />
@@ -1095,16 +1095,16 @@ controller: users
   .
   .
   .
-{% endhighlight %}
+```
 
 `input` 标签的 `value` 属性值为 `"foo"`，所以字段中才会显示有这个文本。
 
 现在表单已经可以正常使用，不会出错了，针对不合法数据的测试也可以通过了：
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/requests/user_pages_spec.rb \
 -e "signup with invalid information"
-{% endhighlight %}
+```
 
 译者注：本小节所说的表单“不出错”，是指表单可以正常提交数据了，“错误”当然还是有的，因为我们提交的是不合法的数据，无法创建新用户，表单会提示哪些字段出错了。这也就是下一小节的内容。
 
@@ -1112,7 +1112,7 @@ $ bundle exec rspec spec/requests/user_pages_spec.rb \
 
 注册失败时的错误提示信息虽不强制要求显示，但如果显示，可以提示访客哪里出错了。在 Rails 中，错误提示信息是基于 User 模型的数据验证机制实现的。举个例子，我们试着用不合法的 Email 地址和长度较短的密码创建用户看看会发生什么：
 
-{% highlight sh %}
+```sh
 $ rails console
 >> user = User.new(name: "Foo Bar", email: "foo@invalid",
 ?>                 password: "dude", password_confirmation: "dude")
@@ -1120,7 +1120,7 @@ $ rails console
 => false
 >> user.errors.full_messages
 => ["Email is invalid", "Password is too short (minimum is 6 characters)"]
-{% endhighlight %}
+```
 
 如上所示，`errors.full_message` 对象是一个错误信息组成的数组。和上面的控制台对话类似，代码 7.21 中的代码也无法保存用户，会生成一个附属在 `@user` 对象上的错误信息数组。如果要在注册页面显示这些错误，我们需要渲染一个错误信息局部视图，如代码 7.22 所示。
 
@@ -1128,7 +1128,7 @@ $ rails console
 
 **代码 7.22** 在注册表单前显示的错误提示信息 <br />`app/views/users/new.html.erb`
 
-{% highlight erb %}
+```erb
 <% provide(:title, 'Sign up') %>
 <h1>Sign up</h1>
 
@@ -1142,13 +1142,13 @@ $ rails console
     <% end %>
   </div>
 </div>
-{% endhighlight %}
+```
 
 注意，在上面的代码中渲染的局部视图名为 `shared/error_messages`，这里用到了 Rails 的一个约定：如果局部视图要在多个控制器重使用，则把它存放在专门的 `shared` 目录下。（这个约定 [9.1.1 节](chapter9.html#9-1-1)还会再介绍）我们除了要新建 `_error_messages.html.erb` 文件之外，还要新建 `app/views/shared` 文件夹。错误提示信息局部视图的内容如代码 7.23 所示。
 
 **代码 7.23** 显示表单错误提示信息的局部视图 <br />`app/views/shared/_error_messages.html.erb`
 
-{% highlight erb %}
+```erb
 <% if @user.errors.any? %>
   <div id="error_explanation">
     <div class="alert alert-error">
@@ -1161,56 +1161,56 @@ $ rails console
     </ul>
   </div>
 <% end %>
-{% endhighlight %}
+```
 
 这个局部视图的代码使用了几个之前没用过的 Rails/Ruby 结构，还有两个新方法。第一个新方法是 `count`，它的返回值是错误信息的数量：
 
-{% highlight sh %}
+```sh
 >> user.errors.count
 => 2
-{% endhighlight %}
+```
 
 第二个新方法是 `any?`，它和 `empty?` 的作用相反：
 
-{% highlight sh %}
+```sh
 >> user.errors.empty?
 => false
 >> user.errors.any?
 => true
-{% endhighlight %}
+```
 
 第一次使用 `empty?` 方法是在 [4.2.3 节](chapter4.html#sec-4-2-3)，用在字符串上；从上面的代码可以看出，`empty?` 也可用在 Rails 错误信息对象上，如果对象为空就返回 `true`，否则返回 `false`。`any?` 方法就是取反 `empty?` 的返回值，如果对象中有内容就返回 `true`，没内容则返回 `false`。（顺便说一下，`count`、`empty?` 和 `any?` 都可以用在 Ruby 数组上，在 [10.2 节](chapter10.html#sec-10-2)中会好好地介绍这三个方法。）
 
 还有一个比较新的方法是 `pluralize`，在控制台中默认不可用，不过我们可以引入 `ActionView::Helpers::TextHelper` 模块加载这个方法：<sup>[9](#fn-9)</sup>
 
-{% highlight sh %}
+```sh
 >> include ActionView::Helpers::TextHelper
 >> pluralize(1, "error")
 => "1 error"
 >> pluralize(5, "error")
 => "5 errors"
-{% endhighlight %}
+```
 
 如上所示，`pluralize` 方法的第一个参数是整数，返回值是这个数字和第二个参数文本组合在一起正确的单复数形式。`pluralize` 方法是由功能强大的转置器（inflector）实现的，转置器知道怎么处理大多数单词的单复数变换，甚至是一些不规则的变换方式：
 
-{% highlight sh %}
+```sh
 >> pluralize(2, "woman")
 => "2 women"
 >> pluralize(3, "erratum")
 => "3 errata"
-{% endhighlight %}
+```
 
 所以，使用 `pluralize` 方法后，如下的代码
 
-{% highlight erb %}
+```erb
 <%= pluralize(@user.errors.count, "error") %>
-{% endhighlight %}
+```
 
 返回值就是 `"0 errors"`、`"1 error"` 或 `"2 errors"`等，单复数形式取决于错误的数量。这样就可以避免类似 `"1 errors"` 这种低级的错误了（这是网络中常见的错误之一）。注意，代码 7.21 中还为一个 `div` 标签指定了 `error_explanation` id，可用来样式化错误提示信息。（在 [5.1.2 节](chapter5.html#sec-5-1-2)中介绍过，CSS 中以 `#` 开头的规则是用来给 id 添加样式的。）出错时，Rails 还会自动把有错误的字段包含在一个 class 为 `field_with_errors` 的 `div` 元素中。我们可以利用这个 id 和 class 为错误提示信息添加样式，所需的 SCSS 如代码 7.24 所示。代码 7.24 中使用 Sass 的 `@extend` 函数引入了 `control-group` 和 `error` 两个样式规则集合。添加样式后，如果提交失败，错误信息和出错的字段就会显示为红色，如图 7.17 所示。错误信息的文本是基于模型数据验证自动生成的，所以如果你修改了验证规则（例如，Email 地址的格式，密码的最小长度），错误信息就会自动变化，符合修改后的规则。
 
 **代码 7.24** 错误提示信息的样式 <br />`app/assets/stylesheets/custom.css.scss`
 
-{% highlight scss %}
+```scss
 .
 .
 .
@@ -1231,7 +1231,7 @@ $ rails console
   @extend .control-group;
   @extend .error;
  }
-{% endhighlight %}
+```
 
 ![signup_error_messages_bootstrap](assets/images/figures/signup_error_messages_bootstrap.png)
 
@@ -1239,10 +1239,10 @@ $ rails console
 
 我们可以通过下面的方法模拟代码 7.16 中针对不合法数据的测试过程，来看一下本节编程的效果：在浏览器中，访问“注册”页面，什么也不填，直接点击“Create my account”按钮。结果如图 7.18 所示。既然“注册”页面可以正常使用了，相应的测试也应该可以通过了。
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/requests/user_pages_spec.rb \
 > -e "signup with invalid information"
-{% endhighlight %}
+```
 
 ![blank_signup_password_digest_bootstrap](assets/images/figures/blank_signup_password_digest_bootstrap.png)
 
@@ -1262,16 +1262,16 @@ $ bundle exec rspec spec/requests/user_pages_spec.rb \
 
 要完成注册表单的功能，我们要把代码 7.21 中的注释部分换成相应的处理代码。现在，对提交合法数据的测试还是失败的：
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/requests/user_pages_spec.rb \
 > -e "signup with valid information"
-{% endhighlight %}
+```
 
 测试之所以会失败，是因为 Rails 处理动作的默认方式是渲染视图，可是 `create` 动作还没有（也不应该有）对应的视图。相反的，我们要转向其他的页面，最合理的转向页面是刚创建用户的资料页面。检测是否转向正确页面的测试留作练习（参见 [7.6 节](#sec-7-6)），`create` 动作的代码如代码 7.25 所示。
 
 **代码 7.25** `create` 动作的代码，处理了保存和转向操作<br />`app/controllers/users_controller.rb`
 
-{% highlight ruby %}
+```ruby
 class UsersController < ApplicationController
   .
   .
@@ -1285,21 +1285,21 @@ class UsersController < ApplicationController
     end
   end
 end
-{% endhighlight %}
+```
 
 注意，转向地址我们直接写了 `@user`，而没用 `user_path`，Rails 会自动转向到用户的资料页面。
 
 加入了代码 7.25 后，注册表单就可以正常使用了，你可以运行测试验证一下：
 
-{% highlight sh %}
+```sh
 $ bundle exec rspec spec/
-{% endhighlight %}
+```
 
 <h3 id="sec-7-4-2">7.4.2 Flash 消息</h3>
 
 验证合法数据是否能够正确提交之钱，我们还要加入一个 Web 应用程序大都会实现的功能：在转向后的页面中显示一个消息（这里我们要显示的是一个欢迎新用户的消息），如果访问了其他页面或者刷新了页面，这个消息便会消失。在 Rails 中这种功能是通过 `flash` 变量实现的，`flash` 就像闪存一样，只是暂时存储数据。`flash` 变量的值其实是一个 Hash，你可能还记得，[4.3.3 节](chapter4.html#sec-4-3-3)中我们在控制台中遍历了一个名为 `flash` 的 Hash：
 
-{% highlight sh %}
+```sh
 $ rails console
 >> flash = { success: "It worked!", error: "It failed." }
 => {:success=>"It worked!", error: "It failed."}
@@ -1311,13 +1311,13 @@ success
 It worked!
 error
 It failed.
-{% endhighlight %}
+```
 
 我们可以把显示 Flash 消息的代码加入应用程序的布局，这样整个网站在需要的时候就会显示消息了，如代码 7.26 所示。（代码 7.26 混合了 HTML 和 ERb 代码，有点乱，[7.6 节](#sec-7-6)中的练习会对此进行重构。）
 
 **代码 7.26** 把 `flash` 消息相关的代码加入网站的布局中<br />`app/views/layouts/application.html.erb`
 
-{% highlight erb %}
+```erb
 <!DOCTYPE html>
 <html>
   .
@@ -1338,21 +1338,21 @@ It failed.
     .
   </body>
 </html>
-{% endhighlight %}
+```
 
 代码 7.26 会为每一个 Flash 消息插入一个 `div` 标签，并且把 CSS class 指定为消息的类型。例如，如果 `flash[:success] = "Welcome to the Sample App!"`，那么下面的代码
 
-{% highlight erb %}
+```erb
 <% flash.each do |key, value| %>
   <div class="alert alert-<%= key %>"><%= value %></div>
 <% end %>
-{% endhighlight %}
+```
 
 生成的 HTML 如下
 
-{% highlight html %}
+```html
 <div class="alert alert-success">Welcome to the Sample App!</div>
-{% endhighlight %}
+```
 
 （注意，键 `:success` 是 Symbol，在插入模板之前，ERb 会自动将其转换成字符串 `"success"`。）我们遍历了所有可能出现的 Flash 消息，这样当消息存在时才能显示。在 [8.1.5 节](chapter8.html#8-1-5) 中会使用 `flash[:error]` 显示登录失败消息。<sup>[10](#fn-10)</sup>
 
@@ -1360,7 +1360,7 @@ It failed.
 
 **代码 7.27** 注册成功后显示 Flash 信息<br />`app/controllers/users_controller.rb`
 
-{% highlight ruby %}
+```ruby
 class UsersController < ApplicationController
   .
   .
@@ -1375,7 +1375,7 @@ class UsersController < ApplicationController
     end
   end
 end
-{% endhighlight %}
+```
 
 <h3 id="sec-7-4-3">7.4.3 首次注册</h3>
 
@@ -1383,13 +1383,13 @@ end
 
 我们还可以检查一下数据库，确保真的创建了新用户：
 
-{% highlight sh %}
+```sh
 $ rails console
 >> User.find_by_email("example@railstutorial.org")
 => #<User id: 1, name: "Rails Tutorial", email: "example@railstutorial.org",
 created at: "2011-12-13 05:51:34", updated at: "2011-12-13 05:51:34",
 password digest: "$2a$10$A58/j7wwh3aAffGkMAO9Q.jjh3jshd.6akhDKtchAz/R...">
-{% endhighlight %}
+```
 
 ![signup_flash_bootstrap](assets/images/figures/signup_flash_bootstrap.png)
 
@@ -1405,18 +1405,18 @@ password digest: "$2a$10$A58/j7wwh3aAffGkMAO9Q.jjh3jshd.6akhDKtchAz/R...">
 
 在部署之前，你应该把本章实现的功能合并到 `master` 分支：
 
-{% highlight sh %}
+```sh
 $ git add .
 $ git commit -m "Finish user signup"
 $ git checkout master
 $ git merge sign-up
-{% endhighlight %}
+```
 
 然后我们要设置一下，强制在生产环境中使用 SSL，这里我们要编辑的文件是 `config/environments/production.rb`，添加的设置如代码 7.28 所示。
 
 **代码 7.28** 设置程序在生产环境中开启 SSL<br />`config/environments/production.rb`
 
-{% highlight ruby %}
+```ruby
 SampleApp::Application.configure do
   .
   .
@@ -1428,20 +1428,20 @@ SampleApp::Application.configure do
   .
   .
 end
-{% endhighlight %}
+```
 
 我们要把这次修改提交到 Git 仓库中，然后再推送到 Heroku，所做的设置才能生效：
 
-{% highlight sh %}
+```sh
 $ git commit -a -m "Add SSL in production"
 $ git push heroku
-{% endhighlight %}
+```
 
 然后，我们还要在生产环境中运行数据库迁移，告知 Heroku 我们建立了 User 模型：<sup>[12](#fn-12)</sup>
 
-{% highlight sh %}
+```sh
 $ heroku run rake db:migrate
-{% endhighlight %}
+```
 
 （执行这个命令后，你可能会得到一些功能废弃的警告提示，现在可以直接忽视这些警告。）
 
@@ -1449,9 +1449,9 @@ $ heroku run rake db:migrate
 
 以上所有工作得到的最终结果是，在生产服务器上可以正常使用注册表单了，如图 7.22 所示：
 
-{% highlight sh %}
+```sh
 $ heroku open
-{% endhighlight %}
+```
 
 注意，在图 7.22 中，通常显示为 `http://` 的地方现在显示的是 `https://`，就是这个额外的“s”，证明我们正在使用 SSL。
 
@@ -1475,7 +1475,7 @@ $ heroku open
 
 **代码 7.29** 重新定义 `gravatar_for` 方法，允许接受可选的 `size` 参数<br />`app/helpers/users_helper.rb`
 
-{% highlight ruby %}
+```ruby
 module UsersHelper
 
   # Returns the Gravatar (http://gravatar.com/) for the given user.
@@ -1486,21 +1486,21 @@ module UsersHelper
     image_tag(gravatar_url, alt: user.name, class: "gravatar")
   end
 end
-{% endhighlight %}
+```
 
 **代码 7.30** 让未填写密码时显示一个更好的错误提示信息<br />`config/locales/en.yml`
 
-{% highlight yaml %}
+```yaml
 en:
   activerecord:
     attributes:
       user:
         password digest: "Password"
-{% endhighlight %}
+```
 
 **代码 7.31** 错误提示信息测试的参考<br />`spec/requests/user_pages_spec.rb`
 
-{% highlight ruby %}
+```ruby
   .
   .
   .
@@ -1522,11 +1522,11 @@ en:
       .
       .
       .
-{% endhighlight %}
+```
 
 **代码 7.32** 对 `create` 动作中保存用户操作的测试<br />`spec/requests/user_pages_spec.rb`
 
-{% highlight ruby %}
+```ruby
     .
     .
     .
@@ -1544,11 +1544,11 @@ en:
       .
       .
       .
-{% endhighlight %}
+```
 
 **代码 7.33** 使用 `content_for` 编写的 Flash 消息视图代码<br />`app/views/layouts/application.html.erb`
 
-{% highlight erb %}
+```erb
 <!DOCTYPE html>
   <html>
   .
@@ -1561,7 +1561,7 @@ en:
   .
   .
 </html>
-{% endhighlight %}
+```
 
 <div class="navigation">
   <a class="prev_page" href="chapter6.html">&laquo; 第六章 用户模型</a>
