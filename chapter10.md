@@ -388,4 +388,329 @@ end
 $ bundle exec rspec spec/models
 ```
 
-<h3 id="sec-10-1-4">10.1.4 改进微博</h3>
+<h3 id="sec-10-1-4">10.1.4 改进微博模型</h3>
+
+代码 10.9 中的代码并没有深入测试通过 `has_many` 实现的关联，仅仅检测了是否可以响应 `microposts` 方法。本小节，我们会为微博模型加入排序方法和依属关系，还会测试 `user.microposts` 方法的返回结果是否为数组。
+
+我们要在用户模型的测试中生成一些微博，所以现在我们先要创建一个生成微博的预构件。在所创建的预构件中我们要找到一种方法把微博和用户关联起来，幸运的是，在 FactoryGirl 中实现关联是很容易的，如代码 10.12 所示。
+
+**代码 10.12** 完整的预构件文件，包含了创建微博的新预构件<br />`spec/factories.rb`
+
+```ruby
+FactoryGirl.define do
+  factory :user do
+    sequence(:name)  { |n| "Person #{n}" }
+    sequence(:email) { |n| "person_#{n}@example.com"}
+    password "foobar"
+    password_confirmation "foobar"
+
+    factory :admin do
+      admin true
+    end
+  end
+
+  factory :micropost do
+    content "Lorem ipsum"
+    user
+  end
+end
+```
+
+在 FactoryGirl 中我们只需要在创建微博的预构件中包含一个用户对象就可以实现所需的关联了：
+
+```ruby
+factory :micropost do
+  content "Lorem ipsum"
+  user
+end
+```
+
+在下一节中会介绍，我们可以使用下面的方法生成一篇微博：
+
+```ruby
+FactoryGirl.create(:micropost, user: @user, created_at: 1.day.ago)
+```
+
+#### 默认作用域
+
+默认情况下，使用 `user.microposts` 从数据库中读取用户的微博不能保证微博的次序，但是按照博客和 Titter 的习惯，我们希望微博按照创建时间倒序排列，也就是最新创建的微博在最前面。要测试微薄的次序，我们先要创建两篇微博：
+
+```ruby
+FactoryGirl.create(:micropost, user: @user, created_at: 1.day.ago)
+FactoryGirl.create(:micropost, user: @user, created_at: 1.hour.ago)
+```
+
+我们把第二篇微博的创建时间设的晚一些，即 `1.hour.ago`（利用了[旁注 8.1](chapter8.html#box-8-1)中介绍的帮助函数），第一篇微博的创建时间要早一些，是 `1.day.ago`。请注意一下使用 FactoryGirl 创建微博是多么方便：我们不仅可以直接指定微博所属的用户（FactoryGirl 会逃过 `attr_accessible` 限制），还可以设定通常情况下不能自由设定的 `created_at` 属性（因为在 Active Record 做了限制）。（再次说明一下，`created_at` 和 `updated_at` 两个属性是“魔法”列，会被自动设为相应的创建时间戳和更新时间戳，即使手动指定了值也会被覆盖。）
+
+大多数数据库适配器（包括 SQLite 的适配器）读取的微博都是按照 ID 来排序的，因此代码 10.13 中的测试肯定不会通过。在这段测试代码中没有使用 `let`，用的是 `let!`（读作“let bang”），因为 `let` 方法指定的变量是“惰性”的，只有当后续有引用时才会被创建。而我们希望创建的两个微博变量理解被创建，这样才能保证两篇微博时间戳的顺序是正确的，也保证了 `@user.microposts` 数组不是空的。所以我们才用了 `let!` 方法，迫使相应的变量立即被创建。
+
+**代码 10.13** 测试用户微博的次序<br />`spec/models/user_spec.rb`
+
+```ruby
+require 'spec_helper'
+
+describe User do
+  .
+  .
+  .
+  describe "micropost associations" do
+
+    before { @user.save }
+    let!(:older_micropost) do
+      FactoryGirl.create(:micropost, user: @user, created_at: 1.day.ago)
+    end
+    let!(:newer_micropost) do
+      FactoryGirl.create(:micropost, user: @user, created_at: 1.hour.ago)
+    end
+
+    it "should have the right microposts in the right order" do
+      @user.microposts.should == [newer_micropost, older_micropost]
+    end
+  end
+end
+```
+
+这个测试中最关键的一行是：
+
+```ruby
+@user.microposts.should == [newer_micropost, older_micropost]
+```
+
+这行代码表明所创建的微博应该按照创建时间倒序排列，即最新创建的微博排在最前面。这个测试注定是无法通过的，因为微博默认是按照 ID 排序的，应该是 `[older_micropost, newer_micropost]`。这个测试同时也验证了 `has_many` 关联最基本的效果是否正确，即检测 `user.microposts` 返回的结果是否是数组。
+
+要让这个测试通过，我们要使用 Rails 中的 `default_scope` 方法，还要设定它的 `:order` 参数，如代码 10.14 所示。（这是我们第一次接触作用域的概念，在[第 11 章](chapter11.html)中会介绍作用域更一般的用法。）
+
+**代码 10.14** 通过 `default_scope` 设定微博的排序<br />`app/models/micropost.rb`
+
+```ruby
+class Micropost < ActiveRecord::Base
+  .
+  .
+  .
+  default_scope order: 'microposts.created_at DESC'
+end
+```
+
+我们通过 `microposts.created_at DESC` 设定了所需的排序，其中 `DESC` 在 SQL 中是“倒序”的意思，即按照由新到旧这种顺序排序。
+
+#### 依属关系：destroy
+
+除了设定恰当的排序外，我们还要对微博模型做另一项改进。我们在 [9.4 节](chapter9.html#sec-9-4)中介绍过，管理员是有权限删除用户的。那么，在删除用户的同时，就有必要把该用户发布的微博也删除。对此我们可以编写一个测试，检测当用户被删除后，其发布的微博是否还在数据库中。
+
+为了能够正确的测试微博是否被删除了，我们先要把用户的一篇微博赋值给一个局部变量，然后在删除这个用户。对此，一种直观的实现方式如下：
+
+```ruby
+microposts = @user.microposts
+@user.destroy
+microposts.each do |micropost|
+  # Make sure the micropost doesn't appear in the database.
+end
+```
+
+可是这种方式并不凑效，这涉及到 Ruby 中数组的一个诡异表现。在 Ruby 中把数组赋值给变量时，只是获取了该数组的引用，而不是数组的值本身，所以如果修改了原始的数组，其他的引用也会改变。举个例子，我们新建一个数组，再把它赋值给另一个变量，然后调用 `reverse!` 反转第一个数组：
+
+```sh
+$ rails console
+>> a = [1, 2, 3]
+=> [1, 2, 3]
+>> b = a
+=> [1, 2, 3]
+>> a.reverse!
+=> [3, 2, 1]
+>> a
+=> [3, 2, 1]
+>> b
+=> [3, 2, 1]
+```
+
+可能有点奇怪，`b` 的值和 `a` 一样也反转了，因为 `a` 和 `b` 指向的是同一个数组。（类似的表现也可以推广到 Ruby 中其他的数据类型，例如字符串和 Hash。）
+
+再来看用户的微博，结果如下：
+
+```sh
+$ rails console --sandbox
+>> @user = User.first
+>> microposts = @user.microposts
+>> @user.destroy
+>> microposts
+=> []
+```
+
+（因为我们还没有实现销毁所关联微博的方法，所以上述的操作是无效的，在这里列出来只是要表达这种表现。）我们可以看到，删除用户后，`microposts` 变量的值也为空了，即空的数组 `[]`。
+
+鉴于此，在复制 Ruby 对象是要格外的小心。在赋值一些相对简单的对象时，例如数组，我们可以调用 `dup` 方法：
+
+```sh
+$ rails console
+>> a = [1, 2, 3]
+=> [1, 2, 3]
+>> b = a.dup
+=> [1, 2, 3]
+>> a.reverse!
+=> [3, 2, 1]
+>> a
+=> [3, 2, 1]
+>> b
+=> [1, 2, 3]
+```
+
+（上面展示的是“浅拷贝（shallow copy）”。“深拷贝（deep copy）”是很复杂的，也没用通用的方法，如果你要赋值复杂的数据结构，例如嵌套的数字，可以搜索一下“ruby deep copy”，应该可以找到一些方法。）使用 `dup` 方法后的代码如下：
+
+```ruby
+microposts = @user.microposts.dup
+@user.destroy
+microposts.should_not be_empty
+microposts.each do |micropost|
+  # Make sure the micropost doesn't appear in the database.
+end
+```
+
+我们还加入了下面这行：
+
+```ruby
+microposts.should_not be_empty
+```
+
+这才能确保测试可以扑捉到因为失手删除 `dup` 导致的错误。<sup>[3](#fn-3)</sup> 完整的测试代码如代码 10.15 所示。
+
+**代码 10.15** 测试用户删除后，所发布的微博是否也被删除了<br />`spec/models/user_spec.rb`
+
+```ruby
+require 'spec_helper'
+
+describe User do
+  .
+  .
+  .
+  describe "micropost associations" do
+
+    before { @user.save }
+    let!(:older_micropost) do
+      FactoryGirl.create(:micropost, user: @user, created_at: 1.day.ago)
+    end
+    let!(:newer_micropost) do
+      FactoryGirl.create(:micropost, user: @user, created_at: 1.hour.ago)
+    end
+    .
+    .
+    .
+    it "should destroy associated microposts" do
+      microposts = @user.microposts.dup
+      @user.destroy
+      microposts.should_not be_empty
+      microposts.each do |micropost|
+        Micropost.find_by_id(micropost.id).should be_nil
+      end
+    end
+  end
+  .
+  .
+  .
+end
+```
+
+在这个测试中，我们调用的是 `Micropost.find_by_id` 方法，如果没有找到相应的记录这个方法会返回 `nil`。而 `Micropost.find` 方法在没有找到记录时直接抛出异常，比较难测试。（如果你好奇如何测试 `Micropost.find` 抛出的异常，可以使用下面这段代码。）
+
+```ruby
+lambda do
+  Micropost.find(micropost.id)
+end.should raise_error(ActiveRecord::RecordNotFound)
+```
+
+要让代码 10.15 中的测试通过，我们甚至不需要加入一行完整的代码，只需在 `has_many` 方法中设定一个参数即可，如代码 10.16 所示。
+
+**代码 10.16** 保证用户的微博在删除用户的同时也会被删除<br />`app/models/user.rb`
+
+```ruby
+class User < ActiveRecord::Base
+  attr_accessible :name, :email, :password, :password_confirmation
+  has_secure_password
+  has_many :microposts, dependent: :destroy
+  .
+  .
+  .
+end
+```
+
+上面代码中有这么一行：
+
+```ruby
+has_many :microposts, dependent: :destroy
+```
+
+其中的 `dependent: :destroy` 只是程序在用户被删除的时候，其所属的微博也要被删除。这么一来，如果管理员删除了用户，数据库中就不会出现无主的微博了。
+
+至此，用户和微博之间的关联就设置好了，所有的测试应该都可以通过了：
+
+```sh
+$ bundle exec rspec spec/
+```
+
+<h3 id="sec-10-1-5">10.1.5 验证微博内容</h3>
+
+在结束讨论微博模型之前，我们还要为微博的内容加上数据验证（参照 [2.3.2 节](chapter2.html#sec-2-3-2)）。和 `user_id` 一样，`content` 属性不能为空，而且还要限制内容的长度不能多于 140 个字符，这才是真正的“微”博。我们要编写的测试和 [6.2 节](chapter6.html#sec-6-2)中对用户模型的验证测试类似，如代码 10.17 所示。
+
+**代码 10.17** 测试微博模型的数据验证<br />`spec/models/micropost_spec.rb`
+
+```ruby
+require 'spec_helper'
+
+describe Micropost do
+
+  let(:user) { FactoryGirl.create(:user) }
+  before { @micropost = user.microposts.build(content: "Lorem ipsum") }
+  .
+  .
+  .
+  describe "when user_id is not present" do
+    before { @micropost.user_id = nil }
+    it { should_not be_valid }
+  end
+
+  describe "with blank content" do
+    before { @micropost.content = " " }
+    it { should_not be_valid }
+  end
+
+  describe "with content that is too long" do
+    before { @micropost.content = "a" * 141 }
+    it { should_not be_valid }
+  end
+end
+```
+
+和 [6.2 节](chapter6.html#sec-6-2)一样，在代码 10.17 中我们用到了字符串乘积来测试微博内容长度的验证：
+
+```sh
+$ rails console
+>> "a" * 10
+=> "aaaaaaaaaa"
+>> "a" * 141
+=> "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+```
+
+我们要在程序中加入下面这行代码：
+
+```ruby
+validates :content, presence: true, length: { maximum: 140 }
+```
+
+微博模型的最终代码如代码 10.18 所示。
+
+**代码 10.18** 微博模型的数据验证<br />`app/models/micropost.rb`
+
+```ruby
+class Micropost < ActiveRecord::Base
+  attr_accessible :content
+
+  belongs_to :user
+
+  validates :content, presence: true, length: { maximum: 140 }
+  validates :user_id, presence: true
+
+  default_scope order: 'microposts.created_at DESC'
+end
+```
+
+<h2 id="sec-10-2">10.2 显示微博</h2>
