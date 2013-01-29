@@ -26,7 +26,7 @@ title: 第一章 从零到部署
 
 自 2004 年出现以来，Rails 迅速成为动态 Web 程序开发领域功能最强大、最受欢迎的框架之一。从初创的项目到很多的大公司都在使用 Rails：[37signals](http://37signals.com/)，[Github](http://github.com/)，[Shopify](http://shopify.com/)，[Scribd](http://scribd.com/)，[Twitter](http://twitter.com/)，[LivingSocial](http://livingsocial.com/)，[Groupon](http://groupon.com/)，[Hulu](http://hulu.com/) 和 [Yellow Pages](http://yellowpages.com/) 等，[这个列表](http://rubyonrails.org/applications)还很长。有很多 Web 开发工作室也在使用 Rails，比如 [ENTP](http://entp.com/)，[thoughtbot](http://thoughtbot.com/)，[Pivotal Labs](http://pivotallabs.com/) 和 [Hashrocket](http://hashrocket.com/)，以及无数的独立顾问，培训人员和项目承包商。
 
-是什么使得 Rails 如此成功呢？首先，Ruby on Rails 是完全开源的，基于 [MIT 协议](http://www.opensource.org/licenses/mit-license.php)发布，可以免费下载、使用。Rails 的成功有很大一部分是得益于它优雅而紧凑的设计。研习 Ruby 语言的高可扩展性后，Rails 开发了一套用于开发 Web 程序的 [DSL](http://en.wikipedia.org/wiki/Domain_Specific_Language)（Domain-speific Language）。所以 Web 编程中像生成 HTML、创建数据模型、URI 路由等任务在 Rails 中都很容易实现，最终得到的程序代码很简洁而且可读性较高。
+是什么使得 Rails 如此成功呢？首先，Ruby on Rails 是完全开源的，基于 [MIT 协议](http://www.opensource.org/licenses/mit-license.php)发布，可以免费下载、使用。Rails 的成功有很大一部分是得益于它优雅而紧凑的设计。研习 Ruby 语言的高可扩展性后，Rails 开发了一套用于开发 Web 程序的 [DSL](http://en.wikipedia.org/wiki/Domain_Specific_Language)（Domain-specific Language）。所以 Web 编程中像生成 HTML、创建数据模型、URI 路由等任务在 Rails 中都很容易实现，最终得到的程序代码很简洁而且可读性较高。
 
 Rails 还会快速跟进 Web 领域最新的技术和框架架构技术。例如，Rails 是最早实现 REST 这个 Web 程序架构体系的框架之一（这一体系将贯穿本书）。当其他的框架开发出成功的新技术后，Rails 的创建者 DHH 及其核心开发团队会毫不犹豫的将其吸纳进来。或许最典型的例子就是 Rails 和 Merb （和 Rails 类似的 Ruby Web 框架）两个项目的合并，这样一来 Rails 就继承了 Merb 的模块化设计、稳定的 API，性能也得到了提升。
 
