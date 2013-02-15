@@ -728,8 +728,8 @@ end
 ```sh
 >> %w[foo bar baz]
 => ["foo", "bar", "baz"]
->> addresses = %w[user@foo.COM THE US-ER@foo.bar.org first.last@foo.jp]
-=> ["user@foo.COM", "THE US-ER@foo.bar.org", "first.last@foo.jp"]
+>> addresses = %w[user@foo.COM THE_US-ER@foo.bar.org first.last@foo.jp]
+=> ["user@foo.COM", "THE_US-ER@foo.bar.org", "first.last@foo.jp"]
 >> addresses.each do |address|
 ?> puts address
 >> end
@@ -754,7 +754,7 @@ describe User do
   .
   describe "when email format is invalid" do
     it "should be invalid" do
-      addresses = %w[user@foo,com user at foo.org example.user@foo. foo@bar baz.com foo@bar+baz.com]
+      addresses = %w[user@foo,com user_at_foo.org example.user@foo. foo@bar_baz.com foo@bar+baz.com]
       addresses.each do |invalid_address|
         @user.email = invalid_address
         @user.should_not be_valid
@@ -764,7 +764,7 @@ describe User do
 
   describe "when email format is valid" do
     it "should be valid" do
-      addresses = %w[user@foo.COM A-US-ER@f.b.org frst.lst@foo.jp a+b@baz.cn]
+      addresses = %w[user@foo.COM A_US-ER@f.b.org frst.lst@foo.jp a+b@baz.cn]
       addresses.each do |valid_address|
         @user.email = valid_address
         @user.should be_valid
@@ -909,7 +909,7 @@ class User < ActiveRecord::Base
 end
 ```
 
-这还不行，Email 地址是不区分大小写的，也就说 `foo@bar.com` 和 `FOO@BAR.COM` 或 `FoO@BAr.coM` 是等下ode，所以验证时也要考虑这种情况。代码 6.20 是针对这中问题的测试代码。
+这还不行，Email 地址是不区分大小写的，也就说 `foo@bar.com` 和 `FOO@BAR.COM` 或 `FoO@BAr.coM` 是等效的，所以验证时也要考虑这种情况。代码 6.20 是针对这种问题的测试代码。
 
 **代码 6.20** 拒绝相同 Email 地址的测试，不区分大小写<br />`spec/models/user_spec.rb`
 
@@ -1028,7 +1028,7 @@ end
 
 在代码 6.23 中，`before_save` 后跟有一个块，块中的代码调用了字符串的 `downcase` 方法，把用户的 Email 地址转换成小写字母形式。这些代码有些深度，此时你只需相信这些代码可以达到目的就行了。如果你有所怀疑，可以把代码 6.19 中的唯一性验证代码注释掉，创建几个 Email 地址一样的用户，看一下得到存储时得到的错误信息。（[8.2.1 节](chapter8.html#sec-8-2-1) 还会用到这种方法。）
 
-至此，上面 Alice 遇到的问题就解决了，数据库会存储请求 1 创建的用户，不会存储请求 2 创建的用户，因为它违反了唯一性限制。（在 Rails 的日志中会显示一个错误，不过无大碍。其实我们可以捕获抛出的 `ActiveRecord::StatementInvalid` 异常（Insoshi 就这么做了），不过本教程不会涉及异常处理。）为 `email` 列建立索引同时也解决了 [6.1.4 节](#sec-6-1-4)中提到的 `find_by_email` 的效率问题（参阅[旁注 6.2](#box-6-2)）。
+至此，上面 Alice 遇到的问题就解决了，数据库会存储请求 1 创建的用户，不会存储请求 2 创建的用户，因为它违反了唯一性限制。（在 Rails 的日志中会显示一个错误，不过无大碍。其实我们可以捕获抛出的 `ActiveRecord::StatementInvalid` 异常（[Insoshi](http://github.com/insoshi/insoshi/blob/master/app/controllers/people_controller.rb) 就这么做了），不过本教程不会涉及异常处理。）为 `email` 列建立索引同时也解决了 [6.1.4 节](#sec-6-1-4)中提到的 `find_by_email` 的效率问题（参阅[旁注 6.2](#box-6-2)）。
 
 <div id="box-6-2" class="aside">
     <p>创建数据库列时，要考虑是否会用这个列进行查询。例如，代码 6.2 中的迁移，创建了 `email` 列，<a href="/chapter7.html">第七章</a>中实现的用户登录功能，会通过提交的 Email 地址查询对应的用户记录。按照现有的数据模型，使用 Email 地址查找用户的唯一方式是遍历数据库中所有的用户记录，对比提交的 Email 地址和记录中的 `email` 列，看看是否一致。在数据库的术语中，这叫做“全表扫描（full-table scan）”，对一个有上千用户的网站而言，这可不是一件轻松的事。</p>
@@ -1100,7 +1100,7 @@ end
 $ rails generate migration add_password_digest_to_users password_digest:string
 ```
 
-上述命令的第一个参数是迁移的名字，第二个参数指明要添加列的名字和数据类型。（可以和代码 6.1 中生成 `users` 表的代码对比一下。）迁移的名字可以随便起，但一般会已 `_to_users` 结尾，Rails 会自动生成一个向 `users` 表中增加列的迁移。我们还提供了第二个参数，Rails 就得到了足够的信息，会为我们生成整个迁移文件，如代码 6.26 所示。
+上述命令的第一个参数是迁移的名字，第二个参数指明要添加列的名字和数据类型。（可以和代码 6.1 中生成 `users` 表的代码对比一下。）迁移的名字可以随便起，但一般会以 `_to_users` 结尾，Rails 会自动生成一个向 `users` 表中增加列的迁移。我们还提供了第二个参数，Rails 就得到了足够的信息，会为我们生成整个迁移文件，如代码 6.26 所示。
 
 **代码 6.26** 向 `users` 表中添加 `password_digest` 列的迁移<br />`db/migrate/[ts]_add_password_digest_to_users.rb`
 
@@ -1331,7 +1331,7 @@ end
     <h4>旁注 6.3 `let` 方法</h4>
     <p>我们可以使用 RSpec 提供的 `let` 方法便捷的在测试中定义局部变量。`let` 方法的句法看起来有点怪，不过和变量赋值语句的作用是一样的。`let` 方法的参数是一个 Symbol，后面可以跟着一个块，块中代码的返回值会赋给名为 Symbol 代表的局部变量。也就是说：</p>
     <pre>let(:found_user) { User.find_by_email(@user.email) }</pre>
-    <p>定义了一个名为 `found_user` 的变量，其值等于 `find_by_email` 的返回值。在这个测试用例的任何一个 `before` 或 `it` 块中都可以使用这个变量。使用 `let` 方法定义变量的一个好处是，它可以记住（memoize）变量的值。（memoize 是个行业术语，不是“memorize”的误拼写。）对上面的代码而言，因为 `let` 的备忘功能，`found_user` 的值会被记住，因此不管调用多少次 User 模型测试，`find_by_email` 方法只会运行依次。</p>
+    <p>定义了一个名为 `found_user` 的变量，其值等于 `find_by_email` 的返回值。在这个测试用例的任何一个 `before` 或 `it` 块中都可以使用这个变量。使用 `let` 方法定义变量的一个好处是，它可以记住（memoize）变量的值。（memoize 是个行业术语，不是“memorize”的误拼写。）对上面的代码而言，因为 `let` 的备忘功能，`found_user` 的值会被记住，因此不管调用多少次 User 模型测试，`find_by_email` 方法只会运行一次。</p>
 </div>
 
 最后，安全起见，我们还要编写一个密码长度测试，大于 6 个字符才能通过：
