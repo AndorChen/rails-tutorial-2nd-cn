@@ -998,7 +998,7 @@ Sass 提供了很多功能，可以用来简化样式表，不过代码 5.15 只
       <td class="align_right"><code>help_path</code></td>
     </tr>
     <tr>
-      <td class="align_left">“练习”</td>
+      <td class="align_left">“联系”</td>
       <td class="align_left">/contact</td>
       <td class="align_right"><code>contact_path</code></td>
     </tr>
