@@ -714,3 +714,423 @@ end
 ```
 
 <h2 id="sec-10-2">10.2 显示微博</h2>
+
+尽管我们还没实现直接在网页中发布微博的功能（将在 [10.3.2 节](#sec-10-3-2)实现），不够我们还是有办法能够显示微博，并对显示的内容进行测试。我们将按照 Twitter 的方式，用户的微博不在 `index` 页面中显示，而在 `show` 页面中，构思图如图 10.4 所示。我们会先创建一些很简单的 ERb 代码，在用户的资料页面显示微博，然后要在 [9.3.2 节](chapter9.html#sec-9-3-2)中实现的数据生成器中加入生成微博的代码，这样我们才有内容可以显示。
+
+![user microposts mockup bootstrap](images/figures/user_microposts_mockup_bootstrap.png)
+
+图 10.4：显示了微博的资料页面构思图
+
+和 [8.2.1 节](chapter8.html#sec-8-2-1)中对登录机制的介绍类似，[10.2.1 节](#sec-10-2-1)节会经常将一些元素推送到[堆栈]()http://en.wikipedia.org/wiki/Stack_(data_structure))里，然后再一个一个的从栈尾取出来。如果你理解起来有点困难，多点耐心，你的付出在 [10.2.2 节](#sec-10-2-2)会得到回报的。
+
+<h3 id="sec-10-2-1">10.2.1 </h3>
+
+我们现在用户的 request spec 中加入对显示微博的测试。我们采用的方法是，先通过预构件创建几篇微博，然后检查用户资料页面是否显示了这几篇微博，同时我们还要验证是否显示了如图 10.4 中所示的总的微博数量。
+
+创建微博我们可以使用 `let` 方法，不过如代码 10.13 所示，我们希望用户和微博的关联立即生效，这样微博才能显示在用户的资料页面中。所以，我们要使用 `let!` 方法：
+
+```ruby
+let(:user) { FactoryGirl.create(:user) }
+let!(:m1) { FactoryGirl.create(:micropost, user: user, content: "Foo") }
+let!(:m2) { FactoryGirl.create(:micropost, user: user, content: "Bar") }
+
+before { visit user_path(user) }
+```
+
+按照上面这种方式定义了微博后，我们就可以使用代码 10.19 中的代码测试用户资料页面中是否显示了这些微博。
+
+**代码 10.19** 检测用户资料页面是否显示了微博的测试<br />`spec/requests/user_pages_spec.rb`
+
+```ruby
+require 'spec_helper'
+
+describe "User pages" do
+  .
+  .
+  .
+  describe "profile page" do
+    let(:user) { FactoryGirl.create(:user) }
+    let!(:m1) { FactoryGirl.create(:micropost, user: user, content: "Foo") }
+    let!(:m2) { FactoryGirl.create(:micropost, user: user, content: "Bar") }
+
+    before { visit user_path(user) }
+
+    it { should have_selector('h1',    text: user.name) }
+    it { should have_selector('title', text: user.name) }
+
+    describe "microposts" do
+      it { should have_content(m1.content) }
+      it { should have_content(m2.content) }
+      it { should have_content(user.microposts.count) }
+    end
+  end
+  .
+  .
+  .
+end
+```
+
+注意，我们可以在关联关系的方法上调用 `count` 方法：
+
+```ruby
+user.microposts.count
+```
+
+这个 `count` 方法是很聪明的，可以直接在数据库层统计数量。也就是说，`count` 的计数过程不是微博从数据库中取出来，然后再在所得的数组上调用 `length` 方法，如果这样做的话，微博数量一旦很多的话，效率就会很低。其实，`count` 方法会直接在数据库层中统计用户 user_id` 的微博数量。如果统计数量仍然是你的程序的性能瓶颈的话，你可以使用“[计数缓存](http://railscasts.com/episodes/23-counter-cache-column)”进一步提速。
+
+在加入代码 10.21 之前，代码 10.19 中的测试是无法通过的，不过现在我们可以现在用户的资料页面中加入一些微博，如代码 10.20 所示。
+
+**代码 10.20** 在用户资料页面中加入微博<br />`app/views/users/show.html.erb`
+
+```erb
+<% provide(:title, @user.name) %>
+<div class="row">
+  .
+  .
+  .
+  <aside>
+    .
+    .
+    .
+  </aside>
+  <div class="span8">
+    <% if @user.microposts.any? %>
+      <h3>Microposts (<%= @user.microposts.count %>)</h3>
+      <ol class="microposts">
+        <%= render @microposts %>
+      </ol>
+      <%= will_paginate @microposts %>
+    <% end %>
+  </div>
+</div>
+```
+
+微博列表稍后分析，现在先看看其他部分。在这段代码中，使用 `if @user.microposts.any?`（在代码 7.23 中见过类似的用法）的作用是，如果用户没有发布微博的话，就不会显示后面的列表。
+
+还要注意一下，在代码 10.20 中我们也加入了微博的分页显示功能：
+
+```erb
+<%= will_paginate @microposts %>
+```
+
+如果你和用户索引页面中对应的代码（参见代码 9.34）比较的话，会发现，之前所用的代码是：
+
+```erb
+<%= will_paginate %>
+```
+
+之前直接调用之所以可以使用，是因为在 Users 控制器中，`will_paginate` 默认存在一个名为 `@users` 的变量（在 [9.3.3 节](chapter9.html#sec-9-3-3)中介绍过，该变量的值必须是 `AvtiveRecord::Relation` 的实例）。现在，对然我们还在 Users 控制器中，但是我们要对**微博**分页，所以 `will_paginate` 方法要指定 `@microposts` 变量作为参数。当然了，我们还要在 `show` 动作中定义 `@microposts` 变量（参见代码 10.22）。
+
+接着，我们还显示了当前微博的数量：
+
+```erb
+<h3>Microposts (<%= @user.microposts.count %>)</h3>
+```
+
+前面介绍过，`@user.microposts.count` 的作用和 `User.count` 类似，不过统计的微博数量却是建立在用户和微博的关联关系上的。
+
+最后，我们来看一下显示微博的列表：
+
+```erb
+<ol class="microposts">
+  <%= render @microposts %>
+</ol>
+```
+
+这段代码使用了一个有序列表标签 `ol`，显示一个微博列表，不过关键的部分是通过一个微博局部视图实现的。在 [9.3.4 节](chapter9.html#sec-9-3-4)中介绍过，如下的代码
+
+```erb
+<%= render @users %>
+```
+
+会使用名为 `_user.html.erb` 的局部视图渲染 `@users` 变量中的每一个用户。因此，如下的代码
+
+```erb
+<%= render @microposts %>
+```
+
+会对微博最同样的渲染操作。所以，我们要创建名为 `_micropost.html.erb` 的局部视图（存放在微博对应的视图文件夹中），如代码 10.21 所示。
+
+**代码 10.21** 显示单篇微博的局部视图<br />`app/views/microposts/_micropost.html.erb`
+
+```erb
+<li>
+  <span class="content"><%= micropost.content %></span>
+  <span class="timestamp">
+    Posted <%= time_ago_in_words(micropost.created_at) %> ago.
+  </span>
+</li>
+```
+
+这段代码使用了 `time_ago_in_words` 帮助方法，会在 [10.2.2 节](#sec-10-2-2)中介绍。
+
+至此，尽管定义了所需的全部视图，但是代码 10.19 中的测试仍旧无法通过，提示未定义 `@microposts` 变量。加入代码 10.22 中的代码后，测试就可以通过了。
+
+**代码 10.22** 在 Users 控制器的 `show` 动作中加入 `@microposts` 实例变量<br />`app/controllers/users_controller.rb`
+
+```ruby
+class UsersController < ApplicationController
+  .
+  .
+  .
+  def show
+    @user = User.find(params[:id])
+    @microposts = @user.microposts.paginate(page: params[:page])
+  end
+end
+```
+
+请注意一下 `paginate` 方法是多么的智能，它甚至可以通过关联关系，在 `microposts` 数据表中取出每个分页中要显示的微博。
+
+现在，我们可以查看一下刚编好的用户资料页面了，如图 10.5 所示，可能会出乎你的意料，这也是理所当然的，因为我们还没有发布微博呢。下面我们就来发布微博。
+
+![user profile no microposts bootstrap](assets/images/figures/user_profile_no_microposts_bootstrap.png)
+
+图 10.5：添加了显示微博代码后的用户资料页面，不过还没有微博可显示
+
+<h3 id="sec-10-2-2">10.2.2 示例微博</h3>
+
+在 [10.2.1 节](#sec-10-2-1)中为了显示微博，创建了几个视图，但是结果有点不给力。为了改变这个悲剧，我们要在 [9.3.2 节](chapter9.html#sec-9-3-2)中用到的示例数据生成器中加入生成微博数据的代码。如果给所有的用户都生成一些微博的话要用很长的时间，所以我们暂且只给前六个用户<sup>[4](#fn-4)</sup>生成微博数据，这要用到 `User.all` 方法的 `:limit` 选项：<sup>[5](#fn-5)</sup>
+
+```ruby
+users = User.all(limit: 6)
+```
+
+我们要为每个用户生成 50 篇微博（这个数量大于单页显示的 30 篇限制），使用 Faker gem 中简便的 `Lorem.sentence` 方法生成每篇微博的内容。（`Faker::Lorem.sentence` 生成的是 lorem ipsum 示例文字，我们在[第 6 章](chapter6.html)中介绍过，lorem ipsum 背后有一段[有趣的故事](http://www.straightdope.com/columns/read/2290/what-does-the-filler-text-lorem-ipsum-mean)。）代码 10.23 中显示的是修改后的示例数据生成器。
+
+**代码 10.23** 在示例数据生成器中加入生成微博的代码<br />`lib/tasks/sample_data.rake`
+
+```ruby
+namespace :db do
+  desc "Fill database with sample data"
+  task populate: :environment do
+    .
+    .
+    .
+    users = User.all(limit: 6)
+    50.times do
+      content = Faker::Lorem.sentence(5)
+      users.each { |user| user.microposts.create!(content: content) }
+    end
+  end
+end
+```
+
+当然，如果要生成示例数据，我们要执行 `db:populate` 命令：
+
+```sh
+$ bundle exec rake db:reset
+$ bundle exec rake db:populate
+$ bundle exec rake db:test:prepare
+```
+
+然后，我们就能看到 [10.2.1 节](#sec-10-2-1)中劳动的果实了，在用户资料页面显示了生成的微博。<sup>[6](#fn-6)</sup>初步结果如图 10.6 所示。
+
+![user profile microposts no styling bootstrap](assets/images/figures/user_profile_microposts_no_styling_bootstrap.png)
+
+图 10.6：用户资料页面（[/users/1](http://localhost/users/1)）中显示的尚未样式化的微博列表
+
+图 10.6 中显示的微博列表还没有加入样式，那我们就加入一些样式（参见代码 10.24）<sup>[7](#fn-7)</sup>，再看一下页面显示的效果.图 10.7 显示的是第一个用户（当前登录用户）的资料页面，图 10.8 显示的是另一个用户的资料页面，图 10.9 显示的是第一个用户资料页面的第 2 页，页面底部还显示了分页链接。注意观察这三幅图，我们可以看到微博后面显示了距离发布的时间（例如，“Posted 1 minute ago.”），这个效果是通过代码 10.21 中的 `time_ago_in_words` 方法实现的。过一会再刷新页面，你会发现这些文字依据当前时间自动更新了。
+
+**代码 10.24** 微博列表的样式（包含了本章用到的所有样式）<br />`app/assets/stylesheets/custom.css.scss`
+
+```scss
+.
+.
+.
+
+/* microposts */
+
+.microposts {
+  list-style: none;
+  margin: 10px 0 0 0;
+
+  li {
+    padding: 10px 0;
+    border-top: 1px solid #e8e8e8;
+  }
+}
+.content {
+  display: block;
+}
+.timestamp {
+  color: $grayLight;
+}
+.gravatar {
+  float: left;
+  margin-right: 10px;
+}
+aside {
+  textarea {
+    height: 100px;
+    margin-bottom: 5px;
+  }
+}
+```
+
+![user profile with microposts bootstrap](assets/images/figures/user_profile_with_microposts_bootstrap.png)
+
+图 10.7：显示了微博的用户资料页面（[/users/1](http://localhost:3000/users/1)）
+
+![other profile with microposts bootstrap](assets/images/figures/other_profile_with_microposts_bootstrap.png)
+
+图 10.8：另一个用户的资料页面，也显示了微博列表（[/users/5](http://localhost:3000/users/5)）
+
+![user profile microposts page 2 rails3 bootstrap](assets/images/figures/user_profile_microposts_page_2_rails_3_bootstrap.png)
+
+图 10.9：微博分页链接（[/users/1?page=2](http://localhost:3000/users/1?page=2)）
+
+<h2 id="sec-10-2">10.2 微博相关的操作</h2>
+
+微博的数据模型构建好了，也编写了相关的视图文件，接下来我们的开发重点是，通过网页发布微博。这实现的过程中，我们会第三次用到表单来创建资源，这一次创建的是微博资源<sup>[8](#fn-8)</sup>。本节，我们还会初步实现状态 Feed（status feed），在[第 11 章](chapter11.html)再完善。最后，和用户资源类似，我们还要实现在网页中删除微博的功能。
+
+上述功能的实现和之前的惯例有一点是不一样的，需要特别注意，那就是，微博资源相关的页面不是通过 Microposts 控制器实现的，而是依赖于 Users 和 StaticPages 控制器。这也就意味着，微博资源的路由设置是很简单的，如代码 10.25 所示。代码 10.25 中的代码所代表的符合 REST 结构的路由如[表格 10.2](#table-10-2) 所示，表中的路由只是[表格 2.3](chapter2.html#table-2-3) 的一部分。不过，路由虽然简化了，但预示着实现的过程需要更高级的技术，而不会减小代码的复杂度。从[第 2 章](chapter2.html)起我们就十分依赖脚手架，不过现在我们将舍弃脚手架的大部分功能。
+
+**代码 10.25** 微博资源的路由设置<br />`config/routes.rb`
+
+```ruby
+SampleApp::Application.routes.draw do
+  resources :users
+  resources :sessions,   only: [:new, :create, :destroy]
+  resources :microposts, only: [:create, :destroy]
+  .
+  .
+  .
+end
+```
+
+<table id="table-2" class="tabular">
+  <tbody>
+    <tr>
+      <th class="align_left"><strong>HTTP request</strong></th>
+      <th class="align_left"><strong>URI</strong></th>
+      <th class="align_left"><strong>Action</strong></th>
+      <th class="align_left"><strong>Purpose</strong></th>
+    </tr>
+    <tr class="top_bar">
+      <td class="align_left"><tt>POST</tt></td>
+      <td class="align_left">/microposts</td>
+      <td class="align_left"><code>create</code></td>
+      <td class="align_left">create a new micropost</td>
+    </tr>
+    <tr>
+      <td class="align_left"><tt>DELETE</tt></td>
+      <td class="align_left">/microposts/1</td>
+      <td class="align_left"><code>destroy</code></td>
+      <td class="align_left">delete micropost with id <code>1</code></td>
+    </tr>
+  </tbody>
+</table>
+
+表格 10.2：代码 10.25 设置的微博资源路由
+
+<h3 id="sec-10-3-1">10.3.1 访问限制</h3>
+
+开发微博资源的第一步，我们要在微博控制器中实现访问限制。我们要实现的效果很简单：若要访问 `create` 和 `destroy` 动作就要先登录。针对访问限制的 RSpec 测试如代码 10.26 所示。（在 [10.3.4 节](#sec-10-3-4)中，我们还会测试并加入第三层保护措施，确保只有微博的发布者才能删除该微博。）
+
+**代码 10.26** 限制访问微博资源的测试<br />`spec/requests/authentication_pages_spec.rb`
+
+```ruby
+require 'spec_helper'
+
+describe "Authentication" do
+  .
+  .
+  .
+  describe "authorization" do
+
+    describe "for non-signed-in users" do
+      let(:user) { FactoryGirl.create(:user) }
+      .
+      .
+      .
+      describe "in the Microposts controller" do
+
+        describe "submitting to the create action" do
+          before { post microposts_path }
+          specify { response.should redirect_to(signin_path) }
+        end
+
+        describe "submitting to the destroy action" do
+          before { delete micropost_path(FactoryGirl.create(:micropost)) }
+          specify { response.should redirect_to(signin_path) }
+        end
+      end
+      .
+      .
+      .
+    end
+  end
+end
+```
+
+上述代码没有使用即将实现的网页界面，而是直接在微博控制器层面操作：如果向 /microposts 发送 POST 请求（`POST microposts_path` 访问的是 `create` 动作），或者向 /microposts/1 发送 DELETE 请求（`delete micropost_path(micropost)` 访问的是 `destroy` 动作），则会转向登录页面——我们在代码 9.14 中就用过这种方法。
+
+我们要先对程序的代码做点重构，然后再加入程序中，让代码 10.26 中的测试通过。在 [9.2.1 节](chapter9.html#sec-9-2-1)中，我们定义了一个名为 `signed_in_user` 的事前过滤器（参见代码 9.12），确保访问相关的动作之前用户要先登录。那时，我们只需要在 Users 控制器中使用这个事前过滤器，但是现在我们在 Microposts 控制器中也要用到，那么我们就把它移到 Sessions 的帮助方法中，如代码 10.27 所示。<sup>[9](#fn-9)</sup>
+
+**代码 10.27** 把 `signed_in_user` 方法移到 Sessions 帮助方法中<br />`app/helpers/sessions_helper.rb`
+
+```ruby
+module SessionsHelper
+  .
+  .
+  .
+  def current_user?(user)
+    user == current_user
+  end
+
+  def signed_in_user
+    unless signed_in?
+      store_location
+      redirect_to signin_url, notice: "Please sign in."
+    end
+  end
+  .
+  .
+  .
+end
+```
+
+为了避免代码重复，同时还要把 `signed_in_user` 从 Users 控制器中删掉。
+
+加入了代码 10.27 之后，我们就可以在 Microposts 控制器中使用 `signed_in_user` 方法了，因此我们就可以使用代码 10.28 中的事前过滤器来限制访问 `create` 和 `destroy` 动作了。（因为我们没有使用命令行生成 Microposts 控制器文件，因此需要手动创建。）
+
+**代码 10.28** 在 Microposts 控制器中加入访问限制功能<br />`app/controllers/microposts_controller.rb`
+
+```ruby
+class MicropostsController < ApplicationController
+  before_filter :signed_in_user
+
+  def create
+  end
+
+  def destroy
+  end
+end
+```
+
+注意，我们没有明确指定事前过滤器要限制的动作有哪几个，因为默认情况下仅有的两个动作都会被限制。如果我们要加入第三个动作，例如 `index` 动作，未登录的用户也可以访问，那么我们就要明确的指定要限制的动作了：
+
+```ruby
+class MicropostsController < ApplicationController
+  before_filter :signed_in_user, only: [:create, :destroy]
+
+  def index
+  end
+
+  def create
+  end
+
+  def destroy
+  end
+end
+```
+
+现在，测试应该可以通过了：
+
+```sh
+$ bundle exec rspec spec/requests/authentication_pages_spec.rb
+```
+
+<h3 id="sec-10-3-2">10.3.2 发布微博</h3>
+
