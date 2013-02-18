@@ -1422,7 +1422,7 @@ $ bundle exec rake cucumber
 
 （鉴于某些原因，我经常使用的命令是 `rake cucumber:ok`。）
 
-我们只是写了一些纯文本，所以毫无意外，Cucumber 场景现在不会通过。若要让测试通过，我们要新建一个步骤定义文件，把场景中的纯文本和 Ruby 代码对应起来。步骤定义文件存放在 `features/step_definition` 文件夹中，我盟要将其命名为 `authentication_steps.rb`。
+我们只是写了一些纯文本，所以毫无意外，Cucumber 场景现在不会通过。若要让测试通过，我们要新建一个步骤定义文件，把场景中的纯文本和 Ruby 代码对应起来。步骤定义文件存放在 `features/step_definition` 文件夹中，我们要将其命名为 `authentication_steps.rb`。
 
 以 `Feature` 和 `Scenario` 开头的行基本上只被视作文档，其他的行则都要和 Ruby 代码对应。例如，功能文件中下面这行
 
@@ -1674,7 +1674,7 @@ $ heroku run console
   <a class="next_page" href="chapter9.html">第九章 更新、显示和删除用户 &raquo;</a>
 </div>
 
-1. 另外一个常见的 session 处理方式是，在一定时间之后失效。这种方式特别适合包含敏感信心的网站，例如银行和交易账户。
+1. 另外一个常见的 session 处理方式是，在一定时间之后失效。这种方式特别适合包含敏感信息的网站，例如银行和交易账户。
 2. 图片来自 <http://www.flickr.com/photos/hermanusbackpackers/3343254977/>
 3. 我选择这么生成记忆权标是因为看了 Railscasts 第 274 集《[Remember Me & Reset Password](http://railscasts.com/episodes/274-remember-me-reset-password)》。
 4. Active Record 支持的其他回调函数[在 Rails 指南中](http://guides.rubyonrails.org/active_record_validations_callbacks.html#callbacks-overview)有介绍。
