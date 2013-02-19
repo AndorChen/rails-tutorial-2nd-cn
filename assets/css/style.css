@@ -674,14 +674,6 @@ body {
   margin: 0 auto;
 }
 
-.main code,
-.main tt {
-    background-color: #DEEAC9;
-    border: 1px solid #CAD5B7;
-    border-radius: 3px;
-    padding: 1px 3px;
-}
-
 .main .center {
   text-align: center;
 }
@@ -788,7 +780,7 @@ body {
 }
 
 .main pre {
-  line-height: 1.2em;
+  line-height: 1.5;
   font-family: monospace;
 }
 
