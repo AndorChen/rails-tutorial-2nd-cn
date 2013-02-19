@@ -1031,8 +1031,8 @@ end
 至此，上面 Alice 遇到的问题就解决了，数据库会存储请求 1 创建的用户，不会存储请求 2 创建的用户，因为它违反了唯一性限制。（在 Rails 的日志中会显示一个错误，不过无大碍。其实我们可以捕获抛出的 `ActiveRecord::StatementInvalid` 异常（[Insoshi](http://github.com/insoshi/insoshi/blob/master/app/controllers/people_controller.rb) 就这么做了），不过本教程不会涉及异常处理。）为 `email` 列建立索引同时也解决了 [6.1.4 节](#sec-6-1-4)中提到的 `find_by_email` 的效率问题（参阅[旁注 6.2](#box-6-2)）。
 
 <div id="box-6-2" class="aside">
-    <p>创建数据库列时，要考虑是否会用这个列进行查询。例如，代码 6.2 中的迁移，创建了 `email` 列，<a href="/chapter7.html">第七章</a>中实现的用户登录功能，会通过提交的 Email 地址查询对应的用户记录。按照现有的数据模型，使用 Email 地址查找用户的唯一方式是遍历数据库中所有的用户记录，对比提交的 Email 地址和记录中的 `email` 列，看看是否一致。在数据库的术语中，这叫做“全表扫描（full-table scan）”，对一个有上千用户的网站而言，这可不是一件轻松的事。</p>
-    <p>为 `email` 列建立索引则可以解决这个问题。我们可以将数据库索引比拟成书籍的索引。如果要在一本书中找出某个字符串（例如 `"foobar"`）出现的所有位置，我们需要翻看书中的每一页。但是如果有索引的话，只需在索引中找到 `"foobar"` 条目，就能看到所有包含 `"foobar"` 的页码。数据库索引基本上也是这种原理。</p>
+    <p>创建数据库列时，要考虑是否会用这个列进行查询。例如，代码 6.2 中的迁移，创建了 <code>email</code> 列，<a href="/chapter7.html">第七章</a>中实现的用户登录功能，会通过提交的 Email 地址查询对应的用户记录。按照现有的数据模型，使用 Email 地址查找用户的唯一方式是遍历数据库中所有的用户记录，对比提交的 Email 地址和记录中的 <code>email</code> 列，看看是否一致。在数据库的术语中，这叫做“全表扫描（full-table scan）”，对一个有上千用户的网站而言，这可不是一件轻松的事。</p>
+    <p>为 <code>email</code> 列建立索引则可以解决这个问题。我们可以将数据库索引比拟成书籍的索引。如果要在一本书中找出某个字符串（例如 <code>"foobar"</code>）出现的所有位置，我们需要翻看书中的每一页。但是如果有索引的话，只需在索引中找到 <code>"foobar"</code> 条目，就能看到所有包含 <code>"foobar"</code> 的页码。数据库索引基本上也是这种原理。</p>
 </div>
 
 <h2 id="sec-6-3">6.3 加上安全密码</h2>
@@ -1328,10 +1328,10 @@ end
 再次用到了 `let` 方法，还用到了 `specify` 方法。`specify` 是 `it` 方法的别名，如果你觉得某个地方用 `it` 读起来怪怪的，就可以换用 `specify`。本例中，“it should not equal wrong user”读起来很顺，不过“user: user with invalid password should be false”有点累赘，换用“specify: user with invalid password should be false”感觉就好些。
 
 <div id="box-6-3" class="aside">
-    <h4>旁注 6.3 `let` 方法</h4>
-    <p>我们可以使用 RSpec 提供的 `let` 方法便捷的在测试中定义局部变量。`let` 方法的句法看起来有点怪，不过和变量赋值语句的作用是一样的。`let` 方法的参数是一个 Symbol，后面可以跟着一个块，块中代码的返回值会赋给名为 Symbol 代表的局部变量。也就是说：</p>
+    <h4>旁注 6.3 <code>let</code> 方法</h4>
+    <p>我们可以使用 RSpec 提供的 <code>let</code> 方法便捷的在测试中定义局部变量。<code>let</code> 方法的句法看起来有点怪，不过和变量赋值语句的作用是一样的。<code>let</code> 方法的参数是一个 Symbol，后面可以跟着一个块，块中代码的返回值会赋给名为 Symbol 代表的局部变量。也就是说：</p>
     <pre>let(:found_user) { User.find_by_email(@user.email) }</pre>
-    <p>定义了一个名为 `found_user` 的变量，其值等于 `find_by_email` 的返回值。在这个测试用例的任何一个 `before` 或 `it` 块中都可以使用这个变量。使用 `let` 方法定义变量的一个好处是，它可以记住（memoize）变量的值。（memoize 是个行业术语，不是“memorize”的误拼写。）对上面的代码而言，因为 `let` 的备忘功能，`found_user` 的值会被记住，因此不管调用多少次 User 模型测试，`find_by_email` 方法只会运行一次。</p>
+    <p>定义了一个名为 <code>found_user</code> 的变量，其值等于 <code>find_by_email</code> 的返回值。在这个测试用例的任何一个 <code>before</code> 或 <code>it</code> 块中都可以使用这个变量。使用 <code>let</code> 方法定义变量的一个好处是，它可以记住（memoize）变量的值。（memoize 是个行业术语，不是“memorize”的误拼写。）对上面的代码而言，因为 <code>let</code> 的备忘功能，<code>found_user</code> 的值会被记住，因此不管调用多少次 User 模型测试，<code>find_by_email</code> 方法只会运行一次。</p>
 </div>
 
 最后，安全起见，我们还要编写一个密码长度测试，大于 6 个字符才能通过：

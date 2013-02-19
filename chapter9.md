@@ -1840,7 +1840,7 @@ end
 
 <div class="navigation">
   <a class="prev_page" href="chapter8.html">&laquo; 第八章 登录和退出</a>
-  <a class="next_page" href="chapter10.html">第十章 用户的微博&raquo;</a>
+  <a class="next_page" href="chapter10.html">第十章 用户的微博 &raquo;</a>
 </div>
 
 1. 图片来自 <http://www.flickr.com/photos/sashawolff/4598355045/>
