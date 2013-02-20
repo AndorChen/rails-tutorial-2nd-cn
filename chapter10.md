@@ -1002,22 +1002,22 @@ end
 <table id="table-2" class="tabular">
   <tbody>
     <tr>
-      <th class="align_left"><strong>HTTP request</strong></th>
+      <th class="align_left"><strong>HTTP 请求</strong></th>
       <th class="align_left"><strong>URI</strong></th>
-      <th class="align_left"><strong>Action</strong></th>
-      <th class="align_left"><strong>Purpose</strong></th>
+      <th class="align_left"><strong>动作</strong></th>
+      <th class="align_left"><strong>作用</strong></th>
     </tr>
     <tr class="top_bar">
       <td class="align_left"><tt>POST</tt></td>
       <td class="align_left">/microposts</td>
       <td class="align_left"><code>create</code></td>
-      <td class="align_left">create a new micropost</td>
+      <td class="align_left">创建新微博</td>
     </tr>
     <tr>
       <td class="align_left"><tt>DELETE</tt></td>
       <td class="align_left">/microposts/1</td>
       <td class="align_left"><code>destroy</code></td>
-      <td class="align_left">delete micropost with id <code>1</code></td>
+      <td class="align_left">删除 id 为 1 的微博</td>
     </tr>
   </tbody>
 </table>
