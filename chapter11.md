@@ -64,7 +64,7 @@ has many :followed users, through: :relationships, source: "followed id"
 
 ![profile_mockup_profile_name_bootstrap](assets/images/figures/user_has_many_followed_users.png)
 
-图11.7 一个简单的用户互相关注实现
+图11.7 通过user relationships建立的关注用户数据模型
 
 
 
