@@ -64,10 +64,167 @@ has many :followed users, through: :relationships, source: "followed id"
 
 ![profile_mockup_profile_name_bootstrap](assets/images/figures/user_has_many_followed_users.png)
 
-图11.7 通过user relationships建立的关注用户数据模型
+图11.7 通过 user relationships 建立的关注用户数据模型
+
+下面让我们动手实现， 首先我们通过创建一个关系模型
+
+```
+$ rails generate model Relationship follower_id:integer followed_id:integer
+```
+
+由于我们需通过 follower_id 及 followed_id 来查找关系， 我们需要为这两列数据加上索引， 如列表11.1所示。
+
+```
+class CreateRelationships < ActiveRecord::Migration 
+	def change		create table :relationships do |t| 
+			t.integer :follower id			t.integer :followed id			t.timestamps 
+	end	
+	add index :relationships, :follower id	add index :relationships, :followed id	add index :relationships, [:follower id, :followed id], unique: true	end 
+end```
+``列表11.1`` 同样设置了一个 index 来保证每一对 (``follower_id, followed_id``)也是唯一的， 这样用户就无法关注同一个用户多次 (可以和列表6.22中为保持 email 唯一的 index 做对比)：
+```
+￼add index :relationships, [:follower id, :followed id], unique: true```
+在[ 11.1.4节 ](chapter11.html#sec-11-1-4)将会看到， 在我们的用户界面，我们采用另外的方式保证了不允许关注同一个用户多次，但在这里，当一个用户创建重复关系时，通过添加一个唯一的index，我们能够触发错误(例如，使用控制台工具如 curl )。 我们也可以为关系模型添加一个唯一校验， 但因为每次我们尝试创建一个重复关系时会触发错误，所以通过添加唯一的index足以满足我们的要求。
+为了创建 ``relationships`` 数据表，我们迁移(migrate) 数据库，并和往常一样准备好测试数据库：
+``
+￼$ bundle exec rake db:migrate$ bundle exec rake db:test:prepare``
+最后的数据模型关系如图11.8所示。
+![profile_mockup_profile_name_bootstrap](assets/images/figures/relationship_model.png)
+
+图11.8 relationship数据模型。
+
+<h3 id="sec-11-1-2">11.1.2 User/Relationship 之间的关系 </h3>
+在着手实现已关注用户 (followed users) 和关注者 (followers)之前， 我们首先需要建立 users 和 relationships 之间的关系。 一个user ``has_many`` relationships, 并且由于 relationships 包含了两个 users， 所以同一个relationship 会同时 ``belongs_to`` 已关注用户 (followed users) 和关注者 (followers)。
+
+与[ 10.1.3节 ](chapter10.html#sec-10-1-3)微博类似，我们将通过关联用户来创建新的relationships， 如下所示
+```
+user.relationships.build(followed_id: ...)
+```
+首先，我们编写测试，如列表11.2所示， 我们声明一个 ``relationship`` 变量， 检查其是否 valid， 并保证 ``follower_id`` 无法访问 (如果检查可访问属性的测试通过，请检查你的 ``application.rb``已经参照列表10.6更新) 
 
 
 
+```
+require 'spec helper' describe Relationship do	let(:follower) { FactoryGirl.create(:user) }	let(:followed) { FactoryGirl.create(:user) }	let(:relationship) { follower.relationships.build(followed id: followed.id) }  
+	subject { relationship }	it { should be_valid }	
+	describe "accessible attributes" do		it "should not allow access to follower id" do
+			expect do
+				Relationship.new(follower id: follower.id)			end.should raise_error(ActiveModel::MassAssignmentSecurity::Error)		end 	endend
+```
+``列表11.2`` 测试 Relationship 创建及其属性
+spec/models/relationship_spec.rb
+
+这里需要注意， 与测试 User 和 Micropost 模型时使用``@user`` 和 ``@micropost``不同，列表11.2使用 ``let`` 替代实例变量 (instance variable )。 两者之间几乎没有差别[4](#fn-4), 但我认为使用 ``let`` 相对于使用实例变量更加清晰。 我们一开始测试 User 和 Micropost 时使用实例变量是希望读者早些接触这个重要的概念，而 ``let`` 则是略微高级的技巧，所以我们放在后面。
+
+同时我们需要对一个 relationships 中的 User 数据模型进行测试，如列表11.3所示
+
+```
+require 'spec helper'describe User do .	.	.	it { should respond_to(:feed) }	it { should respond_to(:relationships) } .	.	.end
+```
+``列表11.3`` 测试``user.relationships``的属性。
+``spec/models/user_spec.rb``
+此时，你可能会期待类似于[ 10.1.3节 ](chapter10.html#sec-10-1-3) 的应用代码， 确实，两者非常相似， 除了一点关键的不同：对于Micropost 模型而言， 我们可以说
+```
+class Micropost < ActiveRecord::Base
+	belongs_to :user
+	.
+	.
+	.
+end```
+及
+```
+class User < ActiveRecord::Base
+	has_many :microposts
+	.
+	.
+	.
+end```
+因为 ``microposts`` 数据表有一个 ``user_id`` 属性来辨识每一个用户 ([ 10.1.1节 ](chapter10.html#sec-10-1-1))。这种链接两个数据表的id项，我们称之为外键(foreign key)，且当一个 User 模型的外键为 ``user_id`` 时，Rails会自动的获知两者之间的联系：默认情况下，Rails 期望外键形如 ``<class>_id`` ，其中 ``<class>`` 是类名的小写形式。[5](#fn-5) 对于现在的情况， 尽管我们仍在和 users 打交道， 但我们是通过外键 ``follower_id`` 来辨识他们， 所以我们需要告诉rails， 如列表11.4所示[6](#fn-6)。
+```
+class User < ActiveRecord::Base
+	.
+	.
+	.
+	has_many :microposts, dependent: :destroy
+	has_many :relationships, foreign_key: "follower_id", dependent: :destroy
+	.
+	.
+	.`````列表11.4`` 实现 user/relationships ``一对多``关系
+``app/models/user.rb``
+
+由于删除一个 user 同时也应该删除该 user 的 relationships， 于是我们加入了``dependent: :destroy``；我们把这个测试留作练习([ 11.5节 ](chapter11.html#sec-11-5))。
+
+```
+describe Relationship do .	.	.	describe "follower methods" do		it { should respond_to(:follower) } 
+		it { should respond_to(:followed) } 
+		its(:follower) { should == follower } 
+		its(:followed) { should == followed }	end 
+end
+```
+``列表11.5`` 测试 user/relationships ``belongs_to`` 关系。
+``spec/models/relationship_spec.rb``
+
+下面我们开始写 application 代码， 我们与往常一样定义``belongs_to`` 关系。 Rails会通过符号变量获知外键名字(例如 从``:follower``中获知 ``follower_id``， 和从``:followed`` 中获知 ``followed_id``)，但由于此时没有 Followed 或 Follower 模型， 我们需要提供提供 ``User`` 类的名字。 结果如列表11.6所示。 注意，与默认生成的 Relationship 模型不同， 此时只有``followed_id``可以访问。
+
+```
+class Relationship < ActiveRecord::Base
+	attr_accessible :followed_id
+	
+	belongs_to :follower, class_name: "User"
+	belongs_to :followed,class_name: "User"
+end
+```
+``列表11.6`` 为 Relationship 模型添加``belongs_to``关系。
+``spec/models/relationship_spec.rb``
+
+尽管直到[ 11.1.5节 ](chapter11.html#sec-11-1-5)我们才会用到``followed``关系， 但同时实现 follower/followed 结构会更容易理解。
+
+此时，列表11.2和列表11.3的测试应该可以通过了。
+
+```
+$ bundle exec rspec spec/
+```
+
+<h3 id="sec-11-1-3">11.1.3 校验</h3>
+在结束这部分之前，我们将添加一些对 Relationship 模型的校验，保证其完整性。 测试 (列表11.7) 和 application 代码 (列表11.8)非常直接易懂。
+
+```
+describe Relationship do .	.	.	describe "when followed id is not present" do		before { relationship.followed id = nil }		it { should not be valid }	end	describe "when follower id is not present" do 
+		before { relationship.follower id = nil } 
+		it { should not be valid }	end 
+end
+```
+``列表 11.7`` 测试 Relationship 模型校验
+``spec/models/relationship_spec.rb``
+
+```
+class Relationship < ActiveRecord::Base 	attr accessible :followed id	belongs to :follower, class name: "User" 
+	belongs to :followed, class name: "User"	validates :follower id, presence: true	validates :followed id, presence: true end
+```
+``列表 11.8`` 添加 Relationship 模型校验
+``app/models/relationship.rb``
+
+<h3 id="sec-11-1-4">11.1.4 关注用户</h3>
+下面到了 Relationship 关系的核心部分： followed_users 及 followers。 我们首先从 followed_users 开始， 如列表 11.9所示。
+
+```
+require 'spec helper'describe User do .	.	.	it { should respond to(:relationships) } 
+	it { should respond to(:followed users) } .	.	.end
+```
+``列表 11.9`` 测试 ``user.followed_users`` 属性
+``spec/models/user_spec.rb``
+
+这里的实现第一次使用了``has_many through``：一个用户拥有多个following ``through`` 关系， 如图 11.7所示。 默认情况下， 在一个 ``has_many through``关系中，Rails 会寻找对应于singular version的关系； 换句话说，像下面的代码
+```
+has_may :followeds, through: :relationships
+``` 
+会使用 ``relationships`` 表中的 ``followed_id`` 生成一个数组。 但是，正如 [ 11.1.1节 ](chapter11.html#sec-11-1-1) 提到的，``user.followeds ``名字比较蹩脚； 若我们使用 "followed users" 作为 “followed” 的复数形式会好得多， 并使用 ``user.followed_users`` 来表示关注用户的序列。 Rails允许我们重写默认设定, 对于这个例子，使用 ``:source`` 参数 (列表 11.10)来告诉 Rails ``followed_users``列表的 source 是 ``followed`` ids集合。
+
+```
+class User < ActiveRecord::Base .	.	.	has many :microposts, dependent: :destroy	has many :relationships, foreign key: "follower id", dependent: :destroy has 	many :followed users, through: :relationships, source: :followed	.	.	.end
+```
+``列表 11.10`` 添加 User 模型的 ``followed_users`` 关系
+``app/models/user.rb``
 
 
 
