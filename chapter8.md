@@ -582,7 +582,7 @@ end
 现在登录失败时的所有测试应该都可以通过了：
 
 ```sh
-$ bundle exec rspec spec/requests/authentication pages spec.rb \
+$ bundle exec rspec spec/requests/authentication_pages_spec.rb \
 > -e "with invalid information"
 ```
 
