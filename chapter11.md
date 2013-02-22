@@ -114,7 +114,7 @@ require 'spec helper' describe Relationship do	let(:follower) { FactoryGirl.cre
 ``列表11.2`` 测试 Relationship 创建及其属性
 spec/models/relationship_spec.rb
 
-这里需要注意， 与测试 User 和 Micropost 模型时使用``@user`` 和 ``@micropost``不同，列表11.2使用 ``let`` 替代实例变量 (instance variable )。 两者之间几乎没有差别[4](#fn-4), 但我认为使用 ``let`` 相对于使用实例变量更加清晰。 我们一开始测试 User 和 Micropost 时使用实例变量是希望读者早些接触这个重要的概念，而 ``let`` 则是略微高级的技巧，所以我们放在后面。
+这里需要注意， 与测试 User 和 Micropost 模型时使用``@user`` 和 ``@micropost``不同，列表11.2使用 ``let`` 替代实例变量 (instance variable )。 两者之间几乎没有差别<sup>[4](#fn-4)</sup>, 但我认为使用 ``let`` 相对于使用实例变量更加清晰。 我们一开始测试 User 和 Micropost 时使用实例变量是希望读者早些接触这个重要的概念，而 ``let`` 则是略微高级的技巧，所以我们放在后面。
 
 同时我们需要对一个 relationships 中的 User 数据模型进行测试，如列表11.3所示
 
@@ -139,7 +139,7 @@ class User < ActiveRecord::Base
 	.
 	.
 end```
-因为 ``microposts`` 数据表有一个 ``user_id`` 属性来辨识每一个用户 ([ 10.1.1节 ](chapter10.html#sec-10-1-1))。这种链接两个数据表的id项，我们称之为外键(foreign key)，且当一个 User 模型的外键为 ``user_id`` 时，Rails会自动的获知两者之间的联系：默认情况下，Rails 期望外键形如 ``<class>_id`` ，其中 ``<class>`` 是类名的小写形式。[5](#fn-5) 对于现在的情况， 尽管我们仍在和 users 打交道， 但我们是通过外键 ``follower_id`` 来辨识他们， 所以我们需要告诉rails， 如列表11.4所示[6](#fn-6)。
+因为 ``microposts`` 数据表有一个 ``user_id`` 属性来辨识每一个用户 ([ 10.1.1节 ](chapter10.html#sec-10-1-1))。这种链接两个数据表的id项，我们称之为外键(foreign key)，且当一个 User 模型的外键为 ``user_id`` 时，Rails会自动的获知两者之间的联系：默认情况下，Rails 期望外键形如 ``<class>_id`` ，其中 ``<class>`` 是类名的小写形式。<sup>[5](#fn-5)</sup> 对于现在的情况， 尽管我们仍在和 users 打交道， 但我们是通过外键 ``follower_id`` 来辨识他们， 所以我们需要告诉rails， 如列表11.4所示<sup>[6](#fn-6)</sup>。
 ```
 class User < ActiveRecord::Base
 	.
@@ -190,16 +190,17 @@ $ bundle exec rspec spec/
 
 ```
 describe Relationship do .	.	.	describe "when followed id is not present" do		before { relationship.followed id = nil }		it { should not be valid }	end	describe "when follower id is not present" do 
-		before { relationship.follower id = nil } 
-		it { should not be valid }	end 
+		before { relationship.follower_id = nil } 
+		it { should_not be_valid }	end 
 end
 ```
 ``列表 11.7`` 测试 Relationship 模型校验
 ``spec/models/relationship_spec.rb``
 
 ```
-class Relationship < ActiveRecord::Base 	attr accessible :followed id	belongs to :follower, class name: "User" 
-	belongs to :followed, class name: "User"	validates :follower id, presence: true	validates :followed id, presence: true end
+class Relationship < ActiveRecord::Base 	attr accessible :followed id	belongs_to :follower, class_name: "User" 
+	belongs_to :followed, class_name: "User"	validates :follower_id, presence: true	validates :followed_id, presence: true 
+end
 ```
 ``列表 11.8`` 添加 Relationship 模型校验
 ``app/models/relationship.rb``
@@ -208,8 +209,8 @@ class Relationship < ActiveRecord::Base 	attr accessible :followed id	belongs 
 下面到了 Relationship 关系的核心部分： followed_users 及 followers。 我们首先从 followed_users 开始， 如列表 11.9所示。
 
 ```
-require 'spec helper'describe User do .	.	.	it { should respond to(:relationships) } 
-	it { should respond to(:followed users) } .	.	.end
+require 'spec helper'describe User do .	.	.	it { should respond_to(:relationships) } 
+	it { should respond_to(:followed_users) } .	.	.end
 ```
 ``列表 11.9`` 测试 ``user.followed_users`` 属性
 ``spec/models/user_spec.rb``
@@ -221,14 +222,142 @@ has_may :followeds, through: :relationships
 会使用 ``relationships`` 表中的 ``followed_id`` 生成一个数组。 但是，正如 [ 11.1.1节 ](chapter11.html#sec-11-1-1) 提到的，``user.followeds ``名字比较蹩脚； 若我们使用 "followed users" 作为 “followed” 的复数形式会好得多， 并使用 ``user.followed_users`` 来表示关注用户的序列。 Rails允许我们重写默认设定, 对于这个例子，使用 ``:source`` 参数 (列表 11.10)来告诉 Rails ``followed_users``列表的 source 是 ``followed`` ids集合。
 
 ```
-class User < ActiveRecord::Base .	.	.	has many :microposts, dependent: :destroy	has many :relationships, foreign key: "follower id", dependent: :destroy has 	many :followed users, through: :relationships, source: :followed	.	.	.end
+class User < ActiveRecord::Base .	.	.	has_many :microposts, dependent: :destroy	has_many :relationships, foreign_key: "follower_id", dependent: :destroy 
+	has_many :followed_users, through: :relationships, source: :followed	.	.	.end
 ```
 ``列表 11.10`` 添加 User 模型的 ``followed_users`` 关系
 ``app/models/user.rb``
 
+为了创建一个 following relationship, 我们将引入一个名为 ``follow!`` 的工具函数，这样我们便能够编写 ``user.follow!(other_user)``。(这个 ``follow!`` 函数应该总能工作， 所以和 ``create!`` ``save!`` 类似，我们使用感叹号来保证当函数运行失败时，会引发异常。) 我们也会添加一个 ``following?`` 布尔函数来检查一个用户是否关注另外一个。<sup>[7](#fn-7)</sup> 列表 11.11 中的测试将告诉您在实际中我们如何使用这些函数。
 
+```
+require 'spec helper'	describe User do .	.	.	it { should respond_to(:followed_users) } 	it { should respond_to(:following?) }	it { should respond_to(:follow!) }	.	.	.	describe "following" do	let(:other_user) { FactoryGirl.create(:user) } 	before do		@user.save		@user.follow!(other_user) 
+	end		it { should be_following(other_user) }	its(:followed_users) { should include(other_user) } endend
+```
+``列表 11.11`` 测试 "following" 工具函数 
+``spec/models/user_spec.rb``
 
+在 application 的代码中， ``following``方法接受一个 user 作为参数， 称之为 ``other_user``, 并检查该关注者的id在数据库中是否存在； ``follow!`` 方法通过 ``relationships`` 关系调用 ``create!`` 来创建 following relationship。 结果如列表 11.12所示。
 
+```
+class User < ActiveRecord::Base .		.		.		def feed		. 
+		. 
+		.		end		def following?(other_user)			relationships.find_by_followed_id(other_user.id)		end
+				def follow!(other_user) 
+			relationships.create!(followed_id: other_user.id)		end		.
+		. 
+		.end
+```
+``列表 11.12`` ``following?`` 及 ``follow!`` 工具函数
+``app/models/user.rb``
 
+在列表 11.12中 我们忽略了 user 自身，注意我们的代码为
+```
+relationships.create!(…)
+```
+而不是
+```
+self.relationships.create!(…)
+```
+但是否专门使用 ``self`` 关键字只是个人偏好而已。
 
+当然， 用户应该能够既能关注用户也可以取消关注， 可想而知，这里还有一个 ``unfollow!`` 函数， 如列表 ``11.13`` 所示<sup>[8](#fn-8)</sup>
 
+```
+require 'spec helper'	describe User do 
+		.		.		.		it { should respond_to(:follow!) } 		it { should respond_to(:unfollow!) } 		.		.		.		describe "following" do			.			.			.			describe "and unfollowing" do				before { @user.unfollow!(other_user)				it { should_not be following(other_user)				its(:followed_users) { should_not include(other_user)			end		end
+	end
+```
+``列表 11.13`` 测试取消关注用户
+``spec/models/user_spec.rb``
+
+实现 ``unfollow!`` 的代码很容易理解，通过 followed_id 找到对应 relationship 并删除它(列表 11.14)
+
+```
+class User < ActiveRecord::Base 
+	.	.	.	def following?(other_user)		relationships.find_by_followed_id(other_user.id) 
+	end	def follow!(other_ser) 
+		relationships.create!(followed_id: other_user.id)	end
+	def unfollow!(other_user)		relationships.find_by_followed_id(other_user.id).destroy	end	.
+	.
+	.end
+```
+``列表 11.14`` 通过删除 relationship 取消关注用户
+``app/models/user.rb``
+
+<h3 id="sec-11-1-5">11.1.5 关注者</h3>
+relationships 拼图的最后一块是给 ``user.followed_users`` 添加一个 `` user.follower ``方法。 从图 11.7你会发现， 从 ``relationships`` 数据表中你可以得到所有必要的信息来获取一个 followers 列表。确实，这里我们用到的技巧和实现 user following 一模一样， 调换 ``follower_id``及``followed_id``的角色。 这说明， 如果我们能够通过将这两列数据调换位置，获得一个 ``reverse_relationships``表格， 我们便可以用很少的精力实现 ``user.followers``。
+
+我们首先编写测试， 相信神奇的Rails将再一次显现威力(列表 11.15)
+
+![profile_mockup_profile_name_bootstrap](assets/images/figures/user_has_many_followers_2nd_ed.png)
+图 11.9 使用倒转后的 Relationship 模型 实现 user followers模型
+
+```
+require 'spec helper'describe User do 
+	.	.	.	it { should respond_to(:relationships) }	it { should respond_to(:followed users) }	it { should respond_to(:reverse relationships) } 
+	it { should respond_to(:followers) }	.	.	.	describe "following" do .		.		.		it { should be following(other user) } 
+		its(:followed users) { should include(other user) }	
+		describe "followed user" do			subject { other user }		its(:followers) { should include(@user) }		end		. 
+		.
+		.	end 
+end
+```
+``列表 11.15`` 测试颠倒后的 relationships。
+``spec/models/user_spec.rb``
+
+这里注意， 我们不会建立一个完整的数据库表格，来存放倒转后的 relationships。 而是通过发现 followers 和 followed users 潜在的对称关系，使用``followed_id``作为主键来模拟一个 ``reverse_relationships``表格。 换句话说， ``relationships``关系使用 ``follower_id`` 作为外键
+
+```
+has_many :relationships, foreign_key: "follower_id"
+```
+
+``reverse_relationships`` 关系使用 ``followed_id``：
+
+```
+has_many :reverse_relationships, foreign_key: "followed_id"
+```
+``followers`` 关系紧接着通过倒转 relationships 被创建， 如列表 11.16所示
+
+```
+class User < ActiveRecord::Base 
+	.	.	.	has many :reverse relationships, foreign key: "followed id",		classname: "Relationship",		dependent: :destroy	has many :followers, through: :reverse relationships, source: :follower	.
+	.
+	.end
+```
+``列表11.16`` 通过倒转 relationships 实现``user.followers``。
+``app/models/user.rb``
+
+(如 列表 11.4所示， 余下的针对``dependent :destroy``的测试留下作为作业[11.5节](chapter11.html#sec-11-1-5)) 注意为了实现数据表之间的关系，我们需要包括类名 比如下面
+```
+has_many :reverse_relationships, foreign_key: "followed_id",
+										class_name: "Relationship"
+```
+
+否则 Rails 会尝试寻找 ``ReverseRelationship`` 类，这个类并不存在。
+
+也值得注意，在此情况下我们实际上可以忽略 ``:source`` 键， 而是用下面的简单方式
+
+```
+has_many :followers, through: :reverse_relationships
+```
+对 ``:followers`` 属性而言， Rails会单一化 (singularize) "followers" 并自动寻找外键 ``follower_id``。 在此我保留了 ``:source`` 键来强调与 `` has_many :followed_users`` 关系之间的平行(parallel)结构， 你也可以选择去掉它。
+
+有了列表 11.16的代码后， following/follower 关系就完成了， 并且所以的测试应该通过：
+```
+$ bundle exec rspec spec/
+```
+
+1. 所有mock tour中出现的图片来自于 [www.flickr.com/photos/john lustig/2518452221 ](www.flickr.com/photos/john lustig/2518452221 ) 及 [www.flickr.com/photos/30775272@N05/2884963755](www.flickr.com/photos/30775272@N05/2884963755).
+
+2.  在本书第一版中，使用了 user.following 术语， 但我发现读起来有时会感觉困惑。感谢读者 Cosmo Lee 说服我修改这个术语并给我提建议如何使其理解起来更加容易。(因为我并没有100%按照他的建议做，所以如果阅读时仍感到困惑请不要怪他)
+
+3. 为了简单清晰，图 11.6没有显示 followed_users 表格的 id 列
+
+4. 请在Stack Overflow网站上参考何时应使用 let 的讨论来了解更多
+
+5. 技术上来说， Rails使用下划线分割命名的方法来将类名转换为 id。例如，"Foobar".underscore 是"foo_bar"，所以一个 Foobar对象的外键将是 foo_bar_id。(巧合的是，下划线分割命名再转换回来时使用的是驼峰命名，会将"camel_case" 转换为"CamelCase".)
+6. 如果你注意到 followed_id 同样标示了一个 user 并且担心这个解决方法会造成followed 与 follower 之间存在非对称的关系, 你已经跑在我们前面了， 我们会在 11.1.5节解决这个问题。
+7. 当你拥有大量在某个领域建立模型的经验后，你总能提前猜到这样的工具 (utility) 方法，而且当你没有猜到时，你总能发现自己动手写这样的方法来使测试更加干净整洁。 在当前这种情况下，你没有猜到他们的话也很正常。 软件开发经常是一个迭代过程，你编写代码直到软件变得很难看，然后开始重构它， 但为了简洁，该教材采取的是一条龙结束的过程。
+8. 事实上unfollow！方法失败时并没有引发异常，我甚至不知道 Rails如何提示一个失败的删除。 但我们使用了感叹号来与follow！保持一致
+
