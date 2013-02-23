@@ -886,7 +886,7 @@ end
 self.current_user = user
 ```
 
-这行代码创建了 `current_user` 方法，可以在控制器和视图中使用，所以你既可以这样用：
+这行代码创建了 `current_user` 实例变量，可以在控制器和视图中使用，所以你既可以这样用：
 
 ```ruby
 <%= current_user.name %>
