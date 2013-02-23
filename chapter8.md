@@ -744,7 +744,7 @@ before_save :create_remember_token
 当 Rails 执行到这行代码时，会寻找一个名为 `create_remember_token` 的方法，然后在保存用户之前执行这个方法。其二，`create_remember_token` 只会在 User 模型内部使用，所以就没必要把它开放给用户之外的对象了。在 Ruby 中，我们可以使用 `private` 关键字（译者注：其实 `private` 是方法而不是关键字，请参阅《Ruby 编程语言》P233）限制方法的可见性：
 
 ```ruby
-pivate
+private
 
   def create_remember_token
     # Create the token.
