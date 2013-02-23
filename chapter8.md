@@ -170,7 +170,7 @@ $ bundle exec rspec spec/
 从图 8.2 我们可以看出，如果提交的数据不正确，我们会重新渲染“注册”页面，还切会显示一个错误提示消息。这个错误提示是 Flash 消息，我们可以通过下面的测试验证：
 
 ```ruby
-it { should have selector('div.alert.alert-error', text: 'Invalid') }
+it { should have_selector('div.alert.alert-error', text: 'Invalid') }
 ```
 
 （在[第七章](chapter7.html)练习中的代码 7.32 中出现过类似的代码。）我们要查找的元素是：
@@ -744,7 +744,7 @@ before_save :create_remember_token
 当 Rails 执行到这行代码时，会寻找一个名为 `create_remember_token` 的方法，然后在保存用户之前执行这个方法。其二，`create_remember_token` 只会在 User 模型内部使用，所以就没必要把它开放给用户之外的对象了。在 Ruby 中，我们可以使用 `private` 关键字（译者注：其实 `private` 是方法而不是关键字，请参阅《Ruby 编程语言》P233）限制方法的可见性：
 
 ```ruby
-pivate
+private
 
   def create_remember_token
     # Create the token.
@@ -1142,7 +1142,7 @@ end
 //= require jquery
 //= require jquery_ujs
 //= require bootstrap
-//= require tree .
+//= require_tree .
 ```
 
 引入文件的功能是由 Sprockets 实现的，而文件本身是由 [5.1.2 节](chapter5.html#sec-5-1-2)中添加的 `bootstrap-sass` gem 提供的。
