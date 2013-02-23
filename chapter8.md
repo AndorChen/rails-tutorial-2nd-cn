@@ -1142,7 +1142,7 @@ end
 //= require jquery
 //= require jquery_ujs
 //= require bootstrap
-//= require tree .
+//= require_tree .
 ```
 
 引入文件的功能是由 Sprockets 实现的，而文件本身是由 [5.1.2 节](chapter5.html#sec-5-1-2)中添加的 `bootstrap-sass` gem 提供的。
