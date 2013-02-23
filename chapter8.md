@@ -170,7 +170,7 @@ $ bundle exec rspec spec/
 从图 8.2 我们可以看出，如果提交的数据不正确，我们会重新渲染“注册”页面，还切会显示一个错误提示消息。这个错误提示是 Flash 消息，我们可以通过下面的测试验证：
 
 ```ruby
-it { should have selector('div.alert.alert-error', text: 'Invalid') }
+it { should have_selector('div.alert.alert-error', text: 'Invalid') }
 ```
 
 （在[第七章](chapter7.html)练习中的代码 7.32 中出现过类似的代码。）我们要查找的元素是：
