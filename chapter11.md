@@ -631,6 +631,679 @@ $ bundle exec rake db:populate
 $ bundle exec rake db:test:prepare
 ```
 
+<h3 id="sec-11-2-2">11.2.2 数量统计和关注表单</h3>
+
+现在用户已经有关注的人和粉丝了，我们要更新一下用户资料页面和首页，把这些变动显示出来。首先，我们要创建一个关注和取消关注的表单，然后再创建显示被关注用户列表和粉丝列表的页面。
+
+我们在 [11.1.1 节](#sec-11-1-1)中说过，“following”这个词作为属性名是有点奇怪的（因为 `user.following` 既可以理解为被关注的用户，也可以理解为关注的用户），但可以作为标签使用，例如，可以说“50 following”。其实，Twitter 就使用了这种标签形式，图 11.1 中的构思图沿用了这种表述，这部分详细的构思如图 11.10 所示。
+
+![stats_partial_mockup](assets/images/figures/stats_partial_mockup.png)
+
+图 11.10：数量统计局部视图的构思图
+
+图 11.10 中显示的数量统计包含了当前用户关注的用户和关注了该用户的粉丝数，二者又分别链接到了各自详细的用户列表页面。在[第五章](chapter5.html)中，我们使用 `#` 占位符代替真是的网址，因为那时我们还没怎么接触路由。现在，虽然在 [11.2.3 节](#sec-11-2-3)中才会创建所需的页面，不过我们可以先设置路由，如代码 11.18 所示。这段代码在 `resources` 块中使用了 `:member` 方法，以前没用过，你可以猜测一下这个方法的作用是什么。（注意，代码 11.18 是用来替换原来的 `resources :users` 的。）
+
+**代码 11.18** 把 `following` 和 `folloers` 动作加入 Users 控制器的路由中<br />`config/routes.rb`
+
+```ruby
+SampleApp::Application.routes.draw do
+  resources :users do
+    member do
+      get :following, :followers
+    end
+  end
+  .
+  .
+  .
+end
+```
+
+你可能猜到了，设定上述路由后，得到的 URI 地址应该是类似 /users/1/following 和 /users/1/folloers 这种形式，不错，代码 11.18 的作用确实如此。因为这两个页面都是用来**显示**数据的，所以我们使用了 `get` 方法，指定这两个地址响应的是 GET 请求。（符合 REST 架构对这种页面的要求）。路由设置中使用的 `member` 方法作用是，设置这两个动作对应的 URI 地址中应该包含用户的 id。类似地，我们还可以使用 `collection` 方法，但 URI 中就没有用户 id 了，所以，如下的代码
+
+```ruby
+resources :users do
+  collection do
+    get :tigers
+  end
+end
+```
+
+设定路由后得到的 URI 是 /users/tigers（可以用来显示程序中所有的老虎）。关于路由的这种设置，更详细的说明可以阅读 Rails 指南中的《[Rails Routing from the Outside In](http://guides.rubyonrails.org/routing.html)》一文。代码 11.18 所生成的路由如[表格 11.1](#table-11-1) 所示。请留意一下被关注用户和粉丝页面的具名路由是什么，稍后我们会用到。为了避免用词混淆，在“following”路由中我们没有使用“followed users”这种说法，而沿用了 Twitter 的方式，采用“following”这个词，因为“followed users” 这种用法会生成 `followed_users_user_path` 这种奇怪的具名路由。如[表格 11.1](#table-11-1) 所示，我们选择使用“following”这个词，因此得到的具名路由是 `following_user_path`。
+
+<table id="table-11-1" class="tabular">
+  <tbody>
+    <tr>
+      <th class="align_left"><strong>HTTP 请求</strong></th>
+      <th class="align_left"><strong>URI</strong></th>
+      <th class="align_left"><strong>动作</strong></th>
+      <th class="align_left"><strong>具名路由</strong></th>
+    </tr>
+    <tr class="top_bar">
+      <td class="align_left"><tt>GET</tt></td>
+      <td class="align_left">/users/1/following</td>
+      <td class="align_left"><code>following</code></td>
+      <td class="align_left"><code>following_user_path(1)</code></td>
+    </tr>
+    <tr>
+      <td class="align_left"><tt>GET</tt></td>
+      <td class="align_left">/users/1/followers</td>
+      <td class="align_left"><code>followers</code></td>
+      <td class="align_left"><code>followers_user_path(1)</code></td>
+    </tr>
+  </tbody>
+</table>
+
+表格 11.1：代码 11.18 中设置的路由生成的 REST 路由
+
+设好了路由后，我们来编写对数量统计局部视图的测试。（原本我们可以先写测试的，但是如果没加入所需的路由设置，可能无从下手编写测试。）数量统计局部视图会出现在用户资料页面和首页中，代码 11.19 只对首页进行了测试。
+
+**代码 11.19** 测试首页中显示的关注和粉丝数量统计<br />`spec/requests/static_pages_spec.rb`
+
+```ruby
+require 'spec_helper'
+
+describe "StaticPages" do
+  .
+  .
+  .
+  describe "Home page" do
+    .
+    .
+    .
+    describe "for signed-in users" do
+      let(:user) { FactoryGirl.create(:user) }
+      before do
+        FactoryGirl.create(:micropost, user: user, content: "Lorem")
+        FactoryGirl.create(:micropost, user: user, content: "Ipsum")
+        sign_in user
+        visit root_path
+      end
+
+      it "should render the user's feed" do
+        user.feed.each do |item|
+          page.should have_selector("li##{item.id}", text: item.content)
+        end
+      end
+
+      describe "follower/following counts" do
+        let(:other_user) { FactoryGirl.create(:user) }
+        before do
+          other_user.follow!(user)
+          visit root_path
+        end
+
+        it { should have_link("0 following", href: following_user_path(user)) }
+        it { should have_link("1 followers", href: followers_user_path(user)) }
+      end
+    end
+  end
+  .
+  .
+  .
+end
+```
+
+上述测试的核心是，检测页面中是否显示了关注和粉丝数，以及是否指向了正确的地址：
+
+```ruby
+it { should have_link("0 following", href: following_user_path(user)) }
+it { should have_link("1 followers", href: followers_user_path(user)) }
+```
+
+我们用到了[表格 11.1](#table-11-1)中的具名路由来测试链接是否指向了正确的地址。还有一处要注意一下，这里的“followers”是作为标签使用的，所以我们会一直用复数形式，即使只有一个粉丝也是如此。
+
+数量统计局部视图的代码很简单，在一个 `div` 元素中显示几个链接就行了，如代码 11.20 所示。
+
+**代码 11.20** 显示关注数量统计的局部视图<br />`app/views/shared/_stats.html.erb`
+
+```erb
+<% @user ||= current_user %>
+<div class="stats">
+  <a href="<%= following_user_path(@user) %>">
+    <strong id="following" class="stat">
+      <%= @user.followed_users.count %>
+    </strong>
+    following
+  </a>
+  <a href="<%= followers_user_path(@user) %>">
+    <strong id="followers" class="stat">
+      <%= @user.followers.count %>
+    </strong>
+    followers
+  </a>
+</div>
+```
+
+因为这个局部视图会同时在用户资料页面和首页中显示，所以在代码 11.20 的第一行中，我们要获取正确的用户对象：
+
+```erb
+<% @user ||= current_user %>
+```
+
+我们在[旁注 8.2](chapter8.html#box-8-2)中介绍过这样的用法，如果 `@user` 不是 `nil`（在用户资料页面），这行代码就没什么效果，而如果是 `nil`（在首页）， 就会把当前用户对象赋值给 `@user`。
+
+还有一处也要注意一下，关注数量和粉丝数量是通过关联获取的，分别使用 `@user.followed_users.count` 和 `@user.followers.count`。
+
+我们可以和代码 10.20 中获取微博数量的代码对比一下，微博的数量是通过 `@user.microposts.count` 获取的。
+
+最后还有一些细节需要注意下，那就是某些元素的 CSS id，例如
+
+```html
+<strong id="following" class="stat">
+...
+</strong>
+```
+
+这些 id 是为 [11.2.5 节](#sec-11-2-5)中实现 Ajax 功能服务的，Ajax 会通过独一无二的 id 获取页面中的元素。
+
+编好了局部视图，把它放入首页中就很简单了，如代码 11.21 所示。（加入局部视图后，代码 11.19 中的测试也就会通过了。）
+
+**代码 11.21** 在首页中显示的关注和粉丝数量统计<br />`app/views/static_pages/home.html.erb`
+
+```erb
+<% if signed_in? %>
+      .
+      .
+      .
+      <section>
+        <%= render 'shared/user_info' %>
+      </section>
+      <section>
+        <%= render 'shared/stats' %>
+      </section>
+      <section>
+        <%= render 'shared/micropost_form' %>
+      </section>
+      .
+      .
+      .
+<% else %>
+  .
+  .
+  .
+<% end %>
+```
+
+我们会添加一些 SCSS 代码来美化一下数量统计部分，如代码 11.22 所示（这段代码包含了本章用到的所有样式）。添加样式后的页面如图 11.11 所示。
+
+**代码 11.22** 首页侧边栏的 SCSS 样式<br />`app/assets/stylesheets/custom.css.scss`
+
+```scss
+.
+.
+.
+
+/* sidebar */
+.
+.
+.
+.stats {
+  overflow: auto;
+  a {
+    float: left;
+    padding: 0 10px;
+    border-left: 1px solid $grayLighter;
+    color: gray;
+    &:first-child {
+      padding-left: 0;
+      border: 0;
+    }
+    &:hover {
+      text-decoration: none;
+      color: $blue;
+    }
+  }
+  strong {
+    display: block;
+  }
+}
+
+.user_avatars {
+  overflow: auto;
+  margin-top: 10px;
+  .gravatar {
+    margin: 1px 1px;
+  }
+}
+.
+.
+.
+```
+
+![home page follow stats bootstrap](assets/images/figures/home_page_follow_stats_bootstrap.png)
+
+图 11.11：显示了关注数量统计的首页
+
+稍后我们再把数量统计局部视图加入用户资料页面，现在先来编写关注和取消关注按钮的局部视图，如代码 11.23 所示。
+
+**代码 11.23** 关注和取消关注表单<br />`app/views/users/_follow_form.html.erb`
+
+```erb
+<% unless current_user?(@user) %>
+  <div id="follow_form">
+  <% if current_user.following?(@user) %>
+    <%= render 'unfollow' %>
+  <% else %>
+    <%= render 'follow' %>
+  <% end %>
+  </div>
+<% end %>
+```
+
+这段代码其实也没做什么，只是把具体的工作分配给 `follow` 和 `unfollow` 局部视图了，这样我们就要再次设置路由，加入 Relationships 资源，参照 Microposts 资源的设置（参见代码 10.25），如代码 11.24 所示。
+
+**代码 11.24** 添加 Relationships 资源的路由设置<br />`config/routes.rb`
+
+```ruby
+SampleApp::Application.routes.draw do
+  .
+  .
+  .
+  resources :sessions,      only: [:new, :create, :destroy]
+  resources :microposts,    only: [:create, :destroy]
+  resources :relationships, only: [:create, :destroy]
+  .
+  .
+  .
+end
+```
+
+`follow` 和 `unfollow` 局部视图的代码分别如代码 11.25 和代码 11.26 所示。
+
+**代码 11.25** 关注用户的表单<br />`app/views/users/_follow.html.erb`
+
+```erb
+<%= form_for(current_user.relationships.build(followed_id: @user.id)) do |f| %>
+  <div><%= f.hidden_field :followed_id %></div>
+  <%= f.submit "Follow", class: "btn btn-large btn-primary" %>
+<% end %>
+```
+
+**代码 11.26** 取消关注用户的表单<br />`app/views/users/_unfollow.html.erb`
+
+```erb
+<%= form_for(current_user.relationships.find_by_followed_id(@user),
+             html: { method: :delete }) do |f| %>
+  <%= f.submit "Unfollow", class: "btn btn-large" %>
+<% end %>
+```
+
+这两个表单都使用了 `form_for` 来处理 Relationship 模型对象，二者之间主要的不同点是，代码 11.25 中的代码是构建一个新的“关系”，而代码 11.26 是查找现有的“关系”。很显然，第一个表单会向 Relationships 控制器发送 POST 请求，创建“关系”；而第二个表单发送的是 DELETE 请求，销毁“关系”。（两个表单用到的动作会在 [11.2.4 节](#sec-11-2-4)编写。）你可能还注意到了，这两个表单中除了按钮之外什么内容也没有，但是还要传送 `followed_id`，我们会调用 `hidden_fields` 方法将其加入，生成的 HTML 如下：
+
+```html
+<input id="followed_relationship_followed_id"
+name="followed_relationship[followed_id]"
+type="hidden" value="3" />
+```
+
+隐藏的 `input` 表单域会把所需的信息包含在表单中，但是在浏览器中不会显示出来。
+
+现在我们可以在页面中加入关注表单和关注数量统计了，只需渲染相应的局部视图即可，如代码 11.27 所示。在用户资料页面中，根据实际的关注情况，会分别显示关注按钮或取消关注按钮，如图 11.12 和图 11.13 所示。
+
+**代码 11.27** 在用户资料页面加入关注表单和关注数量统计<br />`app/views/users/show.html.erb`
+
+```erb
+<% provide(:title, @user.name) %>
+<div class="row">
+  <aside class="span4">
+    <section>
+      <h1>
+        <%= gravatar_for @user %>
+        <%= @user.name %>
+      </h1>
+    </section>
+    <section>
+      <%= render 'shared/stats' %>
+    </section>
+  </aside>
+  <div class="span8">
+    <%= render 'follow_form' if signed_in? %>
+    .
+    .
+    .
+  </div>
+</div>
+```
+
+![profile follow button bootstrap](assets/images/figures/profile_follow_button_bootstrap.png)
+
+图 11.12：显示了关注按钮的用户资料页面（[/users/2](http://localhost:3000/users/2)）
+
+![profile unfollow button bootstrap](assets/images/figures/profile_unfollow_button_bootstrap.png)
+
+图 11.13：显示了取消关注按钮的用户资料页面（[/users/6](http://localhost:3000/users/6)）
+
+稍后我们会让这些按钮起作用，而且我们会使用两种实现方式，一种是常规方式（[11.2.4 节](#sec-11-2-4)），另一种是使用 Ajax 的方式（[11.2.5 节](#sec-11-2-5)）。不过在此之前，我们要完成用户界面的制作，创建显示关注的用户列表和粉丝列表的页面。
+
+<h3 id="sec-11-2-3">11.2.3 关注列表和粉丝列表页面</h3>
+
+显示关注列表和粉丝列表的页面基本上是重组用户的资料页面和用户索引页面（参见 [9.3.1 节](chapter9.html#sec-9-3-1)），在侧边栏中显示用户的信息（包括关注数量统计），再列出用户列表。除此之外，还会在侧边栏中显示一个由用户的头像组成的栅格。构思图如图 11.14（关注的人）和图 11.15（粉丝们）所示。
+
+![following mockup bootstrap](assets/images/figures/following_mockup_bootstrap.png)
+
+图 11.14：关注列表页面的构思图
+
+![followers mockup bootstrap](assets/images/figures/followers_mockup_bootstrap.png)
+
+图 11.15：粉丝列表页面的构思图
+
+首先，我们要让这两个页面的地址可访问，按照 Twitter 的方式，访问这两个页面都需要先登录，测试如代码 11.28 所示。用户登录后，页面中应该分别显示关注的用户列表和粉丝列表，测试如代码 11.29 所示。
+
+**代码 11.28** 测试关注列表和粉丝列表页面的访问权限设置<br />`spec/requests/authentication_pages_spec.rb`
+
+```ruby
+require 'spec_helper'
+
+describe "Authentication" do
+  .
+  .
+  .
+  describe "authorization" do
+
+    describe "for non-signed-in users" do
+      let(:user) { FactoryGirl.create(:user) }
+
+      describe "in the Users controller" do
+        .
+        .
+        .
+        describe "visiting the following page" do
+          before { visit following_user_path(user) }
+          it { should have_selector('title', text: 'Sign in') }
+        end
+
+        describe "visiting the followers page" do
+          before { visit followers_user_path(user) }
+          it { should have_selector('title', text: 'Sign in') }
+        end
+      end
+      .
+      .
+      .
+    end
+    .
+    .
+    .
+  end
+  .
+  .
+  .
+end
+```
+
+**代码 11.29** 测试关注列表和粉丝列表页面<br />`spec/requests/user_pages_spec.rb`
+
+```ruby
+require 'spec_helper'
+
+describe "User pages" do
+  .
+  .
+  .
+  describe "following/followers" do
+    let(:user) { FactoryGirl.create(:user) }
+    let(:other_user) { FactoryGirl.create(:user) }
+    before { user.follow!(other_user) }
+
+    describe "followed users" do
+      before do
+        sign_in user
+        visit following_user_path(user)
+      end
+
+      it { should have_selector('title', text: full_title('Following')) }
+      it { should have_selector('h3', text: 'Following') }
+      it { should have_link(other_user.name, href: user_path(other_user)) }
+    end
+
+    describe "followers" do
+      before do
+        sign_in other_user
+        visit followers_user_path(other_user)
+      end
+
+      it { should have_selector('title', text: full_title('Followers')) }
+      it { should have_selector('h3', text: 'Followers') }
+      it { should have_link(user.name, href: user_path(user)) }
+    end
+  end
+end
+```
+
+在这两个页面的实现过程中，唯一一处很难想到的地方是，要意识到我们需要在 Users 控制器中添加两个动作，按照代码 11.18 中路由的设置，这两个动作分别名为 `following` 和 `followers`。在这两个动作中，需要设置页面的标题，查询用户，分别获取 `@user.followed_users` 和 `@user.followers`（要分页显示），然后再渲染页面，如代码 11.30 所示。
+
+**代码 11.30** `following` 和 `followers` 动作<br />`app/controllers/users_controller.rb`
+
+```ruby
+class UsersController < ApplicationController
+  before_filter :signed_in_user,
+                only: [:index, :edit, :update, :destroy, :following, :followers]
+  .
+  .
+  .
+  def following
+    @title = "Following"
+    @user = User.find(params[:id])
+    @users = @user.followed_users.paginate(page: params[:page])
+    render 'show_follow'
+  end
+
+  def followers
+    @title = "Followers"
+    @user = User.find(params[:id])
+    @users = @user.followers.paginate(page: params[:page])
+    render 'show_follow'
+  end
+  .
+  .
+  .
+end
+```
+
+注意，在这两个动作中都显式的调用了 `render` 方法，渲染一个名为 `show_follow` 的视图，接下来我们就来编写这个视图。这两个动作之所以使用同一个视图是因为，两种情况用到的 ERb 代码差不多，如代码 11.31 所示。
+
+**代码 11.31** 渲染关注列表和粉丝列表的 `show_follow` 视图<br />`app/views/users/show_follow.html.erb`
+
+```erb
+<% provide(:title, @title) %>
+<div class="row">
+  <aside class="span4">
+    <section>
+      <%= gravatar_for @user %>
+      <h1><%= @user.name %></h1>
+      <span><%= link_to "view my profile", @user %></span>
+      <span><b>Microposts:</b> <%= @user.microposts.count %></span>
+    </section>
+    <section>
+      <%= render 'shared/stats' %>
+      <% if @users.any? %>
+        <div class="user_avatars">
+          <% @users.each do |user| %>
+            <%= link_to gravatar_for(user, size: 30), user %>
+          <% end %>
+        </div>
+      <% end %>
+    </section>
+  </aside>
+  <div class="span8">
+    <h3><%= @title %></h3>
+    <% if @users.any? %>
+      <ul class="users">
+        <%= render @users %>
+      </ul>
+      <%= will_paginate %>
+    <% end %>
+  </div>
+</div>
+```
+
+这时，测试应该可以通过了，页面也能正常显示了，如图 11.16（关注的人）和图 11.17（粉丝们）所示。
+
+![user following bootstrap](assets/images/figures/user_following_bootstrap.png)
+
+图 11.16：显示当前用户关注的人
+
+![user followers bootstrap](assets/images/figures/user_followers_bootstrap.png)
+
+图 11.17：显示当前用户的粉丝
+
+<h3 id="sec-11-2-4">11.2.4 关注按钮的常规实现方式</h3>
+
+创建好了视图后，我们就要让关注和取消关注按钮起作用了。针对这两个按钮的测试用到了本教程中介绍的很多测试技术，也是对代码阅读能力的考察。请认真的阅读代码 11.32，直到你理解的测试的内容以及为什么这么做，再阅读后面的内容。（这段代码中有一处很小的安全疏漏，看一下你是否能发现。稍后我们会说明。）
+
+**代码 11.32** 测试关注和取消关注按钮<br />`spec/requests/user_pages_spec.rb`
+
+```ruby
+require 'spec_helper'
+
+describe "User pages" do
+  .
+  .
+  .
+  describe "profile page" do
+    let(:user) { FactoryGirl.create(:user) }
+    .
+    .
+    .
+    describe "follow/unfollow buttons" do
+      let(:other_user) { FactoryGirl.create(:user) }
+      before { sign_in user }
+
+      describe "following a user" do
+        before { visit user_path(other_user) }
+
+        it "should increment the followed user count" do
+          expect do
+            click_button "Follow"
+          end.to change(user.followed_users, :count).by(1)
+        end
+
+        it "should increment the other user's followers count" do
+          expect do
+            click_button "Follow"
+          end.to change(other_user.followers, :count).by(1)
+        end
+
+        describe "toggling the button" do
+          before { click_button "Follow" }
+          it { should have_selector('input', value: 'Unfollow') }
+        end
+      end
+
+      describe "unfollowing a user" do
+        before do
+          user.follow!(other_user)
+          visit user_path(other_user)
+        end
+
+        it "should decrement the followed user count" do
+          expect do
+            click_button "Unfollow"
+          end.to change(user.followed_users, :count).by(-1)
+        end
+
+        it "should decrement the other user's followers count" do
+          expect do
+            click_button "Unfollow"
+          end.to change(other_user.followers, :count).by(-1)
+        end
+
+        describe "toggling the button" do
+          before { click_button "Unfollow" }
+          it { should have_selector('input', value: 'Follow') }
+        end
+      end
+    end
+  end
+  .
+  .
+  .
+end
+```
+
+上述针对关注和取消关注按钮的测试，先点击这两个按钮，然后检测是否做了适当的操作。实现这两个按钮的操作需要想得深入一点：关注和取消关注的过程涉及到创建“关系”和销毁“关系”，也就是说，要在 Relationships 控制器中定义 `create` 和 `destroy` 动作（这就是我们要做的）。虽然只有登录后的用户才能看到关注和取消关注按钮，增加了一层安全措施，但是代码 11.32 中的测试疏忽了一个较为底层的问题，那就是 `create` 和 `destroy` 动作本身只能被登录后的用户访问。（这就是前面提到的安全疏漏。）代码 11.33 中的测试，分别调用 `post` 和 `delete` 方法直接访问这两个动作，检测未登录的用户是否能访问相应的动作。
+
+**代码 11.33** 测试 Relationships 控制器的访问限制<br />`spec/requests/authentication_pages_spec.rb`
+
+```ruby
+require 'spec_helper'
+
+describe "Authentication" do
+  .
+  .
+  .
+  describe "authorization" do
+
+    describe "for non-signed-in users" do
+      let(:user) { FactoryGirl.create(:user) }
+      .
+      .
+      .
+      describe "in the Relationships controller" do
+        describe "submitting to the create action" do
+          before { post relationships_path }
+          specify { response.should redirect_to(signin_path) }
+        end
+
+        describe "submitting to the destroy action" do
+          before { delete relationship_path(1) }
+          specify { response.should redirect_to(signin_path) }
+        end
+      end
+      .
+      .
+      .
+    end
+  end
+end
+```
+
+注意，我们不想多定义一个没用的 Relationship 对象，所以在针对 `delete` 请求的测试中，在具名路由中直接写入了 id 的值：
+
+```ruby
+before { delete relationship_path(1) }
+```
+
+这样的代码之所以有效，是因为程序在尝试使用 id 获取“关系”之前就应该转向到登录页面了。
+
+能够让上述测试通过的控制器代码极其简单，我们只需获得已经关注或想关注的用户对象，然后使用相应的工具方法关注或取消关注就可以了。具体的实现代码如代码 11.34 所示。
+
+**代码 11.34** Relationships 控制器<br />`app/controllers/relationships_controller.rb`
+
+```ruby
+class RelationshipsController < ApplicationController
+  before_filter :signed_in_user
+
+  def create
+    @user = User.find(params[:relationship][:followed_id])
+    current_user.follow!(@user)
+    redirect_to @user
+  end
+
+  def destroy
+    @user = Relationship.find(params[:id]).followed
+    current_user.unfollow!(@user)
+    redirect_to @user
+  end
+end
+```
+
+从代码 11.34 我们能够看出为什么前面提到的安全疏漏不是什么大问题，因为如果未登录的用户直接访问了任意一个动作（例如，使用命令行工具），`current_user` 的值就是 `nil`，那么动作的第二行代码就会抛出异常，因此得到是错误提示，而不会破坏程序或数据。不过，最好还是不要依靠这样测处理方式，因此我们前面我们才键入了额外的安全限制。
+
+至此，整个关注和取消关注的功能就都实现了，任何一个用户都可以关注或取消关注另一个用户了，你可以在程序中点击相应的链接检查一下，也可以运行测试验证一下：
+
+```sh
+$ bundle exec rspec spec/
+```
+
+<h3 id="sec-11-2-5">11.2.5 关注按钮的 Ajax 实现方式</h3>
+
+
+
+<div class="navigation">
+  <a class="prev_page" href="chapter10.html">&laquo; 第十章 用户的微博</a>
+</div>
+
 1. 构思图中的头像来自 <http://www.flickr.com/photos/john_lustig/2518452221> 和 <http://www.flickr.com/photos/30775272@N05/2884963755>
 2. 在本书第一版中，使用了 `user.following`， 但我发现有时读起来感觉怪怪的。感谢读者 Cosmo Lee 说服我修改这个表述，并建议我如何使其理解起来更容易些。(不过我并没有完全采纳他的建议，所以如果你阅读时仍感到迷惑请不要怪他。)
 3. 为了简单清晰，图 11.6 中没有显示 `followed_users` 表的 id 列
