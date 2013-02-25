@@ -467,7 +467,7 @@ The string is nonempty.
 
 <h3 id="sec-4-2-5">4.2.5 回顾一下标题的帮助方法</h3>
 
-下载我们来理解一下代码 4.2 中的 `full_title` 帮助方法：<sup>[5](#fn-5)</sup>
+下面我们来理解一下代码 4.2 中的 `full_title` 帮助方法：<sup>[5](#fn-5)</sup>
 
 ```ruby
 module ApplicationHelper
