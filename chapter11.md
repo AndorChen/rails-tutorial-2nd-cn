@@ -1298,7 +1298,179 @@ $ bundle exec rspec spec/
 
 <h3 id="sec-11-2-5">11.2.5 关注按钮的 Ajax 实现方式</h3>
 
+虽然在上一小节我们说过关注用户的功能已经完全实现了，但是在实现状态列表之前，还有可以增强的地方。你可能已经注意到了，在 [11.2.4 节](#sec-11-2-4)中，Relationships 控制器的 `create` 和 `destroy` 动作最后都返回了一开始访问的用户资料页面。也就是说，用户 A 先浏览了用户 B 的资料页面，点击关注按钮关注用户 B，然后页面会立马转回到用户 A 的资料页面。因此，对这样的过程我们就有了一个疑问：为什么要多一次页面转向呢？
 
+Ajax 可以解决这个疑问，通过向服务器发送异步请求，在不刷新页面的情况下，Ajax 就可以更新也米娜的内容。<sup>[9](#fn-9)</sup>因为在表单中处理 Ajax 请求是很常用的技术，所以 Rails 把实现 Ajax 的过程变得很简单。其实，关注和取消关注表单局部视图不用做大的改动，只要把 `form_for` 改成 `form_for..., remote: true`，Rails 就会自动使用 Ajax 处理表单了。<sup>[10](#fn-10)</sup>更新后的局部视图如代码 11.35 和代码 11.36 所示。
+
+**代码 11.35** 使用 Ajax 后的关注用户表单<br />`app/views/users/_follow.html.erb`
+
+```erb
+<%= form_for(current_user.relationships.build(followed_id: @user.id),
+             remote: true) do |f| %>
+  <div><%= f.hidden_field :followed_id %></div>
+  <%= f.submit "Follow", class: "btn btn-large btn-primary" %>
+<% end %>
+```
+
+**代码 11.36** 使用 Ajax 后的取消关注用户表单<br />`app/views/users/_unfollow.html.erb`
+
+```erb
+<%= form_for(current_user.relationships.find_by_followed_id(@user),
+             html: { method: :delete },
+             remote: true) do |f| %>
+  <%= f.submit "Unfollow", class: "btn btn-large" %>
+<% end %>
+```
+
+上述 ERb 代码生成的 HTML 没什么好说的，如果你好奇的话，可以看一下下面的示例：
+
+```html
+<form action="/relationships/117" class="edit_relationship" data-remote="true"
+      id="edit_relationship_117" method="post">
+  .
+  .
+  .
+</form>
+```
+
+从这段代码中我们可以看到，`form` 元素中设置了 `data-remote="true"` 熟悉那个，这个属性就是用来告知 Rails 该表单可以使用 JavaScript 处理的。Rails 3 遵从了“[非侵入式 JavaScript](http://railscasts.com/episodes/205-unobtrusive-javascript)”原则（unobtrusive JavaScript），没有在视图中写入整个 JavaScript 代码（在 Rails 之前的版本中却是这么做的），而是使用了一个简单的 HTML 属性。
+
+更新表单后，我们要让 Relationships 控制器可以系那个硬 Ajax 请求。针对 Ajax 的测试有点复杂，完全可以写本书了，不过我们可以先从代码 11.37 下手。这段测试中使用了 `xhr` 方法（表示“XmlHttpRequest”）发送 Ajax 请求，`xhr` 方法和之前使用的 `get`、`post`、`put` 和 `delete` 方法是类似的。然后再检查发送 Ajax 请求后，`create` 和 `destroy` 动作是否进行了正确的操作。（如果要为大量使用 Ajax 的程序编写完整的测试，请了解一下 [Selenium](http://seleniumhq.org/) 和 [Watir](http://watir.com/)。）
+
+**代码 11.37** 测试 Relationships 控制器对 Ajax 请求的响应<br />`spec/controllers/relationships_controller_spec.rb`
+
+```ruby
+require 'spec_helper'
+
+describe RelationshipsController do
+
+  let(:user) { FactoryGirl.create(:user) }
+  let(:other_user) { FactoryGirl.create(:user) }
+
+  before { sign_in user }
+
+  describe "creating a relationship with Ajax" do
+
+    it "should increment the Relationship count" do
+      expect do
+        xhr :post, :create, relationship: { followed_id: other_user.id }
+      end.to change(Relationship, :count).by(1)
+    end
+
+    it "should respond with success" do
+      xhr :post, :create, relationship: { followed_id: other_user.id }
+      response.should be_success
+    end
+  end
+
+  describe "destroying a relationship with Ajax" do
+
+    before { user.follow!(other_user) }
+    let(:relationship) { user.relationships.find_by_followed_id(other_user) }
+
+    it "should decrement the Relationship count" do
+      expect do
+        xhr :delete, :destroy, id: relationship.id
+      end.to change(Relationship, :count).by(-1)
+    end
+
+    it "should respond with success" do
+      xhr :delete, :destroy, id: relationship.id
+      response.should be_success
+    end
+  end
+end
+```
+
+代码 11.37 使我们第一次使用控制器测试（controller test），我以前经常使用控制器测试（如在本书的第一版中），但是现在我倾向于使用集成测试。这里之所以使用控制器测试是因为，`xhr` 方法在集成测试中不可用（有点让人不解）。虽然这是我们第一次使用 `xhr` 方法，但结合本书前面的内容，你应该可以理解下面这行代码的作用：
+
+```ruby
+xhr :post, :create, relationship: { followed_id: other_user.id }
+```
+
+我们看到，`xhr` 方法的第一个参数是相应的 HTTP 方法，第二个参数是动作名，第三个参数是一个 Hash，其元素是控制器中的 `params` 变量的值。和以前的测试一样，我们把相关的操作放入 `expect` 块中，检查数量是不是增加或减少了。
+
+这段测试说明，在程序中，我们要使用同等的 `create` 和 `destroy` 动作响应 Ajax 请求，这两个动作之前可响应的是普通的 POST 请求和 DELETE 请求。我们要做的是，当接到普通的 HTTP 请求时，进行页面转向（参见 [11.2.4 节](#sec-11-2-4)），而当接到 Ajax 请求时使用 JavaScript 进行处理。控制器的代码如代码 11.38 所示。（在 [11.5 节](#sec-11-5)的练习中，我们介绍了一种更简单的实现方式。）
+
+**代码 11.38** 在 Relationships 控制器中响应 Ajax 请求<br />`app/controllers/relationships_controller.rb`
+
+```ruby
+class RelationshipsController < ApplicationController
+  before_filter :signed_in_user
+
+  def create
+    @user = User.find(params[:relationship][:followed_id])
+    current_user.follow!(@user)
+    respond_to do |format|
+      format.html { redirect_to @user }
+      format.js
+    end
+  end
+
+  def destroy
+    @user = Relationship.find(params[:id]).followed
+    current_user.unfollow!(@user)
+    respond_to do |format|
+      format.html { redirect_to @user }
+      format.js
+    end
+  end
+end
+```
+
+代码 11.38 中使用了 `respond_to`
+ 方法，根据接到的请求类型进行不同的操作。（这里用到的 `respond_to` 和 RSpec 中的 `respond_to` 没任何联系。）`repond_to` 方法的写法可能有点让人迷糊，你要知道，如下的代码
+
+ ```ruby
+respond_to do |format|
+  format.html { redirect_to @user }
+  format.js
+end
+```
+
+只有一行会被执行（依据请求的类型而定）。
+
+在处理 Ajax 请求是，Rails 会自动调用文件名和动作名一样的“含有 JavaScript 的 ERb（JavaScript Embedded Ruby）”文件（扩展名为 `.js.erb`），例如 `create.js.erb` 和 `destroy.js.erb`。你可能已经猜到了，这种文件是可以包含 JavaScript 和 Ruby 代码的，可以用来处理当前页面的内容。在关注用户和取消关注用户时，更新用户资料页面的内容就需要创建这种文件。
+
+在 JS-ERb 文件中，Rails 自动提供了 jQuery 库的帮助函数，可以通过“文本对象模型（Document Object Model，DOM）”处理页面的内容。jQuery 库中有很多处理 DOM 的函数，但现在我们只会用到其中的两个。首先，我们要知道通过 id 获取 DOM 元素的美元符号，例如，要获取 `follow_form` 元素，我们可以使用如下的代码：
+
+```javascript
+$("#follow_form")
+```
+
+（参见代码 11.23，这个元素是包含表单的 `div`，而不是表单本身。）上面的句法和 CSS 一样，`#` 符号表示 CSS 中的 id。由此你可能猜到了，jQuery 和 CSS 一样，点号 `.` 表示 CSS 中的 class。
+
+我们会使用的第二个函数是 `html`，它会使用参数中指定的内容修改元素所包含的 HTML。例如，如果要把整个表单换成字符串 `"foobar"`，jQuery 代码可以这么写：
+
+```javascript
+$("#follow_form").html("foobar")
+```
+
+和常规的 JavaScript 文件不同，JS-ERb 文件还可以使用嵌入式 Ruby 代码。在 `create.js.erb` 文件中我们会把关注用户表单换成取消关注用户表单（成功关注后），并更新关注者的数量，如代码 11.39 所示。这段代码中用到了 `escape_javascript` 方法，在 JavaScript 中写入 HTML 代码必须使用这个方法对 HTML 进行转义。
+
+**代码 11.39** 创建关注“关系”的 JS-ERb 代码<br />`app/views/relationships/create.js.erb`
+
+```erb
+$("#follow_form").html("<%= escape_javascript(render('users/unfollow')) %>")
+$("#followers").html('<%= @user.followers.count %>')
+```
+
+`destroy.js.erb` 文件的内容类似，如代码 11.40 所示。
+
+**代码 11.40** 销毁关注“关系”的 JS-ERb 代码<br />`app/views/relationships/destroy.js.erb`
+
+```erb
+$("#follow_form").html("<%= escape_javascript(render('users/follow')) %>")
+$("#followers").html('<%= @user.followers.count %>')
+```
+
+加入上述代码后，你应该访问用户资料页面，看一下关注或取消关注用户后页面是不是真的没有刷新，再验证一下测试是否可以通过：
+
+```sh
+$ bundle exec rspec spec/
+```
+
+在 Rails 中使用 Ajax 可以讲的太多了，技术变化的也快，我们只是介绍了点皮毛（本书其他的内容也是如此），你可以据此为基础学习其他更高级的用法。
 
 <div class="navigation">
   <a class="prev_page" href="chapter10.html">&laquo; 第十章 用户的微博</a>
