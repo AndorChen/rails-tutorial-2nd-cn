@@ -1013,7 +1013,7 @@ $ bundle exec rspec spec/
 
 在本小节中，我们要为应用程序添加更多的用户。如果要让用户列表看上去像个列表，我们可以在浏览器中访问注册页面，然后一个一个地注册用户，不过还有更好的方法，让 Ruby 和 Rake 为我们创建用户。
 
-首先，我们要在 `Gemfile` 中加入 `faker` gem（如代码 9.29 所示），使用这个 gem，我们可以使用办真实的名字和 Email 地址创建示例用户。
+首先，我们要在 `Gemfile` 中加入 `faker` gem（如代码 9.29 所示），使用这个 gem，我们可以使用半真实的名字和 Email 地址创建示例用户。
 
 **代码 9.29** 把 `faker` 加入 `Gemfile`
 
@@ -1185,7 +1185,12 @@ describe "User pages" do
     it { should have_selector('h1', text: 'All users') }
 
     describe "pagination" do
+
+      before(:all) { 30.times { FactoryGirl.create(:user) } }
+			after(:all)  { User.delete_all }
+
       it { should have_selector('div.pagination') }
+
       it "should list each user" do
         User.paginate(page: 1).each do |user|
           page.should have_selector('li', text: user.name)
@@ -1373,7 +1378,7 @@ end
 $ rails generate migration add_admin_to_users admin:boolean
 ```
 
-这个名声生成的迁移文件（如代码 9.40 所示）会在 users 表中添加 `admin` 这一列，得到的数据模型如图 9.13 所示。
+这个命令生成的迁移文件（如代码 9.40 所示）会在 users 表中添加 `admin` 这一列，得到的数据模型如图 9.13 所示。
 
 ![user_model_admin_31](assets/images/figures/user_model_admin_31.png)
 
@@ -1686,12 +1691,12 @@ $ git merge updating-users
 
 ```sh
 $ git push heroku
-$ heroku pg:reset SHARED_DATABASE --confirm <name-heroku-gave-to-your-app>
+$ heroku pg:reset DATABASE --confirm <name-heroku-gave-to-your-app>
 $ heroku run rake db:migrate
 $ heroku run rake db:populate
 ```
 
-（如果你忘了 Heroku 程序的名字，可以直接运行 `heroku pg:reset SHARED_DATABASE`，Heroku 会告诉你程序的名字。）
+（如果你忘了 Heroku 程序的名字，可以直接运行 `heroku pg:reset DATABASE`，Heroku 会告诉你程序的名字。）
 
 还有一点需要注意，本章我们加入了程序所需的最后一个 gem，最终的 `Gemfile` 如代码 9.49 所示。
 
