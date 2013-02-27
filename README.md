@@ -24,7 +24,7 @@
 
 ## 做贡献
 
-如果你发现有翻译错误或不当之处，或者有错别字，可以在 [issues](issues) 中发贴，或者发送 pull request。
+如果你发现有翻译错误或不当之处，或者有错别字，可以在 [issues](https://github.com/AndorChen/rails-tutorial-2nd-cn/issues) 中发贴，或者发送 pull request。
 
 **注意**：请先阅读 [CONTRIBUTING.md](CONTRIBUTING.md)
 
