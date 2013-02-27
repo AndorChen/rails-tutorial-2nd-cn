@@ -16,7 +16,7 @@ layout: default
 		<li><a href="chapter8.html" title="第八章 登录和退出">第八章 登录和退出</a></li>
 		<li><a href="chapter9.html" title="第九章 更新、显示和删除用户">第九章 更新、显示和删除用户</a></li>
 		<li><a href="chapter10.html" title="第十章 用户的微博">第十章 用户的微博</a></li>
-		<li><a href="chapter11.html" title="第十一章 用户间互相关注">第十一章 关注用户（翻译中）</a></li>
+		<li><a href="chapter11.html" title="第十一章 用户间互相关注">第十一章 关注用户</a></li>
 	</ol>
 </div>
 

@@ -96,7 +96,7 @@ end
 在代码 11.1 中，我们还设置了一个组合索引（composite index），其目的是确保 (`follower_id, followed_id`) 组合是唯一的，这样用户就无法多次关注同一个用户了 (可以和代码 6.22 中为保持 Email 地址唯一的 index 做比较一下)：
 
 ```ruby
-￼add index :relationships, [:follower id, :followed id], unique: true
+add index :relationships, [:follower id, :followed id], unique: true
 ```
 
 从 [11.1.4 节](#sec-11-1-4)开始，我们会发现，在用户界面中这样的事情是不会发生的，但是添加了组合索引后，如果用户试图二次关注时，程序会抛出异常（例如，使用像 `curl` 正阳的命令行程序）。我们也可以在 Relationship 模型中添加唯一性数据验证，但因为每次尝试创建一个重复关系时都会触发错误，所以这个组合索引足以满足我们的需求了。
@@ -932,8 +932,8 @@ end
 
 ```html
 <input id="followed_relationship_followed_id"
-name="followed_relationship[followed_id]"
-type="hidden" value="3" />
+       name="followed_relationship[followed_id]"
+       type="hidden" value="3" />
 ```
 
 隐藏的 `input` 表单域会把所需的信息包含在表单中，但是在浏览器中不会显示出来。
@@ -1472,6 +1472,415 @@ $ bundle exec rspec spec/
 
 在 Rails 中使用 Ajax 可以讲的太多了，技术变化的也快，我们只是介绍了点皮毛（本书其他的内容也是如此），你可以据此为基础学习其他更高级的用法。
 
+<h2 id="sec-11-3">11.3 动态列表</h2>
+
+接下来我们要实现示例程序最难的功能：动态列表。基本上本节的内容算是全书最高深的部分了。完整的动态列表是以 [10.3.3 节](chapter10.html#sec-10-3-3)的临时动态列表为基础实现的，列表中除了当前用户自己的微博之外，还包含了他所关注用户的微博。为了实现这样的功能，我们会用到一些很高级的 Rails、Ruby 和 SQL 技术。
+
+因为我们要做的事情很多，在此之前最好先清除我们要实现的是什么样的功能。图 11.5 显示了最终要实现的动态列表，图 11.8 还是同一幅图。
+
+![page_flow_home_page_feed_mockup_bootstrap](assets/images/figures/page_flow_home_page_feed_mockup_bootstrap.png)
+
+图 11.8：显示有动态列表的用户首页构思图
+
+<h3 id="sec-11-3-1">11.3.1 目的和策略</h3>
+
+我们对动态列表的构思是很简单的。图 11.19 中显示了一个示例的 `microposts` 表和要显示的动态。动态列表就是要把当前用户所关注用户的微博（也包括当前用户自己的微博）从 `microposts` 表中取出来，如图中箭头所指。
+
+![user_feed](assets/images/figures/user_feed.png)
+
+图 11.19：id 为 1 的用户关注了 id 为 2，7，8，10 的用户后得到的动态列表
+
+因为需要把指定的用户关注用户的所有微博取出来，我们计划定义一个名为 `from_users_followed_by` 方法，以下面的方式调用：
+
+```ruby
+Micropost.from_users_followed_by(user)
+```
+
+虽然我们还不知道怎么定义这个方法，但在此之前却可以先编写测试检测它的功能是否按设想实现了。测试的关键是要覆盖三种情况：动态列表中要包含被关注用户和用户自己的微博，而且不能包含未被关注用户的微博。前面的测试已经检测了其中两种情况：代码 11.38 验证了动态列表中有用户自己的微博，而且没有未被关注用户的微博。既然我们已经实现了关注用户功能，那就加入对第三种情况的测试吧，检测动态列表中是否包含了被关注用户的微博，如代码 11.41 所示。
+
+**代码 11.41** 针对动态列表测试的最终版<br />`spec/models/user_spec.rb`
+
+```ruby
+require 'spec_helper'
+
+describe User do
+  .
+  .
+  .
+  describe "micropost associations" do
+    before { @user.save }
+    let!(:older_micropost) do
+      FactoryGirl.create(:micropost, user: @user, created_at: 1.day.ago)
+    end
+    let!(:newer_micropost) do
+      FactoryGirl.create(:micropost, user: @user, created_at: 1.hour.ago)
+    end
+    .
+    .
+    .
+    describe "status" do
+      let(:unfollowed_post) do
+        FactoryGirl.create(:micropost, user: FactoryGirl.create(:user))
+      end
+      let(:followed_user) { FactoryGirl.create(:user) }
+
+      before do
+        @user.follow!(followed_user)
+        3.times { followed_user.microposts.create!(content: "Lorem ipsum") }
+      end
+
+      its(:feed) { should include(newer_micropost) }
+      its(:feed) { should include(older_micropost) }
+      its(:feed) { should_not include(unfollowed_post) }
+      its(:feed) do
+        followed_user.microposts.each do |micropost|
+          should include(micropost)
+        end
+      end
+    end
+  end
+end
+```
+
+我们要把动态列表的实现交给 `Micropost.from_users_followed_by` 方法，如代码 11.42 所示。
+
+**代码 11.42** 在 User 模型中加入实现动态列表的方法<br />`app/models/user.rb`
+
+```ruby
+class User < ActiveRecord::Base
+  .
+  .
+  .
+  def feed
+    Micropost.from_users_followed_by(self)
+  end
+  .
+  .
+  .
+end
+```
+
+<h3 id="sec-11-3-2">11.3.2 初步实现动态列表</h3>
+
+现在我们要来定义 `Micropost.from_users_followed_by` 方法了，为了行文简洁，在后面的内容中我会使用“动态列表”指代这个方法。因为我们要实现的结果有点复杂，因此我们会一点一点的说明动态列表的实现过程。
+
+首先，我们要知道需要使用怎样的查询语句。我们要做的是，从 `microposts` 表中取出被关注用户发布的微博（也要取出用户自己的微博）。对此，我们可以使用类似下面的查询语句：
+
+```sql
+SELECT * FROM microposts
+WHERE user_id IN (<list of ids>) OR user_id = <user id>
+```
+
+写下这个查询语句时，我们假设 SQL 支持使用 `IN` 关键字检测集合是否包含指定的元素。（还好，SQL 支持。）
+
+在 [10.3.3 节](chapter10.html#sec-10-3-3)实现临时动态列表时，是调用 Active Record 中的 `where` 方法完成上面这种查询的，如代码 10.39 所示。这段代码中用到的查询很简单，只是通过当前用户的 id 取出了他发布的微博：
+
+```ruby
+Micropost.where("user_id = ?", id)
+```
+
+而现在，我们遇到的情况复杂的多，要使用类似下面的代码实现：
+
+```ruby
+where("user_id in (?) OR user_id = ?", following_ids, user)
+```
+
+（在指定查询条件时，我们使用了 Rails 中的约定，用 `users` 代替 `user.id`，Rails 会自动获取用户的 `id`。我们还省略了方法的调用者 `Micropost`，因为我们只会在 Micropost 模型中使用这个方法。）
+
+从上面的查询条件可以看出，我们需要生成一个数组，其元素为被关注用户的 id。生成这个数组的方法之一是，使用 Ruby 中的 `map` 方法，这个方法可以在任意的“可枚举（enumerable）”对象上调用，例如包含了元素的集合类对象（数组，Hash 等）。<sup>[11](#fn-11)</sup>我们在 [4.3.2 节](chapter4.html#sec-4-3-2)中举例介绍过这个方法，其用法如下：
+
+```sh
+$ rails console
+>> [1, 2, 3, 4].map { |i| i.to_s }
+=> ["1", "2", "3", "4"]
+```
+
+像上面这种在每个元素上调用同一个方法的情况是很常见的，所以 Ruby 为此定义了一种简写形式，在 `&` 符号后面跟上被调用方法的 Symbol 形式：<sup>[12](#fn-12)</sup>
+
+```sh
+>> [1, 2, 3, 4].map(&:to_s)
+=> ["1", "2", "3", "4"]
+```
+
+然后再调用 `join` 方法（参见 [4.3.1 节](chapter4.html#sec-4-3-1)），就可以将数组中的元素合并起来组成字符串，各元素之间用逗号加一个空格分开：
+
+```sh
+>> [1, 2, 3, 4].map(&:to_s).join(', ')
+=> "1, 2, 3, 4"
+```
+
+参照上面介绍的方法，我们可以在 `user.followed_users` 的每个元素上调用 `id` 方法，得到一个由被关注用户的 id 组成的数组。例如，对数据库中第 1 个用户而言，就可以用下面的代码实现：
+
+```sh
+>> User.first.followed_users.map(&:id)
+=> [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
+24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42,
+43, 44, 45, 46, 47, 48, 49, 50, 51]
+```
+
+其实，因为这种用法太普遍了，所以 Active Record 默认已经提供了：
+
+```sh
+>> User.first.followed_user_ids
+=> [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
+24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42,
+43, 44, 45, 46, 47, 48, 49, 50, 51]
+```
+
+上述代码中的 `followed_user_ids` 方法是 Active Record 根据 `has_many :followed_users` 关联（参见代码 11.10）合成的，这样我们只需在关联名的后面加上 `_ids` 就可以获取 `user.followed_users` 集合中所有用户的 id 了。用户 id 组成的字符串如下：
+
+```sh
+>> User.first.followed_user_ids.join(', ')
+=> "4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
+24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42,
+43, 44, 45, 46, 47, 48, 49, 50, 51"
+```
+
+不过，当插入 SQL 语句中时，你无须手动生成字符串，`?` 插值操作会为你代劳（同时也避免了一些数据库自检的兼容问题）。所以，我们实际要使用的只是 `user.followed_user_ids` 而已。
+
+现在这个阶段，你可能已经想到了，要使用 `Micropost.from_users_followed_by(user)`，就要在 `Micropost` 类中定义一个类方法（[4.4.1 节](chapter4.html#sec-4-4-1)简单的介绍过）。这个类方法的初步定义如代码 11.43 所示，其中包含了上述分析得到的一些代码：
+
+**代码 11.43** `from_users_followed_by` 方法的初步定义<br />`app/models/micropost.rb`
+
+```ruby
+class Micropost < ActiveRecord::Base
+  .
+  .
+  .
+  def self.from_users_followed_by(user)
+    followed_user_ids = user.followed_user_ids
+    where("user_id IN (?) OR user_id = ?", followed_user_ids, user)
+  end
+end
+```
+
+虽然代码 11.43 之前的讨论都是以假设为基础进行的，但得到的代码却是可用的。你可以运行测试验证一下，应该是可以通过的：
+
+```sh
+$ bundle exec rspec spec/
+```
+
+在某些程序中，这样的初步实现已经能满足大部分需求了。不过这不是我们最终要使用的实现方式，在继续阅读下一小节之前，你可以想一下为什么。（提示：如果用户关注了 5000 个用户呢？）
+
+<h3 id="sec-11-3-3">11.3.3 子查询（subselect）</h3>
+
+如上一小节末尾中所说的，[11.3.2 节](#sec-11-3-2)的实现方式，当动态列表中的微博数量很多时性能就会下降，这种情况可能会发生在用户关注了 5000 个用户后。本小节，我们会重新实现动态列表，在关注用户数量很多时，性能表现也会很好。
+
+[11.3.2 节](#sec-11-3-2)中所用代码的问题在于`followed_user_ids = user.followed_user_ids` 这行代码，它会把**所有**被关注用户的 id 取出存入内存，然后再创建一个元素数量和被关注用户数量相同的数组。既然代码 11.43 的目的只是为了检查集合是否包含了指定的元素，那么就一定存在一种更高效的方法，其实 SQL 真的提供了针对这种问题的优化措施：使用子查询把查询被关注用户 id 的操作放入数据库层进行。
+
+针对动态列表的重构，先从代码 11.44 中的小改动开始。
+
+**代码 11.44** 改进 `from_users_followed_by` 方法<br />`app/models/micropost.rb`
+
+```ruby
+class Micropost < ActiveRecord::Base
+  .
+  .
+  .
+  # Returns microposts from the users being followed by the given user.
+  def self.from_users_followed_by(user)
+    followed_user_ids = user.followed_user_ids
+    where("user_id IN (:followed_user_ids) OR user_id = :user_id",
+          followed_user_ids: followed_user_ids, user_id: user)
+  end
+end
+```
+
+为了给下一步做准备，我们把
+
+```ruby
+where("user_id IN (?) OR user_id = ?", followed_user_ids, user)
+```
+
+换成了等效的
+
+```ruby
+where("user_id IN (:followed_user_ids) OR user_id = :user_id",
+      followed_user_ids: followed_user_ids, user_id: user))
+```
+
+使用问号做插值虽然可以，但当我们要在多出插入同一个值时，后一种写法就方便多了。
+
+上面这段话表明，我们要在 SQL 查询语句中两次用到 `user_id`。简单来说就是，我们要把下面这行 Ruby 代码
+
+```ruby
+followed_user_ids = user.followed_user_ids
+```
+
+换成包含 SQL 语句的代码
+
+```ruby
+followed_user_ids = "SELECT followed_id FROM relationships
+                     WHERE follower_id = :user_id"
+```
+
+上面这行代码使用了 SQL 的子查询语句，那么针对 id 为 1 的用户，整个查询语句就可以写成：
+
+```sql
+SELECT * FROM microposts
+WHERE user_id IN (SELECT followed_id FROM relationships
+                  WHERE follower_id = 1)
+      OR user_id = 1
+```
+
+使用子查询后，所有的集合包含关系都会交由数据库处理，这样性能就得到提升了。<sup>[13](#fn-13)</sup>
+
+有了这些基础，我们就可以着手实现更高效的动态列表了，如代码 11.45 所示。注意，因为现在要使用纯 SQL 语句，所以 `followed_user_ids` 是被插值进语句中的，而没有通过转义的方式。（其实两种方式都可以使用，只不过这种情况使用插值操作更合理。）
+
+**代码 11.45** `from_users_followed_by` 方法的最终版本<br />`app/models/micropost.rb`
+
+```ruby
+class Micropost < ActiveRecord::Base
+  attr_accessible :content
+  belongs_to :user
+
+  validates :user_id, presence: true
+  validates :content, presence: true, length: { maximum: 140 }
+
+  default_scope order: 'microposts.created_at DESC'
+
+  def self.from_users_followed_by(user)
+    followed_user_ids = "SELECT followed_id FROM relationships
+                         WHERE follower_id = :user_id"
+    where("user_id IN (#{followed_user_ids}) OR user_id = :user_id",
+          user_id: user.id)
+  end
+end
+```
+
+这段代码结合了 Rails、Ruby 和 SQL 的优势，达到了目的，而且做的很好。（当然，子查询也不是万能的。对于更大型的网站而言，可能要使用“后台作业（background job）”异步生成动态列表。性能优化这个话题已经超出了本书的范围，你可以观看 [Scaling Rails](http://railslab.newrelic.com/scaling-rails) 系列视频来学习。）
+
+<h3 id="sec-11-3-4">11.3.4 新的动态列表</h3>
+
+编完代码 11.45，动态列表功能就实现了。提醒一下，`home` 动作所需的代码如代码 11.46 所示，这段代码生成了一个可分页显示的动态列表变量，可在视图中使用，如图 11.20 所示。<sup>[14](#fn-14)</sup>注意，`paginate` 最终会调用代码 11.45 中定义的类方法，一次只从数据库中取出 30 篇微博。（如果你想验证一下，可以查看“开发服务器”的日志。）
+
+**代码 11.46** 定义了可分页动态列表的 `home` 动作<br />`app/controllers/static_pages_controller.rb`
+
+```ruby
+class StaticPagesController < ApplicationController
+
+  def home
+    if signed_in?
+      @micropost  = current_user.microposts.build
+      @feed_items = current_user.feed.paginate(page: params[:page])
+    end
+  end
+  .
+  .
+  .
+end
+```
+
+![home_page_with_feed_bootstrap](assets/images/figures/home_page_with_feed_bootstrap.png)
+
+图 11.20：显示了动态列表的首页
+
+<h2 id="sec-11-4">11.4 小结</h2>
+
+实现了动态列表后，本书的核心示例程序就开发完了。这个程序演示了 Rails 全部的主要功能，包括模型，视图，控制器，模板，局部视图，过滤器，数据验证，回调函数，`has_many`/`belongs_to` 和 `has_many through` 关联，安全，测试，以及部署。除此之外，Rails 还有很多功能值得我们学习。你可以把本节作为后续学习的第一站，下面几小节介绍了可以对示例程序进行的功能扩展，也对后续学习提供一些参考资源。
+
+在介绍可对程序进行的功能扩展之前，最好先把本章的改动合并到主分支：
+
+```sh
+$ git add .
+$ git commit -m "Add user following"
+$ git checkout master
+$ git merge following-users
+```
+
+和之前一样，你也可以把代码推动到 GitHub，还可以部署到 Heroku：
+
+```sh
+$ git push
+$ git push heroku
+$ heroku pg:reset <DATABASE>
+$ heroku run rake db:migrate
+$ heroku run rake db:populate
+```
+
+请参照 [9.5 节](chapter9.html#sec-9-5)的说明，把第二个命令中的 `<DATABASE>` 换成正确的值。
+
+<h3 id="sec-11-4-1">11.4.1 扩展示例程序的功能</h3>
+
+本节建议的功能扩展灵感基本上都是来自常规 Web 程序的一般功能，如密码提醒和 Email 地址确认，或是来自同类型程序，例如搜索，回复和私信。自己实现几个功能扩展，可以让你从教程的跟学者变成自主程序开发者。
+
+如果开始时觉得有点难也不用奇怪，从零开始实现一个功能确实有难度。为了帮助你，我可以提两点建设性的建议。第一点，在开始实现新功能之前，浏览一下 [RailsCasts 的归档](http://railscasts.com/episodes/archive)，看一下 Ryan 是否介绍过类似的功能。<sup>[15](#fn-15)</sup>如果他介绍过，先看一下相关的视频会节省很多时间。第二点，总是在 Google 中大范围的搜索你要实现的功能，寻找相关的博文和教程。Web 程序开发是有难度的，从有经验的开发者那里取经总是会对你有所帮助的。
+
+下面列出的功能很多都是有一定挑战性的，在功能的介绍中我会给你一定的提示，告诉你实现过程中可能会用法到的工具。虽然有提示，但是这些功能实现起来比章后的练习难多了，再没下真功夫之前千万别轻言放弃。因为时间有限，我无法一对一的辅导，不过如果你对这些功能感兴趣，将来我可能会发布一些独立的文章或视频介绍一下，请到本书的网站 <http://railstutorial.org/> 订阅 Feed 获取最新的更新。
+
+#### 回复
+
+Twitter 允许用户使用“@replies” 的格式进行回复，回复也是一篇微博，不过内容的开头是 `@` 符号加用户名。回复只会出现在被回复用户的动态列表和粉丝的动态列表中。请实现一个简化的回复功能，限制回复只可以出现在接收者和发送者的动态列表中。实现的过程可能要在 `microposts` 表中加入 `in_reply_to` 列，还要在 Micropost 模型中添加 `including_replies` 作用域。
+
+因为我们的示例程序没有限制用户登录名要是唯一的，所以你可能要决定一下要采用什么方式表示用户的身份。一种方式是，结合 id 和名字，例如 `@1-michael-hartl`。另一种方式是，在注册表单中添加一个用户名字段，用户名将是唯一的，然后用来表示 @replies。
+
+#### 私信
+
+Twitter 支持在微博的前面加上字母“d”发送私信。请在示例程序中加入这个功能。实现的过程中可能要创建 Message 模型，还要使用正则表达式匹配微博的内容。
+
+#### 被关注提醒
+
+请实现当用户有新粉丝时向被关注用户发送提醒邮件的功能，并把这一功能设为可选的，这样如果用户不想接收提醒就可以不选择这个功能。实现这个功能需要学习如何在 Rails 中发送邮件，我建议观看 RailsCasts 中的《[Action Mailer in Rails 3](http://railscasts.com/episodes/206-action-mailer-in-rails-3)》一集来学习。
+
+#### 密码提醒
+
+现在，如果程序的用户忘记密码了，就没办法获取了。因为我们在[第六章](chapter6.html)使用了单向密码加密，程序没办法把密码通过 Email 发送给用户，但是我们可以发送一个重设密码表单的链接。按照 RailsCasts 中的《[Remember Me & Reset Password](http://railscasts.com/episodes/274-remember-me-reset-password)》一集来修正这个问题。
+
+#### 注册确认
+
+除了匹配 Email 地址的正则表达式之外，示例程序现在没有其他方法可以验证用户的 Email 地址是否合法。请在注册步骤中添加确认用户注册这一步。这个功能应该在注册时把用户设为未激活状态，发送一封包含激活链接的邮件，当链接被点击后再把用户设为已激活状态。你可能要先阅读 [Rails state machine 相关的文章](http://www.google.com/search?q=state+machines+in+rails)，学习如何在未激活和激活状态之间转换。
+
+#### RSS Feed
+
+请为每一个用户的微博更新创建一个 RSS，然后再为用户的状态列表实现一个 RSS，如果可以，你还可以使用身份验证机制限制对动态列表 RSS 的访问。RailsCasts 中的《[Generating RSS Feeds](http://railscasts.com/episodes/87-generating-rss-feeds)》一集可以给你一些帮助。
+
+#### REST API
+
+很多网站都提供了“应用编程接口（Application Programmer Interface，API）”，允许第三方程序获取（get），创建（post），更新（put）和删除（delete）程序的资源。请为示例程序实现这种 REST API。实现的过程中可能要为程序的多数控制器动作添加 `respond_to` 代码块（参见 [11.2.5 节](#sec-11-2-5)），相应 XML 类型的请求。请注意安全问题，API 应该只对授权的用户开放。
+
+#### 搜索
+
+现在，除了浏览用户索引页面，或者查看其他用户的动态列表之外，没有办法找到另外的用户。请实现搜索功能来弥补这个缺陷。然后在添加搜索微博的功能。RailsCasts 中的《[Simple Search Form](http://railscasts.com/episodes/37-simple-search-form)》一集可以给你一些帮助。如果你的程序部署在共享主机或专用服务器，我建议你使用 [Thinking Sphinx](http://freelancing-god.github.com/ts/en/)（参考 RailsCasts 中的《[Thinking Sphinx](http://railscasts.com/episodes/120-thinking-sphinx)》一集）。如果你的程序部署在 Heroku 上，你应该参照《[Full Text Search Options on Heroku](https://devcenter.heroku.com/articles/full-text-search)》一文中的说明。
+
+<h3 id="sec-11-4-2">11.4.2 后续学习的资源</h3>
+
+商店和网上都有很多 Rails 资源，而且多得会让你挑花眼。可喜的是，你阅读到这里时，已经可以学习几乎所有的其他知识了。下面是建议你后续学习的资源：
+
+- 本书配套视频：我为本书录制了内容充足的配套视频，除了覆盖本书的内容之外，在视频中我还介绍了很多小技巧，当然视频还能弥补印刷书的不足，让你观看别人是如何开发的。你可以在[本书的网站](http://railstutorial.org/)上购买这些视频。
+- RailsCasts：如何强调 RailsCasts 的重要性都不为过。我建议你浏览一下 [RailsCasts 的视频归档](http://railscasts.com/episodes/archive)，观看你感兴趣的视频。
+- Scaling Rails：本书基本没有设计的内容是性能、优化和扩放。幸好大多数网站不会面对验证的性能问题，纯 Rails 之外的都算是过早优化。如果你确实遇到了性能问题，可以观看 [Envy Labs](http://envylabs.com/) 公司 Gregg Pollack 的 [Scaling Rails](http://railslab.newrelic.com/scaling-rails) 系列视频教程。我也建议你研究一下程序监控应用 [Scout](http://scoutapp.com/) 和 [New Relic](http://www.newrelic.com/)。<sup>[16](#fn-16)</sup>而且，你可能已经猜到了，在 RailsCasts 中有很多集都涉及到性能的问题，包括性能分析，缓存和后台作业。
+- Ruby 和 Rails 相关的书：学习 Ruby 我推荐 Peter Cooper 的《[Ruby 入门](http://www.amazon.com/gp/product/1430223634)》，David A. Black 的《》和 Hal Fulton 的《Ruby 之道》。继续学习 Rails 我推荐 Obie Fernandez 的《[Rails 3 之道](http://www.amazon.com/gp/product/0321601661)》和 Ryan Bigg、Yehuda Katz 合著的《Rails 3 实战》（请阅读第 2 版）。
+- PeepCode 和 Code School：[PeepCode](http://peepcode.com/) 的视频教程和 [Code School](http://codeschool.com/) 的交互教程质量都很高，我真心地向你推荐。
+
+<h2 id="sec-11-5">11.5 练习</h2>
+
+1. 添加针对销毁指定用户关注关联（通过代码 11.4 和代码 11.16 中的 `dependent :destroy` 实现）的测试。提示：可参照代码 10.15。
+2. 代码 11.38 中用到的 `respond_to` 方法可以提取出来让如 Relationships 控制器中，而且 `respond_to` 代码块可以使用 Rails 中的 `respond_with` 方法代替。请运行测试组件确认上面两个操作实施后得到的代码（如代码 11.47 所示）仍是正确的。（`respond_with` 方法的详细用法，请在 Google 中搜索“rails respond_with”。）
+3. 重构代码 11.31，把关注者列表页面、粉丝列表页面，首页和用户资料页面的通用部分提取出来，创建成局部视图。
+4. 按照代码 11.19 中的方式，编写测试检测个人资料页面的关注数量统计。
+
+**代码 11.47** 重构，把代码 11.38 变得更简洁
+
+```ruby
+class RelationshipsController < ApplicationController
+  before_filter :signed_in_user
+
+  respond_to :html, :js
+
+  def create
+    @user = User.find(params[:relationship][:followed_id])
+    current_user.follow!(@user)
+    respond_with @user
+  end
+
+  def destroy
+    @user = Relationship.find(params[:id]).followed
+    current_user.unfollow!(@user)
+    respond_with @user
+  end
+end
+```
+
 <div class="navigation">
   <a class="prev_page" href="chapter10.html">&laquo; 第十章 用户的微博</a>
 </div>
@@ -1484,3 +1893,11 @@ $ bundle exec rspec spec/
 6. 如果你注意到 `followed_id` 同样可以标识用户，并且担心这个解决方法会造成被关注者和粉丝之间存在非对称的关系, 你已经想到我们的前面了，我们会在 [11.1.5 节](#sec-11-1-5)解决这个问题。
 7. 当你拥有在某个领域大量建立模型的经验后，你总能提前猜到这样的工具方法，如果你没有猜到的话，你也经常能发现自己动手写这样的方法可以使测试代码更加整洁。此时，如果你没有猜到它们的话也很正常。软件开发经常是一个循序渐进的过程，你先埋头编写代码，发现代码很乱时，再重构。 但为了行文简洁，本书采取的是直捣黄龙的方法。
 8. 事实上 `unfollow!`方法在失败时不会抛出异常，我甚至不知道 Rails 是如何表明删除操作失败的。不过为了和 `follow!` 保持一致，我们还是加上了感叹号。
+9. 因为 Ajax 是 asynchronous JavaScript and XML 的缩写，所以经常被错误的拼写为“AJAX”，不过在[最初介绍 Ajax 的文章](http://www.adaptivepath.com/ideas/essays/archives/000385.php)中，通篇都拼写为“Ajax”。
+10. 只有当浏览器启用 JavaScript 时才能正常使用，不过可以优雅降级，如果禁用了 JavaScript 就会按照 [11.2.4 节](#sec-11-2-4)中大方式工作。
+11. 可枚举的对象最基本的要求是必须实现 `each` 方法，用来遍历集合。
+12. 整个简写方式最初是 Rails 对 Ruby 的扩展，因为很有用，所以 Ruby 最后自己也实现了。很牛吧。
+13. 创建子查询语句更多高级的方式，请阅读《[Hacking a subselect in ActiveRecord](http://pivotallabs.com/users/jsusser/blog/articles/567-hacking-a-subselect-in-activerecord)》一文。
+14. 为了图 11.20 中显示的动态列表更好看，我自己动手在 Rails 控制台中加入了一些微博。
+15. 注意，RailsCasts 经常会省略测试，可能是为了要控制视频的质量和长度，这可能会让你会错意，认为测试并不重要。观看过 RailsCasts 中相关的视频知道怎么开发后，我建议你按照“测试驱动开发”原则实现功能。（我建议你看一下 RailsCasts 中的《[How I test](http://railscasts.com/episodes/275-how-i-test)》，你会看到 Ryan Bates 在实际的开发中经常会使用 TDD，而且他的测试风格和本书的很像。）
+16. New Relic 这个名称很有新意，新（new）遗迹（relic）在措辞上是矛盾的，而且这个名字还是对公司创始人 Lew Cirne 这个人名的变位词。
