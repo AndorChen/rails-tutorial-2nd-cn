@@ -658,7 +658,7 @@ SampleApp::Application.routes.draw do
 end
 ```
 
-你可能猜到了，设定上述路由后，得到的 URI 地址应该是类似 /users/1/following 和 /users/1/folloers 这种形式，不错，代码 11.18 的作用确实如此。因为这两个页面都是用来**显示**数据的，所以我们使用了 `get` 方法，指定这两个地址响应的是 GET 请求。（符合 REST 架构对这种页面的要求）。路由设置中使用的 `member` 方法作用是，设置这两个动作对应的 URI 地址中应该包含用户的 id。类似地，我们还可以使用 `collection` 方法，但 URI 中就没有用户 id 了，所以，如下的代码
+你可能猜到了，设定上述路由后，得到的 URI 地址应该是类似 /users/1/following 和 /users/1/followers 这种形式，不错，代码 11.18 的作用确实如此。因为这两个页面都是用来**显示**数据的，所以我们使用了 `get` 方法，指定这两个地址响应的是 GET 请求。（符合 REST 架构对这种页面的要求）。路由设置中使用的 `member` 方法作用是，设置这两个动作对应的 URI 地址中应该包含用户的 id。类似地，我们还可以使用 `collection` 方法，但 URI 中就没有用户 id 了，所以，如下的代码
 
 ```ruby
 resources :users do
