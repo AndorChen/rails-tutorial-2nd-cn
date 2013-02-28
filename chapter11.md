@@ -1390,7 +1390,7 @@ xhr :post, :create, relationship: { followed_id: other_user.id }
 
 我们看到，`xhr` 方法的第一个参数是相应的 HTTP 方法，第二个参数是动作名，第三个参数是一个 Hash，其元素是控制器中的 `params` 变量的值。和以前的测试一样，我们把相关的操作放入 `expect` 块中，检查数量是不是增加或减少了。
 
-这段测试说明，在程序中，我们要使用同等的 `create` 和 `destroy` 动作响应 Ajax 请求，这两个动作之前可响应的是普通的 POST 请求和 DELETE 请求。我们要做的是，当接到普通的 HTTP 请求时，进行页面转向（参见 [11.2.4 节](#sec-11-2-4)），而当接到 Ajax 请求时使用 JavaScript 进行处理。控制器的代码如代码 11.38 所示。（在 [11.5 节](#sec-11-5)的练习中，我们介绍了一种更简单的实现方式。）
+这段测试说明：在程序中，我们要使用同等的 `create` 和 `destroy` 动作响应 Ajax 请求，这两个动作之前可响应的是普通的 POST 请求和 DELETE 请求。我们要做的是，当接到普通的 HTTP 请求时，进行页面转向（参见 [11.2.4 节](#sec-11-2-4)），而当接到 Ajax 请求时使用 JavaScript 进行处理。控制器的代码如代码 11.38 所示。（在 [11.5 节](#sec-11-5)的练习中，我们介绍了一种更简单的实现方式。）
 
 **代码 11.38** 在 Relationships 控制器中响应 Ajax 请求<br />`app/controllers/relationships_controller.rb`
 
