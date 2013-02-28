@@ -1335,7 +1335,7 @@ Ajax 可以解决这个疑问，通过向服务器发送异步请求，在不刷
 
 从这段代码中我们可以看到，`form` 元素中设置了 `data-remote="true"` 熟悉那个，这个属性就是用来告知 Rails 该表单可以使用 JavaScript 处理的。Rails 3 遵从了“[非侵入式 JavaScript](http://railscasts.com/episodes/205-unobtrusive-javascript)”原则（unobtrusive JavaScript），没有在视图中写入整个 JavaScript 代码（在 Rails 之前的版本中却是这么做的），而是使用了一个简单的 HTML 属性。
 
-更新表单后，我们要让 Relationships 控制器可以系那个硬 Ajax 请求。针对 Ajax 的测试有点复杂，完全可以写本书了，不过我们可以先从代码 11.37 下手。这段测试中使用了 `xhr` 方法（表示“XmlHttpRequest”）发送 Ajax 请求，`xhr` 方法和之前使用的 `get`、`post`、`put` 和 `delete` 方法是类似的。然后再检查发送 Ajax 请求后，`create` 和 `destroy` 动作是否进行了正确的操作。（如果要为大量使用 Ajax 的程序编写完整的测试，请了解一下 [Selenium](http://seleniumhq.org/) 和 [Watir](http://watir.com/)。）
+更新表单后，我们要让 Relationships 控制器可以响应那个 Ajax 请求。针对 Ajax 的测试有点复杂，完全可以写本书了，不过我们可以先从代码 11.37 下手。这段测试中使用了 `xhr` 方法（表示“XmlHttpRequest”）发送 Ajax 请求，`xhr` 方法和之前使用的 `get`、`post`、`put` 和 `delete` 方法是类似的。然后再检查发送 Ajax 请求后，`create` 和 `destroy` 动作是否进行了正确的操作。（如果要为大量使用 Ajax 的程序编写完整的测试，请了解一下 [Selenium](http://seleniumhq.org/) 和 [Watir](http://watir.com/)。）
 
 **代码 11.37** 测试 Relationships 控制器对 Ajax 请求的响应<br />`spec/controllers/relationships_controller_spec.rb`
 
