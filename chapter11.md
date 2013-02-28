@@ -37,7 +37,7 @@ $ git checkout -b following-users
 
 <h2 id="sec-11-1">11.1 关系模型</h2>
 
-为了实现关注用户这一功能，第一步我们要做的是创建一个看上去并不是那么直观的数据模型。一开始我们可能会认为一个 `has_many` 的数据关系会满足我们的要求：一个用户可以关注多个用户，同时一个用户还能被多个用户关注。但实际上这种关系存在问题的，下面我们就来学习如何使用 `has_many through` 来解决这个问题。本节很多功能的实现初看起来都有点难以理解，你需要花一点时间思考，才能真正搞清楚这样做的原因。如果在某个地方卡住了，尝试着先往后读，然后在把本节读一遍，看一下刚才卡住的地方想明白了没。
+为了实现关注用户这一功能，第一步我们要做的是创建一个看上去并不是那么直观的数据模型。一开始我们可能会认为一个 `has_many` 的数据关系会满足我们的要求：一个用户可以关注多个用户，同时一个用户还能被多个用户关注。但实际上这种关系存在问题的，下面我们就来学习如何使用 `has_many through` 来解决这个问题。本节很多功能的实现初看起来都有点难以理解，你需要花一点时间思考，才能真正搞清楚这样做的原因。如果在某个地方卡住了，尝试着先往后读，然后再把本节读一遍，看一下刚才卡住的地方想明白了没。
 
 <h3 id="sec-11-1-1">11.1.1 数据模型带来的问题(以及解决方式) </h3>
 
@@ -99,7 +99,7 @@ end
 add index :relationships, [:follower id, :followed id], unique: true
 ```
 
-从 [11.1.4 节](#sec-11-1-4)开始，我们会发现，在用户界面中这样的事情是不会发生的，但是添加了组合索引后，如果用户试图二次关注时，程序会抛出异常（例如，使用像 `curl` 正阳的命令行程序）。我们也可以在 Relationship 模型中添加唯一性数据验证，但因为每次尝试创建一个重复关系时都会触发错误，所以这个组合索引足以满足我们的需求了。
+从 [11.1.4 节](#sec-11-1-4)开始，我们会发现，在用户界面中这样的事情是不会发生的，但是添加了组合索引后，如果用户试图二次关注时，程序会抛出异常（例如，使用像 `curl` 这样的命令行程序）。我们也可以在 Relationship 模型中添加唯一性数据验证，但因为每次尝试创建一个重复关系时都会触发错误，所以这个组合索引足以满足我们的需求了。
 
 
 为了创建 `relationships` 表，和之前一样，我们要先执行数据库迁移，再准备好“测试数据库”：
@@ -246,7 +246,7 @@ $ bundle exec rspec spec/
 
 <h3 id="sec-11-1-3">11.1.3 数据验证</h3>
 
-在结束这部分之前，我们将添加一些阵对 Relationship 模型的数据验证，确保代码的完整性。测试（代码 11.7）和程序代码（代码 11.8）都非常易懂。
+在结束这部分之前，我们将添加一些针对 Relationship 模型的数据验证，确保代码的完整性。测试（代码 11.7）和程序代码（代码 11.8）都非常易懂。
 
 **代码 11.7** 测试 Relationship 模型的数据验证<br />`spec/models/relationship_spec.rb`
 
@@ -658,7 +658,7 @@ SampleApp::Application.routes.draw do
 end
 ```
 
-你可能猜到了，设定上述路由后，得到的 URI 地址应该是类似 /users/1/following 和 /users/1/folloers 这种形式，不错，代码 11.18 的作用确实如此。因为这两个页面都是用来**显示**数据的，所以我们使用了 `get` 方法，指定这两个地址响应的是 GET 请求。（符合 REST 架构对这种页面的要求）。路由设置中使用的 `member` 方法作用是，设置这两个动作对应的 URI 地址中应该包含用户的 id。类似地，我们还可以使用 `collection` 方法，但 URI 中就没有用户 id 了，所以，如下的代码
+你可能猜到了，设定上述路由后，得到的 URI 地址应该是类似 /users/1/following 和 /users/1/followers 这种形式，不错，代码 11.18 的作用确实如此。因为这两个页面都是用来**显示**数据的，所以我们使用了 `get` 方法，指定这两个地址响应的是 GET 请求。（符合 REST 架构对这种页面的要求）。路由设置中使用的 `member` 方法作用是，设置这两个动作对应的 URI 地址中应该包含用户的 id。类似地，我们还可以使用 `collection` 方法，但 URI 中就没有用户 id 了，所以，如下的代码
 
 ```ruby
 resources :users do
@@ -1288,7 +1288,7 @@ class RelationshipsController < ApplicationController
 end
 ```
 
-从代码 11.34 我们能够看出为什么前面提到的安全疏漏不是什么大问题，因为如果未登录的用户直接访问了任意一个动作（例如，使用命令行工具），`current_user` 的值就是 `nil`，那么动作的第二行代码就会抛出异常，因此得到是错误提示，而不会破坏程序或数据。不过，最好还是不要依靠这样测处理方式，因此我们前面我们才键入了额外的安全限制。
+从代码 11.34 我们能够看出为什么前面提到的安全疏漏不是什么大问题，因为如果未登录的用户直接访问了任意一个动作（例如，使用命令行工具），`current_user` 的值就是 `nil`，那么动作的第二行代码就会抛出异常，因此得到是错误提示，而不会破坏程序或数据。不过，最好还是不要依靠这样的处理方式，因此我们在前面才键入了额外的安全限制。
 
 至此，整个关注和取消关注的功能就都实现了，任何一个用户都可以关注或取消关注另一个用户了，你可以在程序中点击相应的链接检查一下，也可以运行测试验证一下：
 
@@ -1300,7 +1300,7 @@ $ bundle exec rspec spec/
 
 虽然在上一小节我们说过关注用户的功能已经完全实现了，但是在实现状态列表之前，还有可以增强的地方。你可能已经注意到了，在 [11.2.4 节](#sec-11-2-4)中，Relationships 控制器的 `create` 和 `destroy` 动作最后都返回了一开始访问的用户资料页面。也就是说，用户 A 先浏览了用户 B 的资料页面，点击关注按钮关注用户 B，然后页面会立马转回到用户 A 的资料页面。因此，对这样的过程我们就有了一个疑问：为什么要多一次页面转向呢？
 
-Ajax 可以解决这个疑问，通过向服务器发送异步请求，在不刷新页面的情况下，Ajax 就可以更新也米娜的内容。<sup>[9](#fn-9)</sup>因为在表单中处理 Ajax 请求是很常用的技术，所以 Rails 把实现 Ajax 的过程变得很简单。其实，关注和取消关注表单局部视图不用做大的改动，只要把 `form_for` 改成 `form_for..., remote: true`，Rails 就会自动使用 Ajax 处理表单了。<sup>[10](#fn-10)</sup>更新后的局部视图如代码 11.35 和代码 11.36 所示。
+Ajax 可以解决这个疑问，通过向服务器发送异步请求，在不刷新页面的情况下，Ajax 就可以更新页面里的内容。<sup>[9](#fn-9)</sup>因为在表单中处理 Ajax 请求是很常用的技术，所以 Rails 把实现 Ajax 的过程变得很简单。其实，关注和取消关注表单局部视图不用做大的改动，只要把 `form_for` 改成 `form_for..., remote: true`，Rails 就会自动使用 Ajax 处理表单了。<sup>[10](#fn-10)</sup>更新后的局部视图如代码 11.35 和代码 11.36 所示。
 
 **代码 11.35** 使用 Ajax 后的关注用户表单<br />`app/views/users/_follow.html.erb`
 
@@ -1335,7 +1335,7 @@ Ajax 可以解决这个疑问，通过向服务器发送异步请求，在不刷
 
 从这段代码中我们可以看到，`form` 元素中设置了 `data-remote="true"` 熟悉那个，这个属性就是用来告知 Rails 该表单可以使用 JavaScript 处理的。Rails 3 遵从了“[非侵入式 JavaScript](http://railscasts.com/episodes/205-unobtrusive-javascript)”原则（unobtrusive JavaScript），没有在视图中写入整个 JavaScript 代码（在 Rails 之前的版本中却是这么做的），而是使用了一个简单的 HTML 属性。
 
-更新表单后，我们要让 Relationships 控制器可以系那个硬 Ajax 请求。针对 Ajax 的测试有点复杂，完全可以写本书了，不过我们可以先从代码 11.37 下手。这段测试中使用了 `xhr` 方法（表示“XmlHttpRequest”）发送 Ajax 请求，`xhr` 方法和之前使用的 `get`、`post`、`put` 和 `delete` 方法是类似的。然后再检查发送 Ajax 请求后，`create` 和 `destroy` 动作是否进行了正确的操作。（如果要为大量使用 Ajax 的程序编写完整的测试，请了解一下 [Selenium](http://seleniumhq.org/) 和 [Watir](http://watir.com/)。）
+更新表单后，我们要让 Relationships 控制器可以响应那个 Ajax 请求。针对 Ajax 的测试有点复杂，完全可以写本书了，不过我们可以先从代码 11.37 下手。这段测试中使用了 `xhr` 方法（表示“XmlHttpRequest”）发送 Ajax 请求，`xhr` 方法和之前使用的 `get`、`post`、`put` 和 `delete` 方法是类似的。然后再检查发送 Ajax 请求后，`create` 和 `destroy` 动作是否进行了正确的操作。（如果要为大量使用 Ajax 的程序编写完整的测试，请了解一下 [Selenium](http://seleniumhq.org/) 和 [Watir](http://watir.com/)。）
 
 **代码 11.37** 测试 Relationships 控制器对 Ajax 请求的响应<br />`spec/controllers/relationships_controller_spec.rb`
 
@@ -1390,7 +1390,7 @@ xhr :post, :create, relationship: { followed_id: other_user.id }
 
 我们看到，`xhr` 方法的第一个参数是相应的 HTTP 方法，第二个参数是动作名，第三个参数是一个 Hash，其元素是控制器中的 `params` 变量的值。和以前的测试一样，我们把相关的操作放入 `expect` 块中，检查数量是不是增加或减少了。
 
-这段测试说明，在程序中，我们要使用同等的 `create` 和 `destroy` 动作响应 Ajax 请求，这两个动作之前可响应的是普通的 POST 请求和 DELETE 请求。我们要做的是，当接到普通的 HTTP 请求时，进行页面转向（参见 [11.2.4 节](#sec-11-2-4)），而当接到 Ajax 请求时使用 JavaScript 进行处理。控制器的代码如代码 11.38 所示。（在 [11.5 节](#sec-11-5)的练习中，我们介绍了一种更简单的实现方式。）
+这段测试说明：在程序中，我们要使用同等的 `create` 和 `destroy` 动作响应 Ajax 请求，这两个动作之前可响应的是普通的 POST 请求和 DELETE 请求。我们要做的是：当接到普通的 HTTP 请求时，进行页面转向（参见 [11.2.4 节](#sec-11-2-4)），而当接到 Ajax 请求时使用 JavaScript 进行处理。控制器的代码如代码 11.38 所示。（在 [11.5 节](#sec-11-5)的练习中，我们介绍了一种更简单的实现方式。）
 
 **代码 11.38** 在 Relationships 控制器中响应 Ajax 请求<br />`app/controllers/relationships_controller.rb`
 
@@ -1430,7 +1430,7 @@ end
 
 只有一行会被执行（依据请求的类型而定）。
 
-在处理 Ajax 请求是，Rails 会自动调用文件名和动作名一样的“含有 JavaScript 的 ERb（JavaScript Embedded Ruby）”文件（扩展名为 `.js.erb`），例如 `create.js.erb` 和 `destroy.js.erb`。你可能已经猜到了，这种文件是可以包含 JavaScript 和 Ruby 代码的，可以用来处理当前页面的内容。在关注用户和取消关注用户时，更新用户资料页面的内容就需要创建这种文件。
+在处理 Ajax 请求时，Rails 会自动调用文件名和动作名一样的“含有 JavaScript 的 ERb（JavaScript Embedded Ruby）”文件（扩展名为 `.js.erb`），例如 `create.js.erb` 和 `destroy.js.erb`。你可能已经猜到了，这种文件是可以包含 JavaScript 和 Ruby 代码的，可以用来处理当前页面的内容。在关注用户和取消关注用户时，更新用户资料页面的内容就需要创建这种文件。
 
 在 JS-ERb 文件中，Rails 自动提供了 jQuery 库的帮助函数，可以通过“文本对象模型（Document Object Model，DOM）”处理页面的内容。jQuery 库中有很多处理 DOM 的函数，但现在我们只会用到其中的两个。首先，我们要知道通过 id 获取 DOM 元素的美元符号，例如，要获取 `follow_form` 元素，我们可以使用如下的代码：
 
@@ -1788,7 +1788,7 @@ $ git checkout master
 $ git merge following-users
 ```
 
-和之前一样，你也可以把代码推动到 GitHub，还可以部署到 Heroku：
+和之前一样，你也可以把代码推送到 GitHub，还可以部署到 Heroku：
 
 ```sh
 $ git push
@@ -1806,7 +1806,7 @@ $ heroku run rake db:populate
 
 如果开始时觉得有点难也不用奇怪，从零开始实现一个功能确实有难度。为了帮助你，我可以提两点建设性的建议。第一点，在开始实现新功能之前，浏览一下 [RailsCasts 的归档](http://railscasts.com/episodes/archive)，看一下 Ryan 是否介绍过类似的功能。<sup>[15](#fn-15)</sup>如果他介绍过，先看一下相关的视频会节省很多时间。第二点，总是在 Google 中大范围的搜索你要实现的功能，寻找相关的博文和教程。Web 程序开发是有难度的，从有经验的开发者那里取经总是会对你有所帮助的。
 
-下面列出的功能很多都是有一定挑战性的，在功能的介绍中我会给你一定的提示，告诉你实现过程中可能会用法到的工具。虽然有提示，但是这些功能实现起来比章后的练习难多了，再没下真功夫之前千万别轻言放弃。因为时间有限，我无法一对一的辅导，不过如果你对这些功能感兴趣，将来我可能会发布一些独立的文章或视频介绍一下，请到本书的网站 <http://railstutorial.org/> 订阅 Feed 获取最新的更新。
+下面列出的功能很多都是有一定挑战性的，在功能的介绍中我会给你一定的提示，告诉你实现过程中可能会用法到的工具。虽然有提示，但是这些功能实现起来比章后的练习难多了，在没下真功夫之前千万别轻言放弃。因为时间有限，我无法一对一的辅导，不过如果你对这些功能感兴趣，将来我可能会发布一些独立的文章或视频介绍一下，请到本书的网站 <http://railstutorial.org/> 订阅 Feed 获取最新的更新。
 
 #### 回复
 
@@ -1840,7 +1840,7 @@ Twitter 支持在微博的前面加上字母“d”发送私信。请在示例�
 
 #### 搜索
 
-现在，除了浏览用户索引页面，或者查看其他用户的动态列表之外，没有办法找到另外的用户。请实现搜索功能来弥补这个缺陷。然后在添加搜索微博的功能。RailsCasts 中的《[Simple Search Form](http://railscasts.com/episodes/37-simple-search-form)》一集可以给你一些帮助。如果你的程序部署在共享主机或专用服务器，我建议你使用 [Thinking Sphinx](http://freelancing-god.github.com/ts/en/)（参考 RailsCasts 中的《[Thinking Sphinx](http://railscasts.com/episodes/120-thinking-sphinx)》一集）。如果你的程序部署在 Heroku 上，你应该参照《[Full Text Search Options on Heroku](https://devcenter.heroku.com/articles/full-text-search)》一文中的说明。
+现在，除了浏览用户索引页面，或者查看其他用户的动态列表之外，没有办法找到另外的用户。请实现搜索功能来弥补这个缺陷。然后再添加搜索微博的功能。RailsCasts 中的《[Simple Search Form](http://railscasts.com/episodes/37-simple-search-form)》一集可以给你一些帮助。如果你的程序部署在共享主机或专用服务器，我建议你使用 [Thinking Sphinx](http://freelancing-god.github.com/ts/en/)（参考 RailsCasts 中的《[Thinking Sphinx](http://railscasts.com/episodes/120-thinking-sphinx)》一集）。如果你的程序部署在 Heroku 上，你应该参照《[Full Text Search Options on Heroku](https://devcenter.heroku.com/articles/full-text-search)》一文中的说明。
 
 <h3 id="sec-11-4-2">11.4.2 后续学习的资源</h3>
 
