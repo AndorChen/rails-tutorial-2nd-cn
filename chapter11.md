@@ -1788,7 +1788,7 @@ $ git checkout master
 $ git merge following-users
 ```
 
-和之前一样，你也可以把代码推动到 GitHub，还可以部署到 Heroku：
+和之前一样，你也可以把代码推送到 GitHub，还可以部署到 Heroku：
 
 ```sh
 $ git push
