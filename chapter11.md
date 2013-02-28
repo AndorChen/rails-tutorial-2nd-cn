@@ -246,7 +246,7 @@ $ bundle exec rspec spec/
 
 <h3 id="sec-11-1-3">11.1.3 数据验证</h3>
 
-在结束这部分之前，我们将添加一些阵对 Relationship 模型的数据验证，确保代码的完整性。测试（代码 11.7）和程序代码（代码 11.8）都非常易懂。
+在结束这部分之前，我们将添加一些针对 Relationship 模型的数据验证，确保代码的完整性。测试（代码 11.7）和程序代码（代码 11.8）都非常易懂。
 
 **代码 11.7** 测试 Relationship 模型的数据验证<br />`spec/models/relationship_spec.rb`
 
