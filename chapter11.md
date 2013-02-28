@@ -105,7 +105,7 @@ add index :relationships, [:follower id, :followed id], unique: true
 为了创建 `relationships` 表，和之前一样，我们要先执行数据库迁移，再准备好“测试数据库”：
 
 ```sh
-￼$ bundle exec rake db:migrate
+$ bundle exec rake db:migrate
 $ bundle exec rake db:test:prepare
 ```
 
@@ -385,7 +385,7 @@ relationships.create!(…)
 
 而不是等效的
 
-```
+```ruby
 self.relationships.create!(…)
 ```
 
@@ -413,7 +413,9 @@ require 'spec helper'
       .
       .
       describe "and unfollowing" do
-        before { @user.unfollow!(other_user)        it { should_not be following(other_user)        its(:followed_users) { should_not include(other_user)
+        before { @user.unfollow!(other_user) }
+        it { should_not be following(other_user) }
+        its(:followed_users) { should_not include(other_user) }
       end
     end
   end
@@ -510,7 +512,7 @@ has_many :reverse_relationships, foreign_key: "followed_id"
 
 粉丝的关联就建立在这层反转的关系上，如代码 11.16 所示。
 
-**代码 11.16** 通过反转的关系实现 `user.followers`<br />`app/models/user.rb``
+**代码 11.16** 通过反转的关系实现 `user.followers`<br />`app/models/user.rb`
 
 ```ruby
 class User < ActiveRecord::Base

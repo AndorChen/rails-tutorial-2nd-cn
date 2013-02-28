@@ -2,8 +2,6 @@
 layout: default
 ---
 
-<p class="thanks-giving">本书正在翻译中，<a href="https://me.alipay.com/andor" title="通过支付宝直接支付" target="_blank">给译者一点鼓励吧</a>！</p>
-
 <div class="l-menu">
 	<ol class="menu">
 		<li><a href="chapter1.html" title="第一章 从零到部署">第一章 从零到部署</a></li>
