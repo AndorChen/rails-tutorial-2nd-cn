@@ -1840,7 +1840,7 @@ Twitter 支持在微博的前面加上字母“d”发送私信。请在示例�
 
 #### 搜索
 
-现在，除了浏览用户索引页面，或者查看其他用户的动态列表之外，没有办法找到另外的用户。请实现搜索功能来弥补这个缺陷。然后在添加搜索微博的功能。RailsCasts 中的《[Simple Search Form](http://railscasts.com/episodes/37-simple-search-form)》一集可以给你一些帮助。如果你的程序部署在共享主机或专用服务器，我建议你使用 [Thinking Sphinx](http://freelancing-god.github.com/ts/en/)（参考 RailsCasts 中的《[Thinking Sphinx](http://railscasts.com/episodes/120-thinking-sphinx)》一集）。如果你的程序部署在 Heroku 上，你应该参照《[Full Text Search Options on Heroku](https://devcenter.heroku.com/articles/full-text-search)》一文中的说明。
+现在，除了浏览用户索引页面，或者查看其他用户的动态列表之外，没有办法找到另外的用户。请实现搜索功能来弥补这个缺陷。然后再添加搜索微博的功能。RailsCasts 中的《[Simple Search Form](http://railscasts.com/episodes/37-simple-search-form)》一集可以给你一些帮助。如果你的程序部署在共享主机或专用服务器，我建议你使用 [Thinking Sphinx](http://freelancing-god.github.com/ts/en/)（参考 RailsCasts 中的《[Thinking Sphinx](http://railscasts.com/episodes/120-thinking-sphinx)》一集）。如果你的程序部署在 Heroku 上，你应该参照《[Full Text Search Options on Heroku](https://devcenter.heroku.com/articles/full-text-search)》一文中的说明。
 
 <h3 id="sec-11-4-2">11.4.2 后续学习的资源</h3>
 
