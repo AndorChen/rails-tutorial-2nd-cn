@@ -1430,7 +1430,7 @@ end
 
 只有一行会被执行（依据请求的类型而定）。
 
-在处理 Ajax 请求是，Rails 会自动调用文件名和动作名一样的“含有 JavaScript 的 ERb（JavaScript Embedded Ruby）”文件（扩展名为 `.js.erb`），例如 `create.js.erb` 和 `destroy.js.erb`。你可能已经猜到了，这种文件是可以包含 JavaScript 和 Ruby 代码的，可以用来处理当前页面的内容。在关注用户和取消关注用户时，更新用户资料页面的内容就需要创建这种文件。
+在处理 Ajax 请求时，Rails 会自动调用文件名和动作名一样的“含有 JavaScript 的 ERb（JavaScript Embedded Ruby）”文件（扩展名为 `.js.erb`），例如 `create.js.erb` 和 `destroy.js.erb`。你可能已经猜到了，这种文件是可以包含 JavaScript 和 Ruby 代码的，可以用来处理当前页面的内容。在关注用户和取消关注用户时，更新用户资料页面的内容就需要创建这种文件。
 
 在 JS-ERb 文件中，Rails 自动提供了 jQuery 库的帮助函数，可以通过“文本对象模型（Document Object Model，DOM）”处理页面的内容。jQuery 库中有很多处理 DOM 的函数，但现在我们只会用到其中的两个。首先，我们要知道通过 id 获取 DOM 元素的美元符号，例如，要获取 `follow_form` 元素，我们可以使用如下的代码：
 
