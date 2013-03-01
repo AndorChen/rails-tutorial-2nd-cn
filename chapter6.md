@@ -1031,6 +1031,7 @@ end
 至此，上面 Alice 遇到的问题就解决了，数据库会存储请求 1 创建的用户，不会存储请求 2 创建的用户，因为它违反了唯一性限制。（在 Rails 的日志中会显示一个错误，不过无大碍。其实我们可以捕获抛出的 `ActiveRecord::StatementInvalid` 异常（[Insoshi](http://github.com/insoshi/insoshi/blob/master/app/controllers/people_controller.rb) 就这么做了），不过本教程不会涉及异常处理。）为 `email` 列建立索引同时也解决了 [6.1.4 节](#sec-6-1-4)中提到的 `find_by_email` 的效率问题（参阅[旁注 6.2](#box-6-2)）。
 
 <div id="box-6-2" class="aside">
+    <h4>旁注 6.2：数据库索引</h4>
     <p>创建数据库列时，要考虑是否会用这个列进行查询。例如，代码 6.2 中的迁移，创建了 <code>email</code> 列，<a href="/chapter7.html">第七章</a>中实现的用户登录功能，会通过提交的 Email 地址查询对应的用户记录。按照现有的数据模型，使用 Email 地址查找用户的唯一方式是遍历数据库中所有的用户记录，对比提交的 Email 地址和记录中的 <code>email</code> 列，看看是否一致。在数据库的术语中，这叫做“全表扫描（full-table scan）”，对一个有上千用户的网站而言，这可不是一件轻松的事。</p>
     <p>为 <code>email</code> 列建立索引则可以解决这个问题。我们可以将数据库索引比拟成书籍的索引。如果要在一本书中找出某个字符串（例如 <code>"foobar"</code>）出现的所有位置，我们需要翻看书中的每一页。但是如果有索引的话，只需在索引中找到 <code>"foobar"</code> 条目，就能看到所有包含 <code>"foobar"</code> 的页码。数据库索引基本上也是这种原理。</p>
 </div>
