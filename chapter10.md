@@ -146,7 +146,7 @@ end
 
 现在我就来告诉你为什么 `@micropost = Micropost.new(content: "Lorem ipsum", user_id: user.id)` 是错的。
 
-在 Rails 3.2.3 之前，默认情况下 Micropost 模型的所有属性都是可访问的，我们在 [6.1.2.2 节](chapter6.html#sec-6-1-2-2)和 [9.4.1.1 节](chapter9.html#sec-9-4-1-1) 中做过介绍，可访问就意味着任何人都可以篡改微博对象的属性值，然后通过命令行发送非法请求。例如，某非法用户可以篡改微博的 `user_id` 属性，把该微博的作者设定为错误的用户。所以，我们要把 `user_id` 从 `attr_accessible` 定义的可访问属性列表中删除。如果你真的删除了，上面的测试也就会失败了。我们会在 [10.1.3 节](#sec-10-1-3)中再次让这个测试通过。
+在 Rails 3.2.3 之前，默认情况下 Micropost 模型的所有属性都是可访问的，我们在 [6.1.2.2 节](chapter6.html#sec-6-1-2-2)和 [9.4.1 节](chapter9.html#sec-9-4-1) 中做过介绍，可访问就意味着任何人都可以篡改微博对象的属性值，然后通过命令行发送非法请求。例如，某非法用户可以篡改微博的 `user_id` 属性，把该微博的作者设定为错误的用户。所以，我们要把 `user_id` 从 `attr_accessible` 定义的可访问属性列表中删除。如果你真的删除了，上面的测试也就会失败了。我们会在 [10.1.3 节](#sec-10-1-3)中再次让这个测试通过。
 
 <h3 id="sec-10-1-3">10.1.3 用户和微博之间的关联</h3>
 
@@ -1895,7 +1895,7 @@ end
 6. Faker 中的 lorem ipsum 文本是被设计为随机生成的，所以你的示例微博可能和我的不一样。
 7. 为了行为方便，代码 10.24 实际上包含了本章用到的所有 CSS。
 8. 另外两个资源分别是 [7.2 节](chapter7.html#sec-7-2) 中的 Users 资源和 [8.1 节](chapter8.html#sec-8-1)中的 Sessions 资源。
-9. 我们在 [8.2.1 节](chapter8.html#8-2-1)中介绍过，默认情况下帮助方法只能在视图中使用，因此要在控制器中使用 Sessions 帮助方法就要在 Application 控制器中加入代码 `include SessionHelper`。
+9. 我们在 [8.2.1 节](chapter8.html#sec-8-2-1)中介绍过，默认情况下帮助方法只能在视图中使用，因此要在控制器中使用 Sessions 帮助方法就要在 Application 控制器中加入代码 `include SessionHelper`。
 10. 我之所以在 [1.1.1 节](chapter1.html#sec-1-1-1)中推荐读者在读完本书后阅读一本纯介绍 Ruby 的书，就是为了学习使用类似 `include?` 这样的方法。
 11. 阅读 Rails 指南中的《[Active Record Query Interface](http://guides.rubyonrails.org/active_record_querying.html)》一文，更深入的学习 `where` 等方法的用法。
 12. 很不幸，这样的话分页就不可用了。你可以加入分页，点击分页链接看一下是为什么。

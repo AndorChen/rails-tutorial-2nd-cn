@@ -1144,7 +1144,7 @@ $ rails console
 </div>
 ```
 
-注意，在上面的代码中渲染的局部视图名为 `shared/error_messages`，这里用到了 Rails 的一个约定：如果局部视图要在多个控制器重使用，则把它存放在专门的 `shared` 目录下。（这个约定 [9.1.1 节](chapter9.html#9-1-1)还会再介绍）我们除了要新建 `_error_messages.html.erb` 文件之外，还要新建 `app/views/shared` 文件夹。错误提示信息局部视图的内容如代码 7.23 所示。
+注意，在上面的代码中渲染的局部视图名为 `shared/error_messages`，这里用到了 Rails 的一个约定：如果局部视图要在多个控制器重使用，则把它存放在专门的 `shared` 目录下。（这个约定 [9.1.1 节](chapter9.html#sec-9-1-1)还会再介绍）我们除了要新建 `_error_messages.html.erb` 文件之外，还要新建 `app/views/shared` 文件夹。错误提示信息局部视图的内容如代码 7.23 所示。
 
 **代码 7.23** 显示表单错误提示信息的局部视图 <br />`app/views/shared/_error_messages.html.erb`
 
@@ -1354,7 +1354,7 @@ It failed.
 <div class="alert alert-success">Welcome to the Sample App!</div>
 ```
 
-（注意，键 `:success` 是 Symbol，在插入模板之前，ERb 会自动将其转换成字符串 `"success"`。）我们遍历了所有可能出现的 Flash 消息，这样当消息存在时才能显示。在 [8.1.5 节](chapter8.html#8-1-5) 中会使用 `flash[:error]` 显示登录失败消息。<sup>[10](#fn-10)</sup>
+（注意，键 `:success` 是 Symbol，在插入模板之前，ERb 会自动将其转换成字符串 `"success"`。）我们遍历了所有可能出现的 Flash 消息，这样当消息存在时才能显示。在 [8.1.5 节](chapter8.html#sec-8-1-5) 中会使用 `flash[:error]` 显示登录失败消息。<sup>[10](#fn-10)</sup>
 
 检测页面中是否显示了正确的 Flash 消息的测试留作练习（参见 [7.6 节](#sec-7-6)）。在 `create` 动作中给 `flash[:success]` 赋值一个欢迎信息后（如代码 7.27 所示），这个测试就可以通过了。
 
