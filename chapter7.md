@@ -741,7 +741,7 @@ expect { click_button "Create my account" }.not_to change(User, :count)
 提交合法数据的情况和上述不合法数据的情况类似，不过用户数量不是不变，而是增加了 1 个：
 
 ```ruby
-visit_signup path
+visit signup_path
 fill_in "Name", with: "Example User"
 fill_in "Email", with: "user@example.com"
 fill_in "Password", with: "foobar"
