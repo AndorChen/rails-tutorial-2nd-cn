@@ -23,7 +23,7 @@ layout: default
 
 <div class="r-info">
 	<p><img src="assets/images/cover.jpg" width="116" height="163" alt="Ruby on Rails 教程" title="Ruby on Rails 教程" /></p>
-	<p><a href="http://item.taobao.com/item.htm?id=17282686017" title="购买 PDF 电子书" target="_blank">购买 PDF 电子书</a> ￥4.90</p>
+	<p><a href="http://item.taobao.com/item.htm?id=17282686017" title="购买 PDF 电子书" target="_blank">购买 PDF 电子书</a> ￥9.90</p>
 	<p class="authors">原作者：Michael Hartl <br />译者：Andor Chen</p>
 	<p class="versions">Ruby 1.9.3 / Rails 3.2.12</p>
 </div>
