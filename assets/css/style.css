@@ -678,6 +678,14 @@ body {
   text-align: center;
 }
 
+.main .align-left {
+  text-align: left;
+}
+
+.main .align-right {
+  text-align: right;
+}
+
 .main .caption {
   color: #999;
   text-align: center;
@@ -797,10 +805,9 @@ body {
 /* navigation */
 
 .main .navigation {
-  border-bottom: 3px double #999;
   font-size: 12px;
   margin: 20px 0 40px;
-  padding: 0 0 40px 0;
+  padding-bottom: 20px;
 }
 
 .main .navigation .prev_page {
@@ -811,13 +818,21 @@ body {
   float: right;
 }
 
+/* Footnotes */
+
+.footnotes {
+  border-top: 3px double #999;
+  margin: 0!important;
+  padding-top: 40px;
+}
+
 /* Footer */
 
 .footer {
-    color: #888;
-    text-align: center;
-    font-size: 12px;
-    text-shadow: 0 1px 1px rgba(255,255,255,.9);
+  color: #888;
+  text-align: center;
+  font-size: 12px;
+  text-shadow: 0 1px 1px rgba(255,255,255,.9);
 }
 
 /* Code Highlight */
@@ -882,17 +897,6 @@ body {
 .vg { color: #19177C } /* Name.Variable.Global */
 .vi { color: #19177C } /* Name.Variable.Instance */
 .il { color: #666666 } /* Literal.Number.Integer.Long */
-
-
-
-
-
-
-
-
-
-
-
 
 /* ==========================================================================
    Helper classes

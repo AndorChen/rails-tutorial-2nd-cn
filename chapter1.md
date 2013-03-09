@@ -1121,6 +1121,7 @@ jhyicevg.heroku.com
 <p class="center">我正在阅读 @railstutorial 学习 Ruby on Rails！ http://railstutorial.org/</p>
 
 <div class="navigation">
+  <a class="prev_page" href="foreword.html">&laquo; 序</a>
 	<a class="next_page" href="chapter2.html">第二章 演示程序 &raquo;</a>
 </div>
 

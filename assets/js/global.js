@@ -19,6 +19,8 @@ var tutorialScript = {
 	enhanceFootnoteItem: function() {
 		var t = this;
 		if($('.navigation + ol').length > 0) {
+			$('.navigation + ol').addClass('footnotes');
+
 			$('.navigation + ol > li').each(function(index, ele) {
 				var order = index+1;
 				$(ele).attr('id', 'fn-'+order);

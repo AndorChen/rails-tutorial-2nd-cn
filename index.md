@@ -4,6 +4,9 @@ layout: default
 
 <div class="l-menu">
 	<ol class="menu">
+		<li><a href="author.html" title="作者译者">作者译者</a></li>
+		<li><a href="preface.html" title="致中国读者">致中国读者</a></li>
+		<li><a href="foreword.html" title="序">序</a></li>
 		<li><a href="chapter1.html" title="第一章 从零到部署">第一章 从零到部署</a></li>
 		<li><a href="chapter2.html" title="第二章 演示生活">第二章 演示程序</a></li>
 		<li><a href="chapter3.html" title="第三章 基本静态的页面">第三章 基本静态的页面</a></li>
