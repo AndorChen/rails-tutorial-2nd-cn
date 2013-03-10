@@ -146,9 +146,14 @@ source 'https://rubygems.org'
 .
 .
 group :development do
-gem 'sqlite3', '1.3.5'
-gem 'rspec-rails', '2.9.0'
-gem 'annotate', '~> 2.4.1.beta'
+  gem 'sqlite3', '1.3.5'
+  gem 'rspec-rails', '2.11.0'
+end
+
+group :Development do
+  gem 'annotate', '2.5.0'
+end
+
 group :test do
 .
 .
