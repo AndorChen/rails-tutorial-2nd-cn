@@ -3,7 +3,7 @@ layout: chapter
 title: 第三章 基本静态的页面
 ---
 
-从本章开始我们要开发一个大型的示例程序，本书后续内容都会基于这个示例程序。最终完成的程序会包含用户、微博功能，以及完整的登录和用户验证系统，不过我们会从一个看似功能有限的话题出发——创建静态页面。这看似简单的一件事却是一个很好的锻炼，极具意义，对这个初建的程序而言也是个很好的开端。
+从本章开始我们要开发一个大型的示例程序，本书后续内容都会基于这个示例程序。最终完成的程序会包含用户、微博功能，以及完整的登录和用户身份验证系统，不过我们会从一个看似功能有限的话题出发——创建静态页面。这看似简单的一件事却是一个很好的锻炼，极具意义，对这个初建的程序而言也是个很好的开端。
 
 虽然 Rails 是被设计用来开发基于数据库的动态网站的，不过它也能胜任使用纯 HTML 创建的静态页面。其实，使用 Rails 创建动态页面还有一点好处：我们可以方便的添加一小部分动态内容。这一章就会教你怎么做。在这个过程中我们还会一窥自动化测试（automated testing）的面目，自动化测试可以让我们确信自己编写的代码是正确的。而且，编写一个好的测试用例还可以让我们信心十足的重构（refactor）代码，修改实现过程但不影响最终效果。
 
@@ -52,7 +52,7 @@ group :production do
 end
 ```
 
-上面的代码将 `rspec-rails` 放在了开发组中，这样我们就可以使用 RSpec 相关的生成器了，同样我们还把它放到了测试组中，这样才能在测试时使用它。我们没必要单独的安装 RSpec，因为它是 rspec-rails 的依赖件（dependency），会被自动安装。我们还加入了 [Capybara](https://github.com/jnicklas/capybara)，这个 gem允许我们使用类似英语中的句法编写模拟与应用程序交互的代码。<sup>[1](#fn-1)</sup> 和[第二章](chapter2.html)一样，我们还要把 PostgreSQL 所需的 gem 加入生产组，这样才能部署到 Heroku：
+上面的代码将 `rspec-rails` 放在了开发组中，这样我们就可以使用 RSpec 相关的生成器了，同样我们还把它放到了测试组中，这样才能在测试时使用。我们没必要单独的安装 RSpec，因为它是 rspec-rails 的依赖件（dependency），会被自动安装。我们还加入了 [Capybara](https://github.com/jnicklas/capybara)，这个 gem允许我们使用类似英语中的句法编写模拟与应用程序交互的代码。<sup>[1](#fn-1)</sup> 和[第二章](chapter2.html)一样，我们还要把 PostgreSQL 所需的 gem 加入生产组，这样才能部署到 Heroku：
 
 ```ruby
 group :production do
@@ -62,7 +62,7 @@ end
 
 Heroku 建议在开发环境和生产环境使用不同的数据库，不过对我们的示例程序而言没什么影响，SQLite 比 PostgreSQL 更容易安装和配置。在你的电脑中安装和配置 PostgreSQL 会作为一个练习。（参见 [3.5 节](#sec-3-5)）
 
-要安装和包含这些新加的 gem，运行 `bundle install`：
+要安装和包含这些新加的 gem，请运行 `bundle install`：
 
 ```sh
 $ bundle install --without production
@@ -109,7 +109,7 @@ $ git commit -a -m "Improve the README"
 
 图 3.1：为示例程序在 GitHub 新建一个仓库
 
-这个程序在本书的后续章节会一直使用，所以建议你在 GitHub 新建一个仓库（如图 3.1），然后将代码推动上去：
+这个程序在本书的后续章节会一直使用，所以建议你在 GitHub 新建一个仓库（如图 3.1），然后将代码推送上去：
 
 ```sh
 $ git remote add origin git@github.com:<username>/sample_app.git
@@ -132,7 +132,7 @@ $ git push
 $ git push heroku
 ```
 
-这样你可在远端做个备份，也可以尽早的获知生成环境中出现的错误。如果你在 Heroku 遇到了问题，可以看一下生产环境的日志文件尝试解决这些问题：
+这样你可在远端做个备份，也可以尽早的获知生成环境中出现的错误。如果你在 Heroku 遇到了问题，可以看一下生产环境的日志文件尝试解决：
 
 ```sh
 $ heroku logs
@@ -146,7 +146,7 @@ Rails 中有两种方式创建静态页面。其一，Rails 可以处理真正�
 
 现在回想一下 [1.2.3 节](chapter1.html#sec-1-2-3) 中讲过的 Rails 目录结构（图 1.2）会对我们有点帮助。本节主要的工作都在 `app/controllers` 和 `app/views` 文件夹中。（[3.2 节](#sec-3-2)中我们还会新建一个文件夹）
 
-在这节你会第一次发现在文本编辑器或 IDE 中打开整个 Rails 目录是多么有用。不过怎么做却取决于你的系统，大多数情况下你可以在命令行中用你选择的浏览器命令打开当前应用程序所在的目录，在 Unix 中当前目录就是一个点号（`.`）：
+本节你会第一次发现在文本编辑器或 IDE 中打开整个 Rails 目录是多么有用。不过怎么做却取决于你的系统，大多数情况下你可以在命令行中用你选择的浏览器命令打开当前应用程序所在的目录，在 Unix 中当前目录就是一个点号（`.`）：
 
 ```sh
 $ cd ~/rails_projects/sample_app
@@ -163,7 +163,7 @@ $ subl .
 
 <h3 id="sec-3-1-1">3.1.1 真正的静态页面</h3>
 
-我们先来看一下真正静态的页面。回想一下 [1.2.5 节](chapter1.html#sec-1-2-5)，每个 Rails 应用程序执行过 `rails` 命令后都会生成一个小型的可以运行的程序，默认的欢迎页面的地址是 <http://localhost:3000/>（图 1.3）。
+我们先来看一下真正静态的页面。回想一下 [1.2.5 节](chapter1.html#sec-1-2-5)，每个 Rails 应用程序执行过 `rails` 命令后都会生成一个小型的可以运行的程序，默认的欢迎页面地址是 <http://localhost:3000/>（图 1.3）。
 
 ![public_index_rails_3](assets/images/figures/public_index_rails_3.png)
 
@@ -223,7 +223,7 @@ $ rm public/hello.html
 $ git checkout -b static-pages
 ```
 
-Rails 提供了一个脚本用来创建控制器，叫做 `generate`，只要提供控制器的名字就可以运行了。如果你想让 `generate` 同时生成 RSpec 测试用例，你要执行 RSpec 生成器命令，如果在阅读本章前面内容时没有执行这个命令的话，请执行下面的命令：
+Rails 提供了一个脚本用来创建控制器，叫做 `generate`，只要提供控制器的名字就可以运行了。如果想让 `generate` 同时生成 RSpec 测试用例，需要执行 RSpec 生成器命令，如果在阅读本章前面内容时没有执行这个命令的话，请执行下面的命令：
 
 ```sh
 $ rails generate rspec:install
@@ -251,14 +251,14 @@ $ rails generate controller StaticPages home help --no-test-framework
       create      app/assets/stylesheets/static_pages.css.scss
 ```
 
-注意我们使用了 `--no-test-framework` 选项禁止生成 RSpec 测试代码，因为我们不想自动生成，在 [3.2 节](#sec-3-2)会手动创建测试。同时我们还故意从命令行参数中省去了 `about` 动作，稍后我们会看到如何通过 TDD 添加它（[3.2 节](#sec-3-2)）。
+注意，我们使用了 `--no-test-framework` 选项禁止生成 RSpec 测试代码，因为我们不想自动生成，在 [3.2 节](#sec-3-2)会手动创建测试。同时我们还故意从命令行参数中省去了 `about` 动作，稍后我们会看到如何通过 TDD 添加它（[3.2 节](#sec-3-2)）。
 
 顺便说一下，如果在生成代码时出现了错误，知道如何撤销操作就很有用了。[旁注 3.1](#box-3-1) 中介绍了一些如何在 Rails 中撤销操作的方法。
 
 <div id="box-3-1" class="aside">
   <h4>旁注 3.1 撤销操作</h4>
   <p>即使再小心，在开发 Rails 应用程序过程中仍然可能犯错。幸运的是，Rails 提供了一些工具能够帮助你进行复原。</p>
-  <p>举例来说，一个常见的情况是你想更改控制器的名字，这时你就要撤销生成的代码。生成控制器时，除了控制器文件本身之外，Rails 还会生成很多其他的文件（参见代码 3.4）。撤销生成的文件不仅仅要删除主要的文件，还要删除一些辅助的文件。（事实上，我们还要撤销对 <code>routes.rb</code> 文件自动做的一些改动。）在 Rails 中，我们可以通过 <code>rails destroy</code> 命令完成这些操作。一般来说，下面的两个命令是相互抵消的：</p>
+  <p>举例来说，一个常见的情况是，你想更改控制器的名字，这时你就要撤销生成的代码。生成控制器时，除了控制器文件本身之外，Rails 还会生成很多其他的文件（参见代码 3.4）。撤销生成的文件不仅仅要删除主要的文件，还要删除一些辅助的文件。（事实上，我们还要撤销对 <code>routes.rb</code> 文件自动做的一些改动。）在 Rails 中，我们可以通过 <code>rails destroy</code> 命令完成这些操作。一般来说，下面的两个命令是相互抵消的：</p>
   <pre>
     $ rails generate controller FooBars baz quux
     $ rails destroy  controller FooBars baz quux
@@ -288,13 +288,13 @@ $ rails generate controller StaticPages home help --no-test-framework
   <p>拥有这些技术，我们就可以得心的应对开发过程中遇到的各种<a href="http://en.wikipedia.org/wiki/SNAFU">混乱（snafu）</a>了。</p>
 </div>
 
-代码 3.4 中生成 StaticPages 控制器的命令会自动更新路由文件（route），叫做 `config/routes.rb`，Rails 会通过这个文件寻找 URI 到网页之间的对应关系。这是我们第一次讲到 `config` 目录，所以让我们看一下该目录的结构吧（如图 3.4）。`config` 目录如其名字所示，是存储 Rails 应用程序中的设置文件的。
+代码 3.4 中生成 StaticPages 控制器的命令会自动更新路由文件（route），叫做 `config/routes.rb`，Rails 会通过这个文件寻找 URI 和网页之间的对应关系。这是我们第一次讲到 `config` 目录，所以让我们看一下该目录的结构吧（如图 3.4）。`config` 目录如其名字所示，是存储 Rails 应用程序中的设置文件的。
 
 ![config_directory_rails_3](assets/images/figures/config_directory_rails_3.png)
 
 图 3.4：示例程序的 `config` 文件夹
 
-因为我们生成了 `home` 和 `help` 动作，路由文件中已经为每个动作生成了规则，如代码 3.5。
+因为我们生成了 `home` 和 `help` 动作，路由文件中已经为它们生成了配置，如代码 3.5。
 
 **代码 3.5** StaticPages 控制器中 `home` 和 `help` 动作的路由配置 <br />`config/routes.rb`
 
@@ -314,7 +314,7 @@ end
 get "static_pages/home"
 ```
 
-将来自 /static_pages/home 的请求映射到 StaticPages 控制器的 `home` 动作上。另外，当使用 `get` 时会将其对应到 GET 请求方法上，GET 是 HTTP（超文本传输协议，Hypertext Transfer Protocol）支持的基本方法之一（参见[旁注 3.2](#box-3-2)）。在我们这个例子中，当我们在 StaticPages 控制器中生成 `home` 动作时，我们就自动的在 /static_pages/home 地址上获得一个页面了。访问 [/static_pages/home](http://localhost:3000/static_pages/home) 查看这个页面（如图 3.5）。
+将来自 /static_pages/home 的请求映射到 StaticPages 控制器的 `home` 动作上。另外，当使用 `get` 时会将其对应到 GET 请求方法上，GET 是 HTTP（超文本传输协议，Hypertext Transfer Protocol）支持的基本方法之一（参见[旁注 3.2](#box-3-2)）。在我们这个例子中，当我们在 StaticPages 控制器中生成 `home` 动作时，就自动的在 /static_pages/home 地址上获得了一个页面。访问 [/static_pages/home](http://localhost:3000/static_pages/home) 可以查看这个页面（如图 3.5）。
 
 ![raw_home_view_31](assets/images/figures/raw_home_view_31.png)
 
@@ -323,7 +323,7 @@ get "static_pages/home"
 <div id="box-3-2" class="aside">
   <h4>旁注 3.2 GET 等</h4>
   <p>超文本传输协议（HTTP）定义了四个基本的操作，对应到四个动词上，分别是 get、post、put 和 delete。这四个词表现了客户端电脑（通常会运行一个浏览器，例如 Firefox 或 Safari）和服务器（通常会运行一个 Web 服务器，例如 Apache 或 Nginx）之间的操作。（有一点很重要需要你知道，当在本地电脑上开发 Rails 应用程序时，客户端和服务器是在同一个物理设备上的，但是二者是不同的概念。）受 REST 架构影响的 Web 框架（包括 Rails）都很重视对 HTTP 动词的实现，我们在<a href="chapter2.html">第二章</a>已经简要介绍了 REST，从<a href="chapter7.html">第七章</a>开始会做更详细的介绍。</p>
-  <p>GET 是最常用的 HTTP 操作，用来从网络上读取数据，它的意思是“读取一个网页”，当你访问 google.com 或 wikipedia.org 时，你的浏览器发出的就是 GET 请求。POST 是第二种最常用的操作，当你提交表单时浏览器发送的就是 POST 请求。在 Rails 应用程序中，POST 请求一般被用来创建某个东西（不过 HTTP 也允许 POST 进行更新操作）。例如，你提交注册表单时发送的 POST 请求就会在网站中创建一个新用户。剩下的两个动词，PUT 和 DELETE 分别用来更新和销毁服务器上的某个东西。这两个操作比 GET 和 POST 少用一些，因为浏览器没有内建对这两种请求的支持，不过有些 Web 框架（包括 Rails）通过一些聪明的处理方式让它看起来是浏览器发出的这种请求。</p>
+  <p>GET 是最常用的 HTTP 操作，用来从网络上读取数据，它的意思是“读取一个网页”，当你访问 google.com 或 wikipedia.org 时，你的浏览器发出的就是 GET 请求。POST 是第二种最常用的操作，当你提交表单时浏览器发送的就是 POST 请求。在 Rails 应用程序中，POST 请求一般被用来创建某个东西（不过 HTTP 也允许 POST 进行更新操作）。例如，你提交注册表单时发送的 POST 请求就会在网站中创建一个新用户。剩下的两个动词，PUT 和 DELETE 分别用来更新和销毁服务器上的某个东西。这两个操作比 GET 和 POST 少用一些，因为浏览器没有内建对这两种请求的支持，不过有些 Web 框架（包括 Rails）通过一些聪明的处理方式，看起来就像是浏览器发出的一样。</p>
 </div>
 
 要想弄明白这个页面是怎么来的，让我们在浏览器中看一下 StaticPages 控制器文件吧，你应该会看到类似代码 3.6 的内容。你可能已经注意到了，不像第二章中的 Users 和 Microposts 控制器，StaticPages 控制器没有使用标准的 REST 动作。这对静态页面来说是很常见的，REST 架构并不能解决所有的问题。
@@ -375,7 +375,7 @@ end
 
 这两个视图只是占位用的，它们的内容都包含了一个一级标题（`h1` 标签）和一个显示视图文件完整的相对路径的段落（`p` 标签）。我们会在 [3.3 节](#sec-3-3)中添加一些简单的动态内容。这些静态内容的存在是为了强调一个很重要的事情：Rails 的视图可以只包含静态的 HTML。从浏览器的角度来看，[3.1.1 节](#sec-3-1-1)中的原始 HTML 文件和本节通过控制器和动作的方式渲染的页面没有什么差异，浏览器能看到的只有 HTML。
 
-在本章剩下的内容中，我们会为“首页”和“帮助”页面添加一些内容，然后补上 [3.1.2 节](#sec-3-1-2)中丢下的“关于”页面。然后会添加量很少的动态内容，在每个页面显示不同的标题。
+在本章剩下的内容中，我们会为“首页”和“帮助”页面添加一些内容，然后补上 [3.1.2 节](#sec-3-1-2)中丢下的“关于”页面。然后会添加少量的动态内容，在每个页面显示不同的标题。
 
 在继续下面的内容之前，如果你使用 Git 的话最好将 StaticPages 控制器相关的文件加入仓库：
 
@@ -386,7 +386,7 @@ $ git commit -m "Add a StaticPages controller"
 
 <h2 id="sec-3-2">3.2 第一个测试</h2>
 
-本书采用了一种直观的测试应用程序表现的方法，而不关注具体的实现过程，这是 TDD 的一个变种，叫做 BDD（行为驱动开发，Behavior-driven Development）。我们使用的主要工具是集成测试（integration test）和单元测试(unit test)。集成测试在 RSpec 中叫做 request spec，它允许我们模拟用户在浏览器中和应用程序进行交互的操作。和 Capybara 提供的自然语言句法（natural-language syntax）一起使用，集成测试提供了一种强大的方法来测试应用程序的功能而不用在浏览器中手动去检查每个页面。（BDD 另外一个受欢迎的选择是 Cucumber，在 [8.3 节](chapter8.html#sec-8-3)中会介绍。）
+本书采用了一种直观的测试应用程序表现的方法，而不关注具体的实现过程，这是 TDD 的一个变种，叫做 BDD（行为驱动开发，Behavior-driven Development）。我们使用的主要工具是集成测试（integration test）和单元测试(unit test)。集成测试在 RSpec 中叫做 request spec，它允许我们模拟用户在浏览器中和应用程序进行交互的操作。和 Capybara 提供的自然语言句法（natural-language syntax）一起使用，集成测试提供了一种强大的方法来测试应用程序的功能，而不用在浏览器中手动检查每个页面。（BDD 另外一个受欢迎的选择是 Cucumber，在 [8.3 节](chapter8.html#sec-8-3)中会介绍。）
 
 TDD 的好处在于测试优先，比编写应用程序的代码还早。刚接触的话要花一段时间才能适应这种方式，不过好处很明显。我们先写一个失败测试（failing test），然后编写代码使这个测试通过，这样我们就会相信测试真的是针对我们设想的功能。这种“失败-实现-通过”的开发循环包含了一个[心流](http://en.wikipedia.org/wiki/Flow_\(psychology\))，可以提高编程的乐趣并提高效率。测试还扮演着应用程序代码客户的角色，会提高软件设计的优雅性。
 
@@ -425,7 +425,7 @@ describe "Static pages" do
 end
 ```
 
-代码 3.9 是纯粹的 Ruby，不过即使你以前学习过 Ruby 也看不太懂，这是因为 RSpec 利用了 Ruby 语言的延展性定义了一套“领域特殊语言”（Domain-Specifi Language, DSL）用来写测试代码。重要的是，如果你想使用 RSpec 不是一定要知道 RSpec 的句法。初看起来是有些神奇，RSpec 和 Capybara 就是这样设计的，读起来很像英语，如果你多看一些 `generate` 命令生成的测试或者本书中的示例，很快你就会熟练了。
+代码 3.9 是纯粹的 Ruby，不过即使你以前学习过 Ruby 也看不太懂，这是因为 RSpec 利用了 Ruby 语言的延展性定义了一套“领域专属语言”（Domain-specific Language, DSL）用来写测试代码。重要的是，如果你想使用 RSpec 不是一定要知道 RSpec 的句法。初看起来是有些神奇，RSpec 和 Capybara 就是这样设计的，读起来很像英语，如果你多看一些 `generate` 命令生成的测试或者本书中的示例，很快你就会熟练了。
 
 代码 3.9 包含了一个 `describe` 块以及其中的一个测试用例（sample），以 `it "..." do` 开头的代码块就是一个用例：
 
@@ -496,7 +496,7 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
 
 图 3.7：一个绿色（通过）的测试
 
-基于上面针对“首页”的例子，或许你已经猜到了“帮助”页面类似的测试和程序代码。我们先来测试一下相应的内容，现在我们的字符串变成“`Help`”了（参见代码 3.11）。
+基于上面针对“首页”的例子，或许你已经猜到了“帮助”页面类似的测试和程序代码。我们先来测试一下相应的内容，现在字符串变成“`Help`”了（参见代码 3.11）。
 
 **代码 3.11** 添加测试“帮助”页面内容的代码 <br />`spec/requests/static_pages_spec.rb`
 
@@ -553,11 +553,11 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
 
 <h3 id="sec-3-2-2">3.2.2 添加页面</h3>
 
-看过了上面简单的 TDD 开发过程，下面我们要用这个技术完成一个稍微复杂一些的任务，添加一个新页面，就是 [3.1.3 节](#sec-3-1-2)中没有生成的“关于”页面。通过每一步中编写测试和运行 RSpec 的过程，我们会看到 TDD 是如何引导我们进行应用程序代码开发的。
+看过了上面简单的 TDD 开发过程，下面我们要用这个技术完成一个稍微复杂一些的任务，添加一个新页面，就是 [3.1.3 节](#sec-3-1-2)中没有生成的“关于”页面。通过每一步中编写测试和运行 RSpec 的过程，我们会看到 TDD 是如何引导我们进行应用程序开发的。
 
 <h4>遇红</h4>
 
-先来到“遇红-变绿”过程中的“遇红”部分，为“关于”页面写一个失败测试。按照代码 3.11 的代码，或许你已经知道如何写这个测试了（参见代码 3.13）。
+先来到“遇红-变绿”过程中的“遇红”部分，为“关于”页面写一个失败测试。参照代码 3.11 的代码，或许你已经知道如何写这个测试了（参见代码 3.13）。
 
 **代码 3.13** 添加测试“关于”页面内容的代码 <br />`spec/requests/static_pages_spec.rb`
 
@@ -594,7 +594,7 @@ end
 
 <h4>变绿</h4>
 
-回顾一下 [3.1.2 节](#sec-3-1-2)的内容，在 Rails 中我们可以通过创建一个动作并添加相应的视图文件来生成一个静态页面。所以首先我们要在 StaticPages 控制器中添加一个 `about` 动作。我们已经写过失败测试了，现在已经相信，如果能让它通过，我们就可以创建一个可以运行的“关于”页面。
+回顾一下 [3.1.2 节](#sec-3-1-2)的内容，在 Rails 中我们可以通过创建一个动作并添加相应的视图文件来生成静态页面。所以首先我们要在 StaticPages 控制器中添加一个 `about` 动作。我们已经写过失败测试了，现在已经确信，如果能通过，就创建了一个可以运行的“关于”页面。
 
 如果你运行 RSpec 测试：
 
@@ -610,7 +610,7 @@ No route matches [GET] "/static_pages/about"
 
 这提醒我们要在路由文件中添加 `static_pages/about`，我们可以按照代码 3.5 所示的格式添加，结果如代码 3.14 所示。
 
-**代码 3.14** 添加 `about` 页面的路由 <br />`config/routes.rb`
+**代码 3.14** 添加“关于”页面的路由 <br />`config/routes.rb`
 
 ```ruby
 SampleApp::Application.routes.draw do
@@ -623,7 +623,7 @@ SampleApp::Application.routes.draw do
 end
 ```
 
-现在运行
+现在运行测试
 
 ```sh
 $ bundle exec rspec spec/requests/static_pages_spec.rb
@@ -653,7 +653,7 @@ class StaticPagesController < ApplicationController
 end
 ```
 
-再运行
+再运行测试
 
 ```sh
 $ bundle exec rspec spec/requests/static_pages_spec.rb
@@ -666,9 +666,9 @@ ActionView::MissingTemplate:
   Missing template static_pages/about
 ```
 
-要解决这个问题，我们要添加 `about` 相应的视图。我们需要在 `app/views/static_pages` 目录下创建一个名为 `about.html.erb` 的新文件，写入代码 3.16 所示的内容。
+要解决这个问题，我们要添加 `about` 动作对应的视图。我们需要在 `app/views/static_pages` 目录下创建一个名为 `about.html.erb` 的新文件，写入代码 3.16 所示的内容。
 
-**代码 3.16** “关于”页面的源码 <br />`app/views/static_pages/about.html.erb`
+**代码 3.16** “关于”页面视图代码 <br />`app/views/static_pages/about.html.erb`
 
 ```erb
 <h1>About Us</h1>
@@ -694,19 +694,19 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
 
 <h4>重构</h4>
 
-现在测试已经变绿了，我们可以很自信的尽情重构了。我们的代码经常会“变味”（意思是代码会变得丑陋、啰嗦、大量的重复），电脑不会在意，但是人类会，所以经常的重构让代码变得简洁是很重要的。这时候一个好的测试就显出其价值了，因为它可以降低重构过程中引入 bug 的风险。
+现在测试已经变绿了，我们可以很自信的尽情重构了。我们的代码经常会“变味”（意思是代码会变得丑陋、啰嗦、大量的重复），电脑不会在意，但是人类会，所以经常重构让代码变得简洁是很重要的。这时候一个好的测试就显出其价值了，因为它可以降低重构过程中引入 bug 的风险。
 
 我们的示例程序现在还很小没什么可重构的，不过代码无时无刻不在变味，所以我们的重构也不会等很久：在 [3.3.4 节](#sec-3-3-4)中就要忙于重构了。
 
 <h2 id="sec-3-3">3.3 有点动态内容的页面</h2>
 
-到目前为止，我们已经为一些静态页面创建了动作和视图，我们还改变每一个页面显示的内容（标题）让它看起来是动态的。改变标题到底算不算真正动态还有争议，不过前面的内容却可以为[第七章](chapter7.html)介绍的真正动态打下基础。
+到目前为止，我们已经为一些静态页面创建了动作和视图，我们还改变了每一个页面显示的内容（标题）让它看起来是动态的。改变标题到底算不算真正动态还有争议，不过前面的内容却可以为[第七章](chapter7.html)介绍的真正动态打下基础。
 
-如果你跳过了 [3.2 节](#sec-3-2)中的 TDD 部分，在继续阅读之前先按照代码 3.14、代码 3.15 和代码 3.16 创建“关于”页面。
+如果你跳过了 [3.2 节](#sec-3-2)中的 TDD 部分，在继续阅读之前请先按照代码 3.14、代码 3.15 和代码 3.16 创建“关于”页面。
 
 <h3 id="sec-3-3-1">3.3.1 测试标题的变化</h3>
 
-我们计划修改“首页”、“帮助”页面和“关于”页面的标题，让它在每一页都有所变化。这个过程将使用视图中的 `<title>` 标签。大多数浏览器会在浏览器窗口的顶部显示标题的内容（Google Chrome 是个特例），标题对搜索引擎优化也是很重要的。我们会先写测试标题的代码，然后添加标题，再然后使用一个布局（layout）文件进行重构，削减重复。
+我们计划修改“首页”、“帮助”页面和“关于”页面的标题，在每一页都有所变化。这个过程将使用视图中的 `<title>` 标签。大多数浏览器会在浏览器窗口的顶部显示标题的内容（Google Chrome 是个特例），标题对搜索引擎优化也是很重要的。我们会先写测试标题的代码，然后添加标题，再然后使用一个布局（layout）文件进行重构，削除重复。
 
 你可能已经注意到了，`rails new` 命令已经创建了布局文件。稍后我们会介绍这个文件的作用，现在在继续之前先将其重命名：
 
@@ -759,14 +759,14 @@ it "should have the right title" do
 end
 ```
 
-`have_selector` 方法会测试一个 HTML 元素（“selector”的意思）是否有指定的内容。换句话说，下面的代码：
+`have_selector` 方法会测试一个 HTML 元素（“selector”的意思）是否含有指定的内容。换句话说，下面的代码：
 
 ```ruby
 page.should have_selector('title',
                   :text => "Ruby on Rails Tutorial Sample App | Home")
 ```
 
-检查 `title` 标签的内容是否为
+会检查 `title` 标签的内容是否为
 
 ```ruby
 "Ruby on Rails Tutorial Sample App | Home"
@@ -781,9 +781,9 @@ page.should have_selector('title',
 
 也会匹配完整形式的标题。
 
-注意，在代码 3.17 中，我们将 `have_selector` 方法切成两行显示，这种用法说明了 Ruby 句法中一个很重要的原则：Ruby 不介意换行。<sup>[11](#fn-11)</sup> 我之所以把代码切成两行是因为我要保证代码的每一行都少于 80 个字符，这样能提高可读性。<sup>[12](#fn-12)</sup> 即使这样，代码的结构还是很乱，在 [3.5 节](#sec-3-5)中会有个重构的练习，将代码结构变得更好一些，在 [5.3.4 节](chapter5.html#sec-5-3-4)中会使用 RSpec 最新的功能完全重写 StaticPages 测试。
+注意，在代码 3.17 中，我们将 `have_selector` 方法切成了两行显示，这种用法说明了 Ruby 句法中一个很重要的原则：Ruby 不介意换行。<sup>[11](#fn-11)</sup> 我之所以把代码切成两行是因为我要保证代码的每一行都少于 80 个字符，这样能提高可读性。<sup>[12](#fn-12)</sup> 即使这样，代码的结构还是很乱，在 [3.5 节](#sec-3-5)中会有个重构的练习，将代码结构变得更好一些，在 [5.3.4 节](chapter5.html#sec-5-3-4)中会使用 RSpec 最新的功能完全重写针对 StaticPages 的测试。
 
-按照代码 3.17 的格式为三个静态页面都加上测试代码，结果参照代码 3.18。
+我们按照代码 3.17 的格式为三个静态页面都加上测试代码，结果参照代码 3.18。
 
 **代码 3.18** StaticPages 控制器的测试文件，包含标题测试 <br />`spec/requests/static_pages_spec.rb`
 
@@ -919,7 +919,7 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
 
 <h3 id="sec-3-3-3">3.3.3 嵌入式 Ruby</h3>
 
-本节到目前位置已经做了很多事情，我们通过 Rails 控制器和动作生成了三个可以通过验证的页面，不过这些页面都是纯静态的 HTML，没有体现出 Rails 的强大所在。而且，它们的代码充斥着重复：
+本节到目前为止已经做了很多事情，我们通过 Rails 控制器和动作生成了三个可以通过句法验证的页面，不过这些页面都是纯静态的 HTML，没有体现出 Rails 的强大所在。而且，它们的代码充斥着重复：
 
 - 页面的标签几乎（但不完全）是一模一样的
 - 每个标题中都有“Ruby on Rails Tutorial Sample App”
@@ -929,7 +929,7 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
 
 不过我们去除重复的第一步却是要增加一些代码让页面的标题看起来是一样的。这样我们就可以更容易的去掉重复的代码了。
 
-这个过程会在视图中使用嵌入式 Ruby（Embedded Ruby）。既然“首页”、“帮助”页面和“关于”页面的标题有一个变动的部分，那我们就利用一个 Rails 中特别的函数 `provide` 在每个页面设定不同的标题。通过将视图 `home.html.erb` 标题中的“Home”换成如代码 3.22 所示的代码，我们可以看一下是实现的过程。
+这个过程会在视图中使用嵌入式 Ruby（Embedded Ruby）。既然“首页”、“帮助”页面和“关于”页面的标题有一个变动的部分，那我们就利用一个 Rails 中特别的函数 `provide` 在每个页面设定不同的标题。通过将视图 `home.html.erb` 标题中的“Home”换成如代码 3.22 所示的代码，我们可以看一下实现的过程。
 
 **代码 3.22** 标题中使用了嵌入式 Ruby 代码的“首页”视图 <br />`app/views/static_pages/home.html.erb`
 
@@ -963,7 +963,7 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
 <title>Ruby on Rails Tutorial Sample App | <%= yield(:title) %></title>
 ```
 
-（这两种嵌入 Ruby 代码的方式区别在于，`<% ... %>` **执行**其中的代码，`<%= ... %>` 也会执行其中的代码并将结果**插入**模板中。）最终得到的结果和以前是一样的，只不过标题中变动的部分现在是通过 ERb 动态生成的。
+（这两种嵌入 Ruby 代码的方式区别在于，`<% ... %>` **执行**其中的代码，`<%= ... %>` 也会执行其中的代码，而且会把执行的结果**插入**模板中。）最终得到的结果和以前是一样的，只不过标题中变动的部分现在是通过 ERb 动态生成的。
 
 我们可以运行 [3.3.1 节](#sec-3-3-1)中的测试来证实一下，测试还是会通过：
 
@@ -1071,7 +1071,7 @@ $ mv foobar app/views/layouts/application.html.erb
 <%= yield %>
 ```
 
-这行代码是用来将每一页的内容插入布局中的。没必要了解它的具体实现过程，我们只需要知道，在布局中使用它在访问 /static_pages/home 时会将 `home.html.erb` 中的内容转换成 HTML 然后插入 `<%= yield %>` 所在的位置。
+这行代码是用来将每一页的内容插入布局中的。没必要了解它的具体实现过程，我们只需要知道，在布局中使用后，当访问 /static_pages/home 时会将 `home.html.erb` 中的内容转换成 HTML 然后插入 `<%= yield %>` 所在的位置。
 
 还要注意一下，默认的 Rails 布局文件包含几行特殊的代码：
 
@@ -1131,9 +1131,9 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
 
 <h2 id="sec-3-4">3.4 小节</h2>
 
-总的来说，本章几乎没有做什么：我们从静态页面开始，最后完成的几乎还是静态的页面。不过从表面来看我们使用了 Rails 中的控制器、动作和视图进行开发工作，现在我们已经可以往我们的网站中添加任意的动态内容了。本教程的后续内容会告诉你怎么添加。
+总的来说，本章几乎没有做什么：我们从静态页面开始，最后完成的几乎还是静态的页面。不过从表面来看我们使用了 Rails 中的控制器、动作和视图进行开发工作，现在我们已经可以向我们的网站中添加任意的动态内容了。本教程的后续内容会告诉你怎么添加。
 
-在继续之前，让我们花一点时间提交这些改动，然后将其合并到主分支中。在 [3.1.2 节](#sec-3-1-2)中我们为静态页面的开发工作创建了一个 Git 新分支，在开发的过程中如果你还没有做提交，那么先来做一次提交吧，因为我们已经完成了一些工作：
+在继续之前，让我们花一点时间提交本章的改动，然后将其合并到主分支中。在 [3.1.2 节](#sec-3-1-2)中我们为静态页面的开发工作创建了一个 Git 新分支，在开发的过程中如果你还没有做提交，那么先来做一次提交吧，因为我们已经完成了一些工作：
 
 ```sh
 $ git add .
@@ -1163,7 +1163,7 @@ $ git push heroku
 
 1. 为示例程序制作一个“联系”页面。你可以参照代码 3.18，首先写一个测试用例检测 /static_pages/contact 中是否有一个正确的 `h1`，然后再写第二个测试用例测试标题的内容是否为“Ruby on Rails Tutorial Sample App | Contact”。将代码 3.29 的内容写入“练习”页面，让测试可以通过。（这个练习会在 [5.3 节](chapter5.html#sec-5-3)中解决。）
 2. 你可能已经发现 StaticPages 测试文件（代码 3.18）中有重复的地方，“Ruby on Rails Tutorial Sample App”在每个标题测试中都出现了。使用 RSpec 的 `let` 函数，将值赋给变量，确保代码 3.30 中的测试仍然是通过的。代码 3.30 中使用了字符串插值（interpolation），会在 [4.2.2 节](chapter4.html#sec-4-2-2)中介绍。
-3. （有难度）Heroku 网站中一篇[介绍如何在开发环境中使用 sqlite3 的文章](http://devcenter.heroku.com/articles/how-do-i-use-sqlite3-for-development)提到，最好在开发环境、测试环境和生产环境中使用相同类型的数据库。按照 Heroku 网站上介绍[如何在本地环境中安装 PostgreSQL 的文章](http://devcenter.heroku.com/articles/local-postgresql)内容，在你的电脑上安装 PostgreSQL 数据库。修改 `Gemfile`，删掉 `sqlite3`，换上 `pg`，如代码 3.31 所示。你还要知道如何修改 `config/database.yml` 文件，以及如何在本地运行 PostgreSQL 数据库。这个练习的目标是使用 PostgreSQL 数据库创建并设置开发环境和测试环境中用到的数据库。**注意：**你会发现本题还是有点难度的，我只推荐高级用户做这一题。如果你在某个地方卡住了，不要坚持不放。前面我已经说过了，本教程开发的示例程序完全兼容 SQLite 和 PostgreSQL。
+3. （附加题）Heroku 网站中一篇[介绍如何在开发环境中使用 sqlite3 的文章](http://devcenter.heroku.com/articles/how-do-i-use-sqlite3-for-development)提到，最好在开发环境、测试环境和生产环境中使用相同类型的数据库。按照 Heroku 网站上介绍[如何在本地环境中安装 PostgreSQL 的文章](http://devcenter.heroku.com/articles/local-postgresql)内容，在你的电脑上安装 PostgreSQL 数据库。修改 `Gemfile`，删掉 `sqlite3`，换上 `pg`，如代码 3.31 所示。你还要知道如何修改 `config/database.yml` 文件，以及如何在本地运行 PostgreSQL 数据库。这个练习的目标是使用 PostgreSQL 数据库创建并设置开发环境和测试环境中用到的数据库。**注意：**你会发现本题还是有点难度的，我只推荐高级用户做这一题。如果你在某个地方卡住了，不要坚持不放。前面我已经说过了，本教程开发的示例程序完全兼容 SQLite 和 PostgreSQL。
 
 **代码 3.29** “练习”页面的内容 <br />`app/views/static_pages/contact.html.erb`
 
@@ -1293,9 +1293,9 @@ rvm 1.15.6 (master)
 $ rspec spec/
 ```
 
-而不用前面的 `bundle exec`。如果你成功了，那么就可以跳过本小节剩下的内容了。
+而不用加上前面的 `bundle exec`。如果你成功了，那么就可以跳过本小节剩下的内容了。
 
-如果由于每种原因你无法使用较新版的 RVM，你还可以通过使用[集成 Bundler 所需的 gem](https://rvm.io/integration/bundler/)<sup>[16](#fn-16)</sup> 配置 RVM 让它在本地环境中自动包含相应的可执行文件，这也能去掉 `bundle exec`。如果你好奇的话，其实步骤很简单。首先，执行下面的两个命令：
+如果由于某种原因无法使用较新版的 RVM，你还可以通过使用[集成 Bundler 所需的 gem](https://rvm.io/integration/bundler/)<sup>[16](#fn-16)</sup> 配置 RVM 让它在本地环境中自动包含相应的可执行文件，这样也能去掉 `bundle exec`。如果你好奇的话，其实步骤很简单。首先，执行下面的两个命令：
 
 ```sh
 $ rvm get head && rvm reload
@@ -1359,7 +1359,7 @@ $ bin/rspec spec/
 $ bin/rake db:migrate
 ```
 
-如果你添加了其他的可执行文件（例如 [3.6.2 节](#sec-3-6-2)中的 `guard`），你需要重新执行 `bundle --binstubs` 命令。
+如果你添加了其他的可执行文件（例如 [3.6.2 节](#sec-3-6-2)中的 `guard`），需要重新执行 `bundle --binstubs` 命令。
 
 鉴于某些读者会跳过这一节，本教程的后续内容还是会使用 `bundle exec`，避免出现错误。不过，如果你的系统已经做了正确的设置，你应该使用更简洁的形式。
 
@@ -1488,7 +1488,7 @@ guard 'rspec', :version => 2, :all_after_pass => false do
 $ bundle exec guard
 ```
 
-如果你不想输入命令前面的 `bundle exec`，需要按照 [3.6.1 节](#sec-3-6-1)中介绍的内容去做。
+如果你不想输入命令前面的 `bundle exec`，需要按照 [3.6.1 节](#sec-3-6-1)中介绍的内容进行设置。
 
 顺便说一下，如果 Guard 提示缺少 `spec/routing` 目录，你可以创建一个空的文件夹来修正这个错误：
 
@@ -1632,7 +1632,7 @@ sys 0m0.258s
 --drb
 ```
 
-使用 Spork 时的一点说明：修改完预派生代码块中包含的文件后（例如 `routes.rb`），你要重启 Spork 服务器让它重新加载 Rails 环境。如果你的测试失败了，而你觉得它应该是通过的，你可以使用 `Ctrl-C` 退出然后重启 Spork：
+使用 Spork 时的一点说明：修改完预派生代码块中包含的文件后（例如 `routes.rb`），你要重启 Spork 服务器让它重新加载 Rails 环境。如果测试失败了，而你觉得它应该是通过的，可以使用 `Ctrl-C` 退出然后重启 Spork：
 
 ```sh
 $ bundle exec spork
@@ -1691,7 +1691,7 @@ Guard 会自动启动 Spork 服务器，大大减少了每次运行测试的时�
 
 <h3 id="sec-3-6-4">3.6.4 在 Sublime Text 中进行测试</h3>
 
-如果你使用 Sublime Text 的话，它有一些强大的命令可以在编辑器中直接运行测试。如果要使用这个功能，你要参考 [Sublime Text 2 Ruby 测试](https://github.com/maltize/sublime-text-2-ruby-tests)<sup>[19](#fn-19)</sup>中针对你的系统的说明进行设置。在我的系统中（Mac OS X），我可以按照下面的方法安装所需的命令：
+如果你使用 Sublime Text 的话，它有一些强大的命令可以在编辑器中直接运行测试。如果要使用这个功能，你要参考 [Sublime Text 2 Ruby 测试](https://github.com/maltize/sublime-text-2-ruby-tests)<sup>[19](#fn-19)</sup>中针对你所用系统的说明进行设置。在我的系统中（Mac OS X），我可以按照下面的方法安装所需的命令：
 
 ```sh
 $ cd ~/Library/Application\ Support/Sublime\ Text\ 2/Packages
@@ -1730,14 +1730,14 @@ $ git clone https://github.com/maltize/sublime-text-2-ruby-tests.git RubyTest
 1. 实际上，Rails 会确保请求这样的文件时不经过 Rails 处理，它们会直接从文件系统中传送。（更多内容请参考《[Rails 3 之道](http://www.amazon.com/gp/product/0321601661)》）
 1. 和之前一样，用你使用的文本编辑器的命令替换 `subl`。
 1. HTML 一直在变化，显式声明一个 doctype 可以确保浏览器在未来还可以正确的解析页面。`<!DOCTYPE html>` 这种极为简单的格式是最新的 HTML 标准 HTML5 的一个特色。
-1. 我们创建静态页面使用的方法基本上是最简单的，但不是唯一的方法。方法的选用取决于你的需求。如果你需要创建很多的静态页面，使用 StaticPages 控制器就显得过于麻烦了，不过对我们这个示例程序来说就刚好。你可以阅读 has_many :through 博客上的《[Simple Pages](http://blog.hasmanythrough.com/2008/4/2/simple-pages)》一文查看一些在 Rails 中创建静态页面的方法。注意：这篇文章基本上很高级，所以你可能要花点时间才能理解文章的内容。
+1. 我们创建静态页面使用的方法基本上是最简单的，但不是唯一的。方法的选用取决于你的需求。如果你需要创建很多的静态页面，使用 StaticPages 控制器就显得过于麻烦了，不过对我们这个示例程序来说就刚好。你可以阅读 has_many :through 博客上的《[Simple Pages](http://blog.hasmanythrough.com/2008/4/2/simple-pages)》一文查看一些在 Rails 中创建静态页面的方法。注意：这篇文章基本上很高级，所以你可能要花点时间才能理解文章的内容。
 1. 每次都要输入 `bundle exec` 显然很麻烦，参考 [3.6 节](#sec-3-6)中介绍的方法来避免输入它。
 1. 实际上我的终端和编辑器背景都是暗色调的，在截图中使用亮色效果更好。
 1. 换行符在一行的结尾处，它会开始新的一行。在代码中，换行符用 `\n` 表示。
 1. 数列数会让你发疯的，所以很多文本编辑器都为你提供了一个视觉上的标示。例如，如果你再看一下图 1.1 的话，你会发现右边有一个小的竖杠，它可以帮助你把代码行控制在 80 个字符以内。（事实上只有 78 列，这样可以给错误留一些空间。）如果你使用 TextMate，你可以在如下菜单中找到这个功能：视图 > 换行 > 78。在 Sublime Text 中是：视图 > 标尺 > 78，或是：视图 > 标尺 > 80。
 1. 其实还有另外一个受欢迎的模板系统叫 [Haml](http://haml-lang.com/)，我个人很喜欢用，不过在这样的初级教程中使用不太合适。
 1. 经验丰富的 Rails 开发者可能觉得这里应该使用 `content_for`，可是它在 asset pipeline 中不能很好的工作。`provide` 函数是替代方法。
-1. 如果你学习过 Ruby，你可能会猜测 Rails 是将内容拽入区块中的，这样想也是对的。不过使用 Rails 开发应用程序不必知道这一点。
+1. 如果你学习过 Ruby，可能会猜测 Rails 是将内容拽入区块中的，这样想也是对的。不过使用 Rails 开发应用程序不必知道这一点。
 1. <http://rvm.io/integration/bundler/>
 1. Spork 是 spoon-fork 的合成词。这个项目的名字之所以叫做 Spork 也是取 [POSIX forks](http://en.wikipedia.org/wiki/Fork_\(software_development\)) 的双关。
 1. <http://railstutorial.org/screencasts>
