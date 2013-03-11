@@ -106,7 +106,7 @@ $ git push -u origin master
 
 <h3 id="sec-2-1-2">2.1.2 微博模型</h3>
 
-微博数据模型的核心比用户的模型还要简单：微博要有一个 `id` 和一个内容 `content`（字符串 `string`）。<sup>[1](#fn-1)</sup> 不过还有一个比较复杂的数据要实现：将微博和用户关联起来，我们使用 `user_id` 来存储博文的拥有者。最终的数据模型如图 2.3。
+微博数据模型的核心比用户的模型还要简单：微博要有一个 `id` 和一个内容 `content`（字符串 `string`）。<sup>[1](#fn-1)</sup> 不过还有一个比较复杂的数据要实现：将微博和用户关联起来，我们使用 `user_id` 来存储微博的拥有者。最终的数据模型如图 2.3。
 
 ![demo_micropost_model](assets/images/figures/demo_micropost_model.png)
 
@@ -114,9 +114,9 @@ $ git push -u origin master
 
 在 [2.3.3 节](#sec-2-3-3)中我们会看到怎样使用 `user_id` 字段简单的实现一个用户拥有多个微博的功能（[第十章](chapter10.html)会做更详尽的介绍）。
 
-<h2 id="sec-2-2">2.2 用户资源（user resource）</h2>
+<h2 id="sec-2-2">2.2 Users 资源（users resource）</h2>
 
-本节我们将要实现 [2.1.1 节](#sec-2-1-1)中设定的用户数据模型，还会为这个模型创建基于网页的界面。这二者结合起来就是一个“用户资源（user resource）”，“资源”的意思是将用户设想为对象，可以通过 HTTP 协议在网页中创建（create）、读取（read）、更新（update）和删除（delete）。正如前面提到的，我们的用户资源会使用脚手架功能生成，Rails 内置了这样的功能。我强烈建议你先不要细看生成的代码，在这个时候看只会让你更困惑。
+本节我们将要实现 [2.1.1 节](#sec-2-1-1)中设定的用户数据模型，还会为这个模型创建基于网页的界面。这二者结合起来就是一个“Users 资源”，“资源”的意思是将用户设想为对象，可以通过 HTTP 协议在网页中创建（create）、读取（read）、更新（update）和删除（delete）。正如前面提到的，我们的 Users 资源会使用脚手架功能生成，Rails 内置了这样的功能。我强烈建议你先不要细看生成的代码，在这个时候看只会让你更困惑。
 
 将 `scaffold` 传递给 `rails generate` 就可以使用 Rails 的脚手架功能了。传给 `scaffold` 的参数是资源名的单数形式（本例中就是 `User`），后面可以再跟着指定数据模型的字段：<sup>[2](#fn-2)</sup>
 
@@ -153,7 +153,7 @@ $ rails generate scaffold User name:string email:string
       create    app/assets/stylesheets/scaffolds.css.scss
 ```
 
-上面代码中的命令加入了 `name:string` 和 `email:string`，这样我们就可以实现如图 2.2 所示的用户模型了。（注意没必要指定 `id`，Rails 会自动创建并将其作为表的主键（primary key）。）
+上面代码中的命令加入了 `name:string` 和 `email:string`，这样我们就可以实现如图 2.2 所示的用户模型了。（注意没必要指定 `id`，Rails 会自动创建并将其设为表的主键（primary key）。）
 
 接下来我们要用 Rake（参见[旁注 2.1](#box-2-1)）来迁移（migrate）数据库：
 
@@ -165,7 +165,7 @@ $ bundle exec rake db:migrate
 ==  CreateUsers: migrated (0.0018s) ===========================================
 ```
 
-上面的命令会使用新定义的 `users` 数据模型更新数据库。（在 [6.1.1 节](chapter6.html#sec-6-1-1)中将详细介绍数据库迁移）注意，为了使用 `Gemfile` 中指定的 Rake 版本，我们通过 `bundle exec` 来执行 `rake`。
+上面的命令会使用新定义的 User 数据模型更新数据库。（在 [6.1.1 节](chapter6.html#sec-6-1-1)中将详细介绍数据库迁移）注意，为了使用 `Gemfile` 中指定的 Rake 版本，我们通过 `bundle exec` 来执行 `rake`。
 
 然后我们可以使用 `rails s`（`rails server` 的缩略形式）来启动本地服务器：
 
@@ -180,7 +180,7 @@ $ rails s
 	<p>在 Unix 中，在将源码编译成可执行程序的过程中，<a href="http://en.wikipedia.org/wiki/Make_(software)">make</a> 组件起了很重要的作用。很多程序员的身体甚至已经对下面的代码产生了条件反射</p>
 	<pre>$ ./configure &amp;&amp; make &amp;&amp; sudo make install</pre>
 	<p>这行代码在 Unix 中（包括 Linux 和 Mac OS X）会对代码进行编译。</p>
-	<p>Rake 就是 Ruby 版的 make，用 Ruby 编写的类似 make 的程序。Rails 灵活的运用了 Rake 的功能，特别是提供了一些用来开发基于数据库的 Web 程序所需的任务。<code>rake db:migrate</code> 是最常用的了，还有很多其他的命令，你可以运行 <code>rake -T db</code> 来查看所有和数据库有关的任务：</p>
+	<p>Rake 就是 Ruby 版的 make，用 Ruby 编写的类 make 程序。Rails 灵活的运用了 Rake 的功能，特别是提供了一些用来开发基于数据库的 Web 程序所需的任务。<code>rake db:migrate</code> 是最常用的了，还有很多其他的命令，你可以运行 <code>rake -T db</code> 来查看所有和数据库有关的任务：</p>
 	<pre>$ bundle exec rake -T db</pre>
 	<p>如果要查看所有的 Rake 任务，运行</p>
 	<pre>$ bundle exec rake -T</pre>
@@ -189,7 +189,7 @@ $ rails s
 
 <h3 class="sec-2-2-1">2.2.1 浏览用户相关的页面</h3>
 
-访问根地址 <http://localhost:3000/> 得到的还是如图 1.3 所示的 Rails 程序默认页面，不过使用脚手架生成用户资源的时候也生成了很多用来处理用户的页面。例如，列出所有用户的页面地址是 [/users](http://localhost:3000/users)，创建新用户的地址是 [/users/new](http://localhost:3000/users/new)。本节的目的就是走马观花的浏览一下这些用户相关的页面。浏览的时候你会发现表格 2.1 很有用，表中显示了页面和 URI 地址之间的对应关系。
+访问根地址 <http://localhost:3000/> 得到的还是如图 1.3 所示的 Rails 程序默认页面，不过使用脚手架生成 Users 资源的时候也生成了很多用来处理用户的页面。例如，列出所有用户的页面地址是 [/users](http://localhost:3000/users)，创建新用户的地址是 [/users/new](http://localhost:3000/users/new)。本节的目的就是走马观花的浏览一下这些用户相关的页面。浏览的时候你会发现表格 2.1 很有用，表中显示了页面和 URI 地址之间的对应关系。
 
 <table class="tabular">
 	<tbody>
@@ -221,13 +221,13 @@ $ rails s
 	</tbody>
 </table>
 
-表格 2.1：用户资源中页面和 URI 的对应关系
+表格 2.1：Users 资源中页面和 URI 的对应关系
 
 我们先来看一下显示所有用户的页面，叫做“index”，如你所想，目前还没有用户存在。（如图 2.4）
 
 ![demo_blank_user_index_rails_3](assets/images/figures/demo_blank_user_index_rails_3.png)
 
-图 2.4：用户资源的初始索引页面（[/users](http://localhost:3000/users)）
+图 2.4：Users 资源的初始索引页面（[/users](http://localhost:3000/users)）
 
 如果想创建新用户就要访问“new”页面，如图 2.5 所示。（在本地开发时，地址的前面部分都是 http://localhost:3000，因此在后面的内容中我会省略这一部分）在第七章中我们会将其改造成用户注册页面。
 
@@ -257,7 +257,7 @@ $ rails s
 
 图 2.9：显示了第二个用户的用户索引页面（[/users](http://localhost:3000/users)）
 
-我们已经演示了创建、展示、编辑用户的页面，下面要演示销毁用户页面了（如图 2.10）。点击图 2.10 中的链接会出现一个验证对话框，然后就会删除第二个用户，索引页面就只会显示一个用户。（如果这个操作没有顺利完成，请确保浏览器启用了 JavaScript 支持。销毁用户时 Rails 是通过 JavaScript 发送请求的。）[9.4 节](chapter9.html#sec-9-4)会增强用户的删除功能，只有管理员级别的用户才能删除用户。
+我们已经演示了创建、展示、编辑用户的页面，下面要演示销毁用户页面了（如图 2.10）。点击图 2.10 中的链接会出现一个验证对话框，确认后就会删除第二个用户，索引页面就只会显示一个用户。（如果这个操作没有顺利完成，请确保浏览器启用了 JavaScript 支持。销毁用户时 Rails 是通过 JavaScript 发送请求的。）[9.4 节](chapter9.html#sec-9-4)会增强用户的删除功能，只有管理员级别的用户才能删除用户。
 
 ![demo_destroy_user_rails_3](assets/images/figures/demo_destroy_user_rails_3.png)
 
@@ -265,11 +265,11 @@ $ rails s
 
 <h3 id="sec-2-2-2">2.2.2 MVC 实践</h3>
 
-我们已经大概的浏览了用户资源，下面我们要用 [1.2.6 节](chapter1.html#sec-1-2-6)中介绍的 MVC 的视角来仔细的看一下其中某些特定的部分。我们会分析在浏览器中做一次点击的内在过程，这里通过访问用户索引页面做演示，来了解一下 MVC。（如图 2.11）
+我们已经大概的浏览了 Users 资源，下面我们要用 [1.2.6 节](chapter1.html#sec-1-2-6)中介绍的 MVC 的视角来仔细的看一下其中某些特定的部分。我们会分析在浏览器中做一次点击的内在过程，这里通过访问用户索引页面做演示，来了解一下 MVC。（如图 2.11）
 
 ![mvc_detailed](assets/images/figures/mvc_detailed.png)
 
-图 2.11：Rails 中 MVC 的详细说明图表
+图 2.11：Rails 中 MVC 的详细说明图解
 
 1. 浏览器向 /users 发起一个请求；
 1. Rails 的路由将 /user 分配到 Users 控制器的 `index` 动作；
@@ -280,9 +280,9 @@ $ rails s
 1. 视图使用内嵌 Ruby 代码的模板渲染成 HTML；
 1. 控制器将生成的 HTML 发送回浏览器。<sup>[3](#fn-3)</sup>
 
-首先我们要从浏览器中发起一个请求，你可以直接在浏览器地址栏中敲入地址，也可以点击页面中的链接。（图 2.11 中的第 1 步）接着请求到达 Rails 路由（第 2 步），根据 URI 将其分发到适当的控制器动作（而且还会考量请求的类型，[旁注 3.2](chapter3.html#box-3-2) 中会介绍）。将用户资源中相关的 URI 映射到控制器动作的代码如代码 2.1 所示。这些代码会按照表格 2.1 中的对应关系做映射。（`:users` 是一个 Symbol，[4.3.3 节](chapter4.html#sec-4-3-3)会介绍）
+首先我们要从浏览器中发起一个请求，你可以直接在浏览器地址栏中敲入地址，也可以点击页面中的链接。（图 2.11 中的第 1 步）接着请求到达 Rails 路由（第 2 步），根据 URI 将其分发到适当的控制器动作（而且还会考量请求的类型，[旁注 3.2](chapter3.html#box-3-2) 中会介绍）。将 Users 资源中相关的 URI 映射到控制器动作的代码如代码 2.1 所示。这些代码会按照表格 2.1 中的对应关系做映射。（`:users` 是一个 Symbol，[4.3.3 节](chapter4.html#sec-4-3-3)会介绍）
 
-**代码 2.2** Rails 的路由设置，包含一条用户资源的规则 <br />`config/routes.rb`
+**代码 2.2** Rails 的路由设置，包含一条 Users 资源的规则 <br />`config/routes.rb`
 
 ```ruby
 DemoApp::Application.routes.draw do
@@ -344,7 +344,7 @@ class UsersController < ApplicationController
 end
 ```
 
-或许你发现了动作的数量比我们看过的页面数量要多，`index`、`show`、`new` 和 `edit` 对应了 [2.2.1 节](#sec-2-2-1)中介绍的页面。不过还有一些其他的动作，`create`、`update` 和 `destroy` 等，这些动作一般不会直接渲染页面（不过有时也会），它们只会修改数据库中保存的用户数据。表格 2.2 列出的是控制器的全部动作，这些动作就是 Rails 对 REST 架构（参见[旁注 2.2](#box-2-2)）的实现。REST 是由计算机科学家 [Roy Fielding](http://en.wikipedia.org/wiki/Roy_Fielding) 提出的概念，意思是表现层状态转化（Representational State Transfer）。<sup>[4](#fn-4)</sup> 注意表格 2.2 中的内容，有些部分是有重叠的。例如 `show` 和 `update` 两个动作都映射到 /users/1 这个地址上。二者的区别是它们所用的 [HTTP 请求方法](http://en.wikipedia.org/wiki/HTTP_request#Request_methods)。[3.2.1 节](chapter3.html#sec-3-2-1)将更详细的介绍 HTTP 请求方法。
+或许你发现了动作的数量比我们看过的页面数量要多，`index`、`show`、`new` 和 `edit` 对应了 [2.2.1 节](#sec-2-2-1)中介绍的页面。不过还有一些其他的动作，`create`、`update` 和 `destroy` 等，这些动作一般不会直接渲染页面（不过有时也会），它们只会修改数据库中保存的用户数据。表格 2.2 列出的是控制器的全部动作，这些动作就是 Rails 对 REST 架构（参见[旁注 2.2](#box-2-2)）的实现。REST 是由计算机科学家 [Roy Fielding](http://en.wikipedia.org/wiki/Roy_Fielding) 提出的概念，意思是表现层状态转化（Representational State Transfer）。<sup>[4](#fn-4)</sup> 注意表格 2.2 中的内容，有些部分是有重叠的。例如 `show` 和 `update` 两个动作都映射到 /users/1 这个地址上。二者的区别是它们所用的 [HTTP 请求方法](http://en.wikipedia.org/wiki/HTTP_request#Request_methods)不同。[3.2.1 节](chapter3.html#sec-3-2-1)将更详细的介绍 HTTP 请求方法。
 
 <table id="table-2-2" class="tabular">
 	<tbody>
@@ -399,12 +399,12 @@ end
 	</tbody>
 </table>
 
-表格 2.2：代码 2.2 中用户资源生成的符合 REST 架构的路由
+表格 2.2：代码 2.2 中 Users 资源生成的符合 REST 架构的路由
 
 <div id="box-2-2" class="aside">
 	<h4>旁注 2.2：表现层状态转化（REST）</h4>
 	<p>如果你阅读过一些 Ruby on Rails Web 开发相关的资料，你会看到很多地方都提到了“REST”，它是“表现层状态转化（REpresentational State Transfer）”的简称。REST 是一种架构方式，用来开发分布式、基于网络的系统和程序，例如 WWW 和 Web 应用程序。REST 理论是很抽象的，在 Rails 程序中，REST 意味着大多数的组件（例如用户和微博）会被模型化，变成资源（resource），可以被创建（create）、读取（read）、更新（update）和删除（delete），这些操作会与<a href="http://en.wikipedia.org/wiki/Create,_read,_update_and_delete">关系型数据库中的 CRUD 操作</a>和 <a href="http://en.wikipedia.org/wiki/HTTP_request#Request_methods">HTTP 请求方法</a>（<tt>POST</tt>，<tt>GET</tt>，<tt>PUT</tt> 和 <tt>DELETE</tt>）对应起来。（<a href="chapter3.html#sec-3-2-1">3.2.1 节</a>，特别是<a href="chapter3.html#box-3-2">旁注 3.2</a>，将更详细的介绍 HTTP 请求）</p>
-	<p>作为 Rails 程序开发者，REST 开发方式会帮助你决定编写哪些控制器和动作：你只需简单的将可以创建、读取、更新和删除的资源理清就可以了。对本章的用户和微博来说，这一过程非常明确，因为它们都是很自然的资源形式。在<a href="chapter11.html">第十一章</a>中将看到 REST 原则允许我们将一个很棘手的问题（“关注”功能）通过一种自然而便捷的方法处理。</p>
+	<p>作为 Rails 程序开发者，REST 开发方式会帮助你决定编写哪些控制器和动作：你只需简单的将可以创建、读取、更新和删除的资源理清就可以了。对本章的用户和微博来说，这一过程非常明确，因为它们都是很自然的资源形式。在<a href="chapter11.html">第十一章</a>中将看到 REST 架构允许我们将一个很棘手的问题（“关注用户”功能）通过一种自然而便捷的方式处理。</p>
 </div>
 
 为了解释 Users 控制器和 User 模型之间的关系，我们要看一下简化了的 `index` 动作的代码，如代码 2.4 所示。（脚手架生成的代码很粗糙，所以我们做了简化）
@@ -423,7 +423,7 @@ class UsersController < ApplicationController
 end
 ```
 
-`index` 动作有一行代码是 `@users = User.all`（图 2.11 中的第 3 步），它要求 User 模型从数据库中取出所有的用户（第 4 步），然后将结果赋值给 `@users` 变量（第 5 步）。User 模型的代码参见代码 2.5。代码看似简单，不过它通过继承具备了很多功能（[2.3.4 节](#sec-2-3-4) 和 [4.4 节](chapter4.html#sec-4-4)）。简单来说就是通过调用 Rails 中叫做 Active Record 的库，代码 2.5 中的 `User.all` 就会返回所有的用户。（我们会在 [6.1.2 节](chapter6.html#sec-6-1-2)中介绍 `attr_accessible`。注意这一行不会在 Rails 3.2.2 或之前的版本中出现。）
+`index` 动作有一行代码是 `@users = User.all`（图 2.11 中的第 3 步），它要求 User 模型从数据库中取出所有的用户（第 4 步），然后将结果赋值给 `@users` 变量（第 5 步）。User 模型的代码参见代码 2.5。代码看似简单，不过它通过继承具备了很多功能（参见 [2.3.4 节](#sec-2-3-4) 和 [4.4 节](chapter4.html#sec-4-4)）。简单来说就是通过调用 Rails 中叫做 Active Record 的库，代码 2.5 中的 `User.all` 就会返回所有的用户。（我们会在 [6.1.2 节](chapter6.html#sec-6-1-2)中介绍 `attr_accessible`。注意这一行不会在 Rails 3.2.2 或之前的版本中出现。）
 
 **代码 2.5** 演示程序中的 User 模型 <br />`app/models/user.rb`
 
@@ -433,7 +433,7 @@ class User < ActiveRecord::Base
 end
 ```
 
-一旦定义了 `@users` 变量，控制器就会调用视图代码（第 6 步），其代码如代码 2.6。以 `@` 开头的变量是“实例变量（instance variable）”，在视图中自动可用。在本例中，`index.html.erb` 视图的代码会遍历 `@users`，为每个用户生成一行 HTML。（记住，你现在可能读不懂这些代码，这里只是让你看一下这些代码是什么样子。）
+一旦定义了 `@users` 变量，控制器就会调用视图代码（第 6 步），其代码如代码 2.6 所示。以 `@` 开头的变量是“实例变量（instance variable）”，在视图中自动可用。在本例中，`index.html.erb` 视图的代码会遍历 `@users`，为每个用户生成一行 HTML。（记住，你现在可能读不懂这些代码，这里只是让你看一下这些代码是什么样子。）
 
 **代码 2.6** 用户索引页面的视图代码 <br />`app/views/users/index.html.erb`
 
@@ -468,23 +468,23 @@ end
 
 视图会将代码转换成 HTML（第 7 步），然后控制器将其返回浏览器显示出来（第 8 步）。
 
-<h3 id="sec-2-2-3">2.2.3 上述用户资源的缺陷</h3>
+<h3 id="sec-2-2-3">2.2.3 上述 Users 资源的缺陷</h3>
 
 脚手架生成的 User 资源相关代码虽然能够让你大致的了解一下 Rails，不过它也有一些缺陷：
 
 - **没有对数据进行验证（validation）。**User 模型会接受空的名字和不合法的 Email 地址而不会报错。
-- **没有用户验证机制（authentication）。**没有实现登录和退出功能，随意一个用户都可以进行任何的操作。
+- **没有用户身份验证机制（authentication）。**没有实现登录和退出功能，随意一个用户都可以进行任何的操作。
 - **没有测试。**也不是完全没有，脚手架会生成一些基本的测试，不过很粗糙也不灵便，没有对数据进行验证，不包含验证机制的测试，以及其他的需求。
 - **没有布局。**没有共用的样式和网站导航。
 - **没有真正的被理解。**如果你能读懂脚手架生成的代码就不需要阅读本书了。
 
-<h2 id="sec-2-3">2.3 微博资源（microposts resource）</h2>
+<h2 id="sec-2-3">2.3 Microposts 资源（microposts resource）</h2>
 
-我们已经生成也浏览了 User 资源，现在要生成微博资源了。阅读本节时我推荐你和 [2.2 节](#sec-2-2)对比一下，你会看到两个资源在很多方面都是一致的。通过这样重复的生成资源我们可以更好的理解 Rails 中的 REST 架构。在这样的早期阶段看一下用户资源和微博资源的相同之处也是本章的主要目的之一。（后面我们会看到，开发一个比本章的演示程序复杂的程序要付出很多汗水，微博资源在第十章才会介绍，而我不想这么晚才介绍它。）
+我们已经生成也浏览了 Users 资源，现在要生成 Microposts 资源了。阅读本节时我推荐你和 [2.2 节](#sec-2-2)对比一下，你会看到两个资源在很多方面都是一致的。通过这样重复的生成资源我们可以更好的理解 Rails 中的 REST 架构。在这样的早期阶段看一下 Users 资源和 Microposts 资源的相同之处也是本章的主要目的之一。（后面我们会看到，开发一个比本章的演示程序复杂的程序要付出很多汗水，Microposts 资源在第十章才会用到，而我不想这么晚才介绍。）
 
-<h3 id="sec-2-3-1">2.3.1 微博的概览</h3>
+<h3 id="sec-2-3-1">2.3.1 概览 Microposts 资源</h3>
 
-和用户资源一样，我们使用 `rails generate scaffold` 命令生成微博资源的代码，实现图 2.3 中所示的数据模型：<sup>[5](#fn-5)</sup>
+和 Users 资源一样，我们使用 `rails generate scaffold` 命令生成 Microposts 资源的代码，实现图 2.3 中所示的数据模型：<sup>[5](#fn-5)</sup>
 
 ```sh
 $ rails generate scaffold Micropost content:string user_id:integer
@@ -519,7 +519,7 @@ $ rails generate scaffold Micropost content:string user_id:integer
    identical    app/assets/stylesheets/scaffolds.css.scss
 ```
 
-然后要更新数据库使用最新的数据模型，我们要执行类似 [2.2 节](#sec-2-2)中用到的迁移命令：
+然后要更新数据库，使用最新的数据模型，我们要执行类似 [2.2 节](#sec-2-2)中用到的迁移命令：
 
 ```sh
 $ bundle exec rake db:migrate
@@ -529,9 +529,9 @@ $ bundle exec rake db:migrate
 ==  CreateMicroposts: migrated (0.0026s) ======================================
 ```
 
-现在我们就可以使用类似 [2.2.1 节](#sec-2-2-1)中介绍的方法来创建微博了。就像你猜测的，脚手架也会更新 Rails 的路由文件，为微博资源加入一条规则，如代码 2.7 所示。<sup>[6](#fn-6)</sup> 和用户资源一样，`resources :micropsts` 会将微博相关的 URI 地址映射到 Microposts 控制器，如[表格 2.3](#table-2-3) 所示。
+现在我们就可以使用类似 [2.2.1 节](#sec-2-2-1)中介绍的方法来创建微博了。就像你猜测的，脚手架也会更新 Rails 的路由文件，为 Microposts 资源加入一条规则，如代码 2.7 所示。<sup>[6](#fn-6)</sup> 和 Users 资源一样，`resources :micropsts` 会将微博相关的 URI 地址映射到 Microposts 控制器，如[表格 2.3](#table-2-3) 所示。
 
-**代码 2.7** Rails 的路由配置，有一条针对微博资源的新规则 <br />`config/routes.rb`
+**代码 2.7** Rails 的路由配置，有一条针对 Microposts 资源的新规则 <br />`config/routes.rb`
 
 ```ruby
 DemoApp::Application.routes.draw do
@@ -596,7 +596,7 @@ end
 	</tbody>
 </table>
 
-表格 2.3：代码 2.7 中微博资源生成的符合 REST 架构的路由
+表格 2.3：代码 2.7 中 Microposts 资源生成的符合 REST 架构的路由
 
 Microposts 控制器的代码简化后如代码 2.8 所示。注意，除了将 `UsersController` 换成 `MicropostsController` 之外，这段代码和代码 2.3 没什么区别。这说明了这两个资源在 REST 架构中的共同之处。
 
@@ -663,7 +663,7 @@ end
 
 <h3 id="sec-2-3-2">2.3.2 限制微博内容的长度</h3>
 
-如果要称得上微博这样的名字就要限制其内容的长度。在 Rails 中实现这种限制很简单，我们使用验证（validation）功能。限制微博的长度最大为 140 个字符（就像 Twitter 一样），我们可以使用长度验证。现在你可以用你的文本编辑器或 IDE 打开 `app/models/micropost.rb` 写入代码 2.9 所示的代码。（代码 2.9 中使用的 `validates` 方法只针对 Rails 3；如果你之前用过 Rails 2.3，就可以对比一下它和 `validates_length_of` 的区别。）
+如果要称得上微博这样的名字就要限制其内容的长度。在 Rails 中实现这种限制很简单，使用数据验证（validation）功能。要限制微博的长度最大为 140 个字符（就像 Twitter 一样），我们可以使用长度限制数据验证。现在你可以用你的文本编辑器或 IDE 打开 `app/models/micropost.rb` 写入代码 2.9 所示的代码。（代码 2.9 中使用的 `validates` 方法只针对 Rails 3；如果你之前用过 Rails 2.3，就可以对比一下它和 `validates_length_of` 的区别。）
 
 **代码 2.9** 现在微博的长度最长为 140 个字符 <br />`app/models/micropost.rb`
 
@@ -674,7 +674,7 @@ class Micropost < ActiveRecord::Base
 end
 ```
 
-上面的代码看起来可能很神秘，我们会在 [6.2 节](chapter6.html#sec-6-2)中详细介绍验证功能。如果我们在创建微博页面输入超过 140 个字符的内容就会看到这个验证的样子了。如图 2.14 所示，Rails 会显示一个错误信息（error message）提示微博的内容太长了。（[7.3.2 节](chapter7.html#sec-7-3-2)将更详细的介绍错误信息）
+上面的代码看起来可能很神秘，我们会在 [6.2 节](chapter6.html#sec-6-2)中详细介绍数据验证。如果我们在创建微博页面输入超过 140 个字符的内容就会看到这个验证的样子了。如图 2.14 所示，Rails 会显示一个错误提示信息（error message）提示微博的内容太长了。（[7.3.2 节](chapter7.html#sec-7-3-2)将更详细的介绍错误信息）
 
 ![micropost_length_error_rails_3](assets/images/figures/micropost_length_error_rails_3.png)
 
@@ -705,13 +705,13 @@ class Micropost < ActiveRecord::Base
 end
 ```
 
-我们可以将这种关联用图 2.15 所示的图形表现出来。因为 `microposts` 表中有 `user_id` 这一列，所以 Rails（通过 Active Record）就可以将微博和每个用户关联起来。
+我们可以将这种关联用图 2.15 所示的图形表示出来。因为 `microposts` 表中有 `user_id` 这一列，所以 Rails（通过 Active Record）就可以将微博和每个用户关联起来。
 
 ![micropost_user_association](assets/images/figures/micropost_user_association.png)
 
 图 2.15：微博和用户之间的关联
 
-在[第十章](chapter10.html)和[第十一章](chapter11.html)中，我们将使用用户和微博之间的关联来显示某一个用户的所有微博，并且生成一个和 Twitter 类似的微博 Feed。目前我们可以使用控制台（console）来检查一下用户与微博之间关联的实现，控制台是和 Rails 应用程序交互很有用的工具。在命令行中执行 `rails console` 来启动控制台，然后使用 `User.first` 从数据库中读取第一个用户（并将读取的数据赋值给 `first_user` 变量）：<sup>[7](#fn-7)</sup>
+在[第十章](chapter10.html)和[第十一章](chapter11.html)中，我们将使用用户和微博之间的关联来显示某一个用户的所有微博，并且生成一个和 Twitter 类似的动态列表。我们可以使用控制台（console）来检查一下用户与微博之间关联的实现，控制台是和 Rails 应用程序交互很有用的工具。在命令行中执行 `rails console` 来启动控制台，然后使用 `User.first` 从数据库中读取第一个用户（并将读取的数据赋值给 `first_user` 变量）：<sup>[7](#fn-7)</sup>
 
 ```sh
 $ rails console
@@ -726,7 +726,7 @@ updated_at: "2011-11-03 02:38:54">]
 >> exit
 ```
 
-（上面代码中我包含了最后一行用来演示如何退出控制台，在大多数系统中也可以使用 Ctrl-d 组合键。）然后使用 `first_user.microposts` 获取用户的微博：Active Record 会自动返回 `user_id` 和 `first_user` 的 ID 相同的（`1`）所有微博。我们将在[第十章](chapter10.html)和[第十一章](chapter11.html)更详细的学习 Active Record 中这种关联的实现。
+（上面代码中我包含了最后一行用来演示如何退出控制台，在大多数系统中也可以使用 Ctrl-d 组合键。）然后使用 `first_user.microposts` 获取用户的微博：Active Record 会自动返回 `user_id` 和 `first_user` 的 id 相同的（`1`）所有微博。我们将在[第十章](chapter10.html)和[第十一章](chapter11.html)更详细的学习 Active Record 中这种关联的实现。
 
 <h3 id="sec-2-3-4">2.3.4 继承关系</h3>
 
@@ -756,7 +756,7 @@ end
 
 ![demo_model_inheritance](assets/images/figures/demo_model_inheritance.png)
 
-图 2.16：User 模型和微博模型的继承关系
+图 2.16：User 模型和 Micropost 模型的继承关系
 
 控制器的继承关系更复杂一些。对比一下代码 2.14 和代码 2.15，我们可以看到 Users 控制器和 Microposts 控制器都继承自应用程序的控制器（`ApplicationController`）。如代码 2.16 所示，`ApplicationController` 继承自 `ActionController::Base`，它是 Rails 中的 Action Pack 库为控制器提供的基类。这些类之间的关系如图 2.17 所示。
 
@@ -798,7 +798,7 @@ end
 
 <h3 id="sec-2-3-5">2.3.5 部署演示程序</h3>
 
-完成微博资源之后，是时候将代码推送到 GitHub 的仓库中了：
+完成 Microposts 资源之后，是时候将代码推送到 GitHub 的仓库中了：
 
 ```sh
 $ git add .
@@ -806,7 +806,7 @@ $ git commit -m "Finish demo app"
 $ git push
 ```
 
-通常情况下，你应该经常做一些很小的提交，不过对于本站来说最后做一次大的提交也可以。
+通常情况下，你应该经常做一些很小的提交，不过对于本章来说最后做一次大的提交也可以。
 
 然后，你也可以按照 [1.4 节](chapter1.html#sec-1-4)中介绍的方法将演示程序部署到 Heroku：
 
@@ -821,7 +821,7 @@ $ git push heroku master
 $ heroku run rake db:migrate
 ```
 
-上面的代码会用用户和微博数据模型更新 Heroku 上的数据库。如果得到与 `vendor/plugins` 中资源（asset）相关的错误提示，暂且忽略它，因为我们还没使用插件。
+上面的代码会用 User 和 Micropost 数据模型更新 Heroku 上的数据库。如果得到与 `vendor/plugins` 中资源（asset）相关的错误提示，暂且忽略它，因为我们还没使用插件。
 
 <h2 id="sec-2-4">2.4 小结</h2>
 
@@ -845,21 +845,21 @@ $ heroku run rake db:migrate
 - 不安全
 - 没实现用户和微博的自动关联
 - 没实现“关注”和“被关注”功能
-- 没实现微博的 Feed
+- 没实现动态列表
 - 没使用 TDD
 - 没有真的理解所做的事情
 
-本书后续的内容会建立在这些好的部分之上，然后增强有缺陷的部分。
+本书后续的内容会建立在这些好的部分之上，然后改善有缺陷的部分。
 
 <div class="navigation">
 	<a class="prev_page" href="chapter1.html">&laquo; 第一章 从零到部署</a>
 	<a class="next_page" href="chapter3.html">第三章 基本静态的页面 &raquo;</a>
 </div>
 
-1. 如果要实现内容更长的文章，例如一篇常规博客中的文章，应该将 `string` 换成 `text`；
+1. 如果要实现内容更长的文章，例如一篇常规博客中的文章，应该将字符串类型（`string`）换成文本类型（`text`）；
 1. 脚手架后面跟着的名字和模型一样，是单数形式，而资源和控制器是复数形式。因此是 `User` 而不是 `Users`；
 1. 有些文章会说是视图直接将 HTML 返回给浏览器的（通过 Web 服务器，例如 Apache 和 Nginx）。不管实现的细节是怎样的，我更相信控制器是一个中枢，应用程序中所有的信息都会通过它；
 1. 加利福尼亚大学欧文分校 2000 年 Roy Thomas Fielding 的博士论文《[架构风格与基于网络的软件架构设计](http://www.ics.uci.edu/~fielding/pubs/dissertation/top.htm)》（译者注：[中文翻译](http://www.redsaga.com/opendoc/REST_cn.pdf)）
-1. 和生成用户资源的脚手架命令一样，生成微博资源的脚手架也使用了单数形式，因此我们使用 `generate Micropost`；
+1. 和生成 Users 资源的脚手架命令一样，生成 Microposts 资源的脚手架也使用了单数形式，因此我们使用 `generate Micropost`；
 1. 和代码 2.7 相比，脚手架生成的代码可能会有额外的空行。你无须担心，因为 Ruby 会忽略额外的空行；
 1. 你的控制台可能会显示类似 `ruby-1.9.3-head >` 的开头，示例中使用 `>>` 替代，因为不同的 Ruby 版本会有所不同。
