@@ -25,7 +25,7 @@ var tutorialScript = {
 				var order = index+1;
 				$(ele).attr('id', 'fn-'+order);
 
-				$(ele).append('&nbsp;<a href="#fnref-'+order+'">&uarr;</a>');
+				$(ele).append('&nbsp;&nbsp;<a href="#fnref-'+order+'">&#8617;</a>');
 			});
 		}
 	},
