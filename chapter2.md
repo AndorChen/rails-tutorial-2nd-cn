@@ -732,7 +732,7 @@ updated_at: "2011-11-03 02:38:54">]
 
 接下来我们暂时结束演示程序的讨论，来简单的介绍一下 Rails 中控制器和模型的类继承。如果你有一些面向对象编程（Object-oriented Programming，OOP）的经验将更好的理解这些内容，如果你未接触过 OOP的话可以选择跳过本小节。一般来说，如果你不熟悉类的概念（[4.4 节](chapter4.html#sec-4-4)中会介绍），我建议你稍晚些时候再回过头来看本小节。
 
-我们先介绍模型的继承关系。对比一下代码 2.12 和代码 2.13 中的代码，User 模型和 Microposr 模型都继承自（通过 `<`）`ActiveRecord::Base`，它是 ActiveRecord 为模型提供的基类。图 2.16 列出了这种继承关系。通过继承 `ActiveRecord::Base` 我们的模型对象才能够和数据库通讯、将数据库中的列看做 Ruby 中的属性等。
+我们先介绍模型的继承关系。对比一下代码 2.12 和代码 2.13 中的代码，User 模型和 Micropost 模型都继承自（通过 `<`）`ActiveRecord::Base`，它是 ActiveRecord 为模型提供的基类。图 2.16 列出了这种继承关系。通过继承 `ActiveRecord::Base` 我们的模型对象才能够和数据库通讯、将数据库中的列看做 Ruby 中的属性等。
 
 **代码 2.12** `User` 类，包括继承关系 <br />`app/models/user.rb`
 
