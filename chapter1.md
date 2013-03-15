@@ -310,7 +310,7 @@ update: --no-rdoc --no-ri
 $ gem install rails -v 3.2.12
 ```
 
-译者注：鉴于国内的“社会主义特色”，你可能无法正常下载 gem，这时你可以使用 [VPN](http://en.wikipedia.org/wiki/Vpn) 或者使用 [RubyGems 在国内的镜像](http://ruby.taobao.com)。
+译者注：鉴于国内的“社会主义特色”，你可能无法正常下载 gem，这时你可以使用 [VPN](http://en.wikipedia.org/wiki/Vpn) 或者使用 [RubyGems 在国内的镜像](http://ruby.taobao.org)。
 
 检查 Rails 是否安装成功，执行以下命令显示 Rails 的版本号：
 
