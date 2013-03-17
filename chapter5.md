@@ -7,7 +7,7 @@ title: 第五章 完善布局
 
 <h2 id="sec-5-1">5.1 添加一些结构</h2>
 
-本书是关于 Web 开发而不是 Web 设计的，不过在一个看起来很垃圾的应用程序中开发会让人提不起劲，所以本书我们要向布局中添加一些结构，再加入一些 CSS 构建基本的样式。除了使用自定义的 CSS 之外，还会使用 [Bootstrap](http://twitter.github.com/bootstrap/)，Twitter 开发的开源 Web 设计框架。我们还要按照一定的方式组织代码，即使用局部视图来保持布局文件的结构清晰，避免大量的代码混杂在布局文件中。
+本书是关于 Web 开发而不是 Web 设计的，不过在一个看起来很垃圾的应用程序中开发会让人提不起劲，所以本书我们要向布局中添加一些结构，再加入一些 CSS 构建基本的样式。除了使用自定义的 CSS 之外，我们还会使用 [Bootstrap](http://twitter.github.com/bootstrap/)，由 Twitter 开发的开源 Web 设计框架。我们还要按照一定的方式组织代码，即使用局部视图来保持布局文件的结构清晰，避免大量的代码混杂在布局文件中。
 
 开发 Web 应用程序时，尽早的对用户界面有个统筹安排往往会对你有所帮助。在本书后续内容中，我会经常插入网页的构思图（mockup）（在 Web 领域经常称之为“线框图（wireframe）”），这是对应用程序最终效果的草图设计。<sup>[2](#fn-2)</sup> 本章大部分内容都是在开发 [3.1 节](chapter3.html#sec-3-1)中介绍的静态页面，页面中包含一个网站 LOGO、导航条头部和网站底部。这些网页中最重要的一个是“首页”，它的构思图如图 5.1 所示。图 5.7 是最终实现的效果。你会发现二者之间的某些细节有所不同，例如，在最终实现的页面中我们加入了一个 Rails LOGO——这没什么关系，因为构思图没必要画出每个细节。
 
@@ -89,7 +89,7 @@ $ git checkout -b filling-in-layout
 <!--[if lt IE 9]>
 ```
 
-只有当 IE 浏览器的版本小于 9 时（`if lt IE 9`）才会加载其中的代码。这个奇怪的 `[if lt IE 9]` 句法不是 Rails 提供的，其实它是 IE 浏览器为了解决兼容性问题而特别支持的[条件注释](http://en.wikipedia.org/wiki/Conditional_comment)（conditional comment）。这就带来了一个好处，因为这说明我们只会在 IE9 以前的版本中加载 HTML5 shim，而其他的 Firefox、Chrome 和 Safari 等浏览器则不会受到影响。
+只有当 IE 浏览器的版本小于 9 时（`if lt IE 9`）才会加载其中的代码。这个奇怪的 `[if lt IE 9]` 句法不是 Rails 提供的，其实它是 IE 浏览器为了解决兼容性问题而特别支持的[条件注释](http://en.wikipedia.org/wiki/Conditional_comment)（conditional comment）。这就带来了一个好处，因为这说明我们只会在 IE9 以前的版本中加载 HTML5 shim，而 Firefox、Chrome 和 Safari 等其他浏览器则不会受到影响。
 
 后面的区域是一个 `header`，包含网站的 LOGO（纯文本）、一些小区域（使用 `div` 标签）和一个导航列表元素：
 
@@ -194,7 +194,7 @@ $ git checkout -b filling-in-layout
 <%= link_to image_tag("rails.png", alt: "Rails"), 'http://rubyonrails.org/' %>
 ```
 
-上面代码中第一个 `link_to` 创建了一个占位链接，指向[第七章](chapter7.html)中会加入的用户注册页面
+上面代码中第一个 `link_to` 创建了一个占位链接，指向[第七章](chapter7.html)中创建的用户注册页面
 
 ```erb
 <a href="#" class="btn btn-large btn-primary">Sign up now!</a>
@@ -210,9 +210,9 @@ $ git checkout -b filling-in-layout
 
 `alt` 属性的内容会在图片无法加载时显示，也会在针对视觉障碍人士的屏幕阅读器中显示。人们有时懒得加上 `alt` 属性，可是在 HTML 标准中却是必须的。幸运的是，Rails 默认会加上 `alt` 标签，如果你没有在调用 `image_tag` 时指定的话，Rails 就会使用图片的文件名（不包括扩展名）。本例中，我们自己设定了 `alt` 文本，显示一个首字母大写的“Rails”。
 
-现在我们终于可以看到劳动的果实了（如图 5.2）。你可能会说，这不是很美观啊。或许吧。不过也可以小小的高兴一下，我们已经为 HTML 结构指定了合适的 class，可以用来添加 CSS。
+现在我们终于可以看到劳动的果实了（如图 5.2）。你可能会说，这并不很美观啊。或许吧。不过也可以小小的高兴一下，我们已经为 HTML 结构指定了合适的 class，可以用来添加 CSS。
 
-顺便说一下，你可能会奇怪 `rails.png` 这个图片为什么可以显示出来，它是怎么来的呢？其实每个 Rails 应用程序都有这个图片，存放在 ` app/assets/images/` 目录下。因为我们使用的是 `image_tag` 帮助方法，Rails 会通过 asset pipeline 找到这个图片。（[5.2 节](#sec-5-2)）
+顺便说一下，你可能会奇怪 `rails.png` 这个图片为什么可以显示出来，它是怎么来的呢？其实每个 Rails 应用程序中都有这个图片，存放在 `app/assets/images/` 目录下。因为我们使用的是 `image_tag` 帮助方法，Rails 会通过 asset pipeline 找到这个图片。（[5.2 节](#sec-5-2)）
 
 ![layout_no_logo_or_custom_css_bootstrap](assets/images/figures/layout_no_logo_or_custom_css_bootstrap.png)
 
@@ -256,7 +256,7 @@ app/assets/stylesheets/custom.css.scss
 app/assets/stylesheets
 ```
 
-是 asset pipeline 的一部分（[5.2 节](#sec-5-2)），这个目录中的所有样式表都会自动的包含在网站的 `application.css` 中。`custom.css.scss` 文件的第一个扩展名是 `.css`，说明这是个 CSS 文件；第二个扩展名是 `.scss`，说明这是个“Sassy CSS”文件。asset pipeline 会使用 Sass 处理这个文件。（在 [5.2.2 节](#sec-5-2-2)中才会使用 Sass，bootstrap-sass 有了它才能运作。）创建了自定义 CSS 所需的文件后，我们可以使用 `@import` 引入 Bootstrap，如代码 5.4 所示。
+是 asset pipeline 的一部分（[5.2 节](#sec-5-2)），这个目录中的所有样式表都会自动的包含在网站的 `application.css` 中。`custom.css.scss` 文件的第一个扩展名是 `.css`，说明这是个 CSS 文件；第二个扩展名是 `.scss`，说明这是个“Sassy CSS”文件。asset pipeline 会使用 Sass 处理这个文件。（在 [5.2.2 节](#sec-5-2-2)中才会使用 Sass，有了它 bootstrap-sass 才能运作。）创建了自定义 CSS 所需的文件后，我们可以使用 `@import` 引入 Bootstrap，如代码 5.4 所示。
 
 **代码 5.4** 引入 Bootstrap <br />`app/assets/stylesheets/custom.css.scss`
 
@@ -326,7 +326,7 @@ body {
 
 把 `.center` class 的样式定义为 `text-align: center;`。`.center` 中的点号说明这个规则是样式化一个 class。（我们会在代码 5.7 中看到，`#` 是样式化一个 id。）这个规则的意思是，任何 class 为 `.center` 的标签（例如 `div`），其中包含的内容都会在页面中居中显示。（代码 5.2 中有用到这个 class。）
 
-虽然 Bootstrap 中包含了很精美的文字排版样式，我们还是要为网站添加一些自定义的规则，如代码 5.6 所示。（并不是所有的样式都会应用于“首页”，所有规则都会在网站中的某个地方用到。）代码 5.6 的效果如图 5.5 所示。
+虽然 Bootstrap 中包含了很精美的文字排版样式，我们还是要为网站添加一些自定义的规则，如代码 5.6 所示。（并不是所有的样式都会应用于“首页”，但所有规则都会在网站中的某个地方用到。）代码 5.6 的效果如图 5.5 所示。
 
 **代码 5.6** 添加一些精美的文字排版样式 <br />`app/assets/stylesheets/custom.css.scss`
 
@@ -435,7 +435,7 @@ p {
 <%= render 'layouts/shim' %>
 ```
 
-这行代码会寻找一个名为 `app/views/layouts/_shim.html.erb` 的文件，执行文件中的代码，然后把结果插入视图。<sup>[6](#fn-6)</sup>（回顾一下，执行 Ruby 表达式并将结果插入到模板中要使用 `<%=...%>`。）注意文件名 `_shim.html.erb` 的开头是个下划线，这个下划线是局部视图的命名约定，可以在目录中快速定位所有的局部视图。
+这行代码会寻找一个名为 `app/views/layouts/_shim.html.erb` 的文件，执行文件中的代码，然后把结果插入视图。<sup>[6](#fn-6)</sup>（回顾一下，执行 Ruby 表达式并将结果插入模板中要使用 `<%=...%>`。）注意文件名 `_shim.html.erb` 的开头是个下划线，这个下划线是局部视图的命名约定，可以在目录中快速定位所有的局部视图。
 
 当然，若要局部视图起作用，我们要写入相应的内容。本例中的 HTML shim 局部视图只包含三行代码，如代码 5.9 所示。
 
@@ -561,7 +561,7 @@ footer ul li {
 
 <h2 id="sec-5-2">5.2 Sass 和 asset pipeline</h2>
 
-Rails 3.0 与较新版之间的主要不同之一是 asset pipeline，这个功能可以明显提高如 CSS、JavaScript和图片等静态资源文件（asset）的生成效率，降低管理成本。本节我们会概览一下 asset pipeline，然后再介绍如何使用 Sass 这个生成 CSS 很强大的工具，Sass 现在是 asset pipeline 默认的一部分。
+Rails 3.0 与之前版本的主要不同之一是 asset pipeline，这个功能可以明显提高如 CSS、JavaScript和图片等静态资源文件（asset）的生成效率，降低管理成本。本节我们会概览一下 asset pipeline，然后再介绍如何使用 Sass 这个生成 CSS 很强大的工具，Sass 现在是 asset pipeline 默认的一部分。
 
 <h3 id="sec-5-1-1">5.1.1 Asset pipeline</h3>
 
@@ -575,7 +575,7 @@ Asset pipeline 对 Rails做了很多改动，但对 Rails 开发者来说只有�
 - `public/javascripts`
 - `public/images`
 
-这些文件夹中的文件通过请求 http://example.com/stylesheets 等地址直接发送给浏览器。（Rails 3.0 之后的版本也会这么做。）
+这些文件夹中的文件通过请求 http://example.com/stylesheets 等地址直接发送给浏览器。（Rails 3.0 之后的版本也可以这么做。）
 
 从 Rails 3.1 开始，静态文件可以存放在三个标准的目录中，各有各的用途：
 
@@ -594,7 +594,7 @@ images javascripts stylesheets
 
 #### 清单文件
 
-当你把资源文件存放在适当的目录后，要通过清单文件告诉 Rails怎么把它们合并成一个文件（使用 [Sprockets](https://github.com/sstephenson/sprockets) gem。只适用于 CSS 和 JavaScript，而不会处理图片。）举个例子说明一下，让我们看一下应用程序默认的样式表清单文件（参见代码 5.14）。
+当你把资源文件存放在适当的目录后，要通过清单文件告诉 Rails怎么把它们合并成一个文件（使用 [Sprockets](https://github.com/sstephenson/sprockets) gem。只适用于 CSS 和 JavaScript，而不会处理图片。）举个例子，让我们看一下应用程序默认的样式表清单文件（参见代码 5.14）。
 
 **代码 5.14** 应用程序的样式表清单文件 <br />`app/assets/stylesheets/application.css`
 
@@ -610,7 +610,7 @@ images javascripts stylesheets
 */
 ```
 
-这里的关键代码是几行 CSS 注释，Sprockets 通过这些注释加载相应的文件：
+这里的关键代码是几行 CSS 注释，Sprockets 会通过这些注释加载相应的文件：
 
 ```css
 /*
@@ -664,7 +664,7 @@ Asset pipeline 带来的好处之一是，它会自动优化资源文件，在�
 
 <h3 id="sec-5-2-2">5.2.2 句法强大的样式表</h3>
 
-Sass 是一种编写 CSS 的语言，它从多方面增强了 CSS 的功能。本节我们会介绍其中两个最主要的，嵌套和变量。（还有一个是 mixin，会在 [7.1.1 节](chapter7.html#sec-7-1-1)中介绍。）
+Sass 是一种编写 CSS 的语言，从多方面增强了 CSS 的功能。本节我们会介绍两个最主要的功能，嵌套和变量。（还有一个是 mixin，会在 [7.1.1 节](chapter7.html#sec-7-1-1)中介绍。）
 
 如 [5.1.2 节](#sec-5-1-2)中的简单介绍，Sass 支持一种名为 SCSS 的格式（扩展名为 `.scss`），这是 CSS 句法的一个扩展集。SCSS 只是为 CSS 添加了一些功能，而没有定义全新的句法。<sup>[9](#fn-9)</sup> 也就是说，所有合法的 CSS 文件都是合法的 SCSS 文件，这对已经定义了样式的项目来说是件好事。在我们的程序中，因为要使用 Bootstrap，从一开始就使用了 SCSS。Rails 的 asset pipeline 会自动使用 Sass 预处理器处理扩展名为 `.scss` 的文件，所以 `custom.css.scss` 文件会首先经由 Sass 预处理器处理，然后引入程序的样式表中，再发送给浏览器。
 
@@ -846,11 +846,11 @@ footer {
 }
 ```
 
-使用 Sass 提供的嵌套和定义变量功能后得到的完整 SCSS 文件如代码 5.15 所示。这段代码中使用了 Sass 形式的颜色变量（参照 Bootstrap 变量页面中定义的 LESS 形式的颜色变量）和内置的颜色名称（例如，`white` 代表 `#fff`）。特别注意一下 `footer` 标签样式明显的改进。
+使用 Sass 提供的嵌套和变量功能后得到的完整 SCSS 文件如代码 5.15 所示。这段代码中使用了 Sass 形式的颜色变量（参照 Bootstrap 变量页面中定义的 LESS 形式的颜色变量）和内置的颜色名称（例如，`white` 代表 `#fff`）。请特别注意一下 `footer` 标签样式明显的改进。
 
 译者注：一般不建议在 CSS 中使用颜色名称，因为不同的浏览器和不同的系统对同一个颜色的渲染有所不同，没有使用十六进制的颜色代码准确。
 
-**代码 5.15** 使用嵌套和变量转后后的 SCSS 文件 <br />`app/assets/stylesheets/custom.css.scss`
+**代码 5.15** 使用嵌套和变量转换后的 SCSS 文件 <br />`app/assets/stylesheets/custom.css.scss`
 
 ```scss
 @import "bootstrap";
@@ -1050,7 +1050,7 @@ end
 $ bundle exec rspec spec/requests/static_pages_spec.rb
 ```
 
-这里采用的步骤和 [3.2.2 节](chapter3.html#sec-3-2-2)中添加“关于”页面的步骤是一致的：先更新路由设置（参见代码 5.17），然后在 StaticPages 控制器中添加 `contact` 动作（参见代码 5.18），最后再编写“联系”页面的视图（参见代码 5.19）。
+这里要采用的步骤和 [3.2.2 节](chapter3.html#sec-3-2-2)中添加“关于”页面的步骤是一致的：先更新路由设置（参见代码 5.17），然后在 StaticPages 控制器中添加 `contact` 动作（参见代码 5.18），最后再编写“联系”页面的视图（参见代码 5.19）。
 
 **代码 5.17** 添加“联系”页面的路由设置 <br />`config/routes.rb`
 
@@ -1066,7 +1066,7 @@ SampleApp::Application.routes.draw do
 end
 ```
 
-**代码 5.18** 添加“联系”页面所需的动作 <br />`app/controllers/static_pages_controller.rb`
+**代码 5.18** 添加“联系”页面对应的动作 <br />`app/controllers/static_pages_controller.rb`
 
 ```ruby
 class StaticPagesController < ApplicationController
@@ -1191,7 +1191,7 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
 
 <h3 id="sec-5-3-2">5.3.2 Rails 路由</h3>
 
-我们已经编写了所有 URI 地址的测试，现在就要实现这些地址了。如 [3.1.2 节](chapter3.html#sec-3-1-2)所说，Rails 使用 `config/routes.rb` 文件设置 URI 地址的映射关系。如果你看一下默认的路由文件，会发内容很杂乱，不过还是有点帮助的，因为有很多注释，说明了各路由的映射关系。我建议你找个时间通读一下路由文件，也建议你阅读一下 Rails 指南中《[详解 Rails 路由](http://guides.rubyonrails.org/routing.html)》一文，更深入的了解一下路由。
+我们已经编写了针对所有 URI 地址的测试，现在就要实现这些地址了。如 [3.1.2 节](chapter3.html#sec-3-1-2)所说，Rails 使用 `config/routes.rb` 文件设置 URI 地址的映射关系。如果你看一下默认的路由文件，会发现内容很杂乱，不过还是能提供些帮助的，因为有很多注释，说明了各路由的映射关系。我建议你找个时间通读一下路由文件，也建议你阅读一下 Rails 指南中《[详解 Rails 路由](http://guides.rubyonrails.org/routing.html)》一文，更深入的了解一下路由。
 
 定义具名路由，要把
 
@@ -1243,7 +1243,7 @@ about_url  => 'http://localhost:3000/about'
 
 注意，`about_url` 返回的结果是完整的 URI 地址 http://localhost:3000/about（部署后，会用实际的域名替换 `localhost:3000`，例如 `example.com`）。如 [5.3 节](#sec-5-3)的用法，如果只想返回 /about，使用 `about_path` 就可以了。本书基本上都会使用惯用的 `path` 形式，不过在页面转向时会使用 `url` 形式，因为 HTTP 标准要求转向后的地址为完整的 URI，不过大多数浏览器都可以正常使用这两种形式。
 
-设置了这些路由之后，“帮助”页面、“关于”页面和“联系”页面的测试应该可以通过了：
+设置了这些路由之后，“帮助”页面、“关于”页面和“联系”页面的测试应该就可以通过了：
 
 ```sh
 $ bundle exec rspec spec/requests/static_pages_spec.rb
@@ -1275,7 +1275,7 @@ SampleApp::Application.routes.draw do
 end
 ```
 
-按照上述说明，把根地址 `/` 映射到“首页”上（参见代码 5.23）。
+按照上述说明，我们把根地址 `/` 映射到“首页”上（参见代码 5.23）。
 
 **代码 5.23** 添加根地址的路由设置 <br />`config/routes.rb`
 
@@ -1292,7 +1292,7 @@ SampleApp::Application.routes.draw do
 end
 ```
 
-上面的代码会把根地址 `/` 映射到 /static_pages/home 页面上，同时生成了两个 URI 地址帮助方法，如下所示：
+上面的代码会把根地址 `/` 映射到 /static_pages/home 页面上，同时生成两个 URI 地址帮助方法，如下所示：
 
 ```sh
 root_path => '/'
@@ -1350,7 +1350,7 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
 </header>
 ```
 
-[第八章](chapter8.html)才会为“注册”页面设置具名路由，所以现在还是用占位符 `#` 代替页面的地址。
+[第八章](chapter8.html)才会为“注册”页面设置具名路由，所以现在还是用占位符 `#` 代替该页面的地址。
 
 还有一个包含链接的文件是底部局部视图 `_footer.html.erb`，有到“关于”页面和“联系”页面的链接（参见代码 5.25）。
 
@@ -1372,7 +1372,7 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
 </footer>
 ```
 
-如此一来，[第三章](chapter3.html)创建的所有静态页面的链接都加入布局了，以“关于”页面为例，输入 /about 网址，就会进入网站的“关于”页面（如图 5.8）。
+如此一来，[第三章](chapter3.html)创建的所有静态页面的链接都加入布局了，以“关于”页面为例，输入 /about，就会进入网站的“关于”页面（如图 5.8）。
 
 顺便说一下，要注意，虽然我们没有编写测试检测布局中是否包含这些链接，不过如果没有设置路由的话，前面的测试也会失败，不信你可以把代码 5.21 中的路由注释掉再运行测试来验证一下。检查链接是否指向正确页面的测试代码参见 [5.6 节](#sec-5-6)。
 
@@ -1382,7 +1382,7 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
 
 <h3 id="sec-5-3-4">5.3.4 简化 RSpec 测试代码</h3>
 
-在 [5.3.1 节](#sec-5-3-1)中说过，静态页面的测试有点啰嗦，也有些重复（参见代码 5.20）。本节我们就使用一些最新的 RSpec 特性，把测试变得简洁一些、优雅一些。
+在 [5.3.1 节](#sec-5-3-1)中说过，静态页面的测试有点啰嗦，也有些重复（参见代码 5.20）。本节我们就会使用一些最新的 RSpec 特性，把测试变得简洁一些、优雅一些。
 
 先看一下如何改进下面的代码：
 
@@ -1485,7 +1485,7 @@ it { should have_selector('h1', text: 'Sample App') }
 
 [3.5 节](chapter3.html#sec-3-5)的练习题建议定义一个 `base_title` 变量，再使用字符串插值来消除这个重复（参见代码 3.30）。我们可以更进一步，定义一个和代码 4.2 中 `full_title` 类似的方法。
 
-为此我们要新建 `spec/support` 目录，然后在目录中新建 RSpec 通用函数文件 `utilities.rb`（参见代码 5.26）。
+为此我们要新建 `spec/support` 文件夹，然后在其中新建 RSpec 通用函数文件 `utilities.rb`（参见代码 5.26）。
 
 **代码 5.26** RSpec 通用函数文件，包含 `full_title` 方法 <br />`spec/support/utilities.rb`
 
@@ -1500,7 +1500,7 @@ def full_title(page_title)
 end
 ```
 
-其实这就是代码 4.2 中那个帮助方法的复制，不过，定义两个独立的方法可以捕获标题公共部分中的错误，不过这样也不太靠得住，更好的（也更强大的）方法是直接测试原来那个 `full_title` 帮助方法，参见 [5.6 节](#sec-5-6)中的练习。
+其实这就是代码 4.2 中那个帮助方法的复制，不过，定义两个独立的方法可以捕获标题公共部分中的错误，其实这样也不太靠得住，更好的（也更强大的）方法是直接测试原来那个 `full_title` 帮助方法，参见 [5.6 节](#sec-5-6)中的练习。
 
 RSpec 会自动加载 `spec/support` 目录中的文件，所以我们就可以按照如下的方式编写“首页”的测试：
 
@@ -1515,7 +1515,7 @@ RSpec 会自动加载 `spec/support` 目录中的文件，所以我们就可以�
   end
 ```
 
-下面我们用类似“首页”的方法来简化“帮助”页面、“关于”页面和“联系”页面的测试了，结果如代码 5.27 所示。
+下面我们要用类似“首页”的方法来简化“帮助”页面、“关于”页面和“联系”页面的测试了，结果如代码 5.27 所示。
 
 **代码 5.27** 简化后的静态页面测试 <br />`spec/requests/static_pages_spec.rb`
 
@@ -1571,9 +1571,9 @@ $ bundle exec rspec spec/requests/static_pages_spec.rb
 
 <h3 id="sec-5-4-1">5.4.1 Users 控制器</h3>
 
-创建第一个控制器 StaticPages 是很久以前的事了，还是在 [3.1.2 节](chapter3.html#sec-3-1-2)中。现在我们要创建第二个了，Users 控制器。和之前一样，我们使用 `generate` 命令创建所需的控制器骨架，包含用户注册页面所需的动作。遵照 Rails 的 REST 架构约定，我们把这个动作命名为 `new`，传递给 `generate controller` 就可以自动创建这个动作了（参见代码 5.28）。
+创建第一个控制器 StaticPages 是很久以前的事了，还是在 [3.1.2 节](chapter3.html#sec-3-1-2)中。现在我们要创建第二个了，Users 控制器。和之前一样，我们使用 `generate` 命令创建所需的控制器骨架，包含用户注册页面所需的动作。遵照 Rails 的 REST 架构约定，我们把这个动作命名为 `new`，将其传递给 `generate controller` 就可以自动创建这个动作了（参见代码 5.28）。
 
-**代码 5.28** 生成 User 控制器（包含 `new` 动作）
+**代码 5.28** 生成 Users 控制器（包含 `new` 动作）
 
 ```sh
 $ rails generate controller Users new --no-test-framework
@@ -1612,7 +1612,7 @@ end
 
 <h3 id="sec-5-4-2">5.4.2 “注册”页面的 URI 地址</h3>
 
-[5.4.1 节](#sec-5-4-1)中生成的代码会在 /users/new 地址上对应了一个页面，不过如[表格 5.1](#table-5-1)所示，我们希望“注册”页面的地址是 /signup。为此，和 [5.3 节](#sec-5-3)一样，首先要编写集成测试，可以通过下面的命令生成：
+[5.4.1 节](#sec-5-4-1)中生成的代码会在 /users/new 地址上对应一个页面，不过如[表格 5.1](#table-5-1)所示，我们希望“注册”页面的地址是 /signup。为此，和 [5.3 节](#sec-5-3)一样，首先要编写集成测试，可以通过下面的命令生成：
 
 ```sh
 $ rails generate integration_test user_pages
@@ -1644,7 +1644,7 @@ end
 $ bundle exec rspec spec/requests/user_pages_spec.rb
 ```
 
-不过有一点你要知道，你还可以指定整个目录来运行所有的 request 测试：
+不过有一点要知道，你还可以指定整个目录来运行所有的 request 测试：
 
 ```sh
 $ bundle exec rspec spec/requests/
@@ -1656,7 +1656,7 @@ $ bundle exec rspec spec/requests/
 $ bundle exec rspec spec/
 ```
 
-为了测试全面，在本书后续内容中，我们一般都会使用这个命令运行所有的测试。顺便说一下，你要知道，你也可以使用 Rake 的 `spec` 任务运行测试（你可能见过其他人使用）：
+为了测试全面，在本书后续内容中，我们一般都会使用这个命令运行所有的测试。顺便说一下，你要知道，你也可以使用 Rake 的 `spec` 任务运行测试（你可能见过其他人这样使用）：
 
 ```sh
 $ bundle exec rake spec
@@ -1685,7 +1685,7 @@ SampleApp::Application.routes.draw do
 end
 ```
 
-注意，我们保留了 `get "users/new"` 设置，这是控制器生成命令（代码 5.28）自动添加的路由，如要路由可用，这个设置还不能删除，不过这不符合 REST 约定（[表格 2.2](chapter2.html#table-2-2)），会在 [7.1.2 节](chapter7.html#sec-7-1-2)删除。
+注意，我们保留了 `get "users/new"` 设置，这是控制器生成命令（代码 5.28）自动添加的路由，如要路由可用，这个设置还不能删除，不过这不符合 REST 约定（参见[表格 2.2](chapter2.html#table-2-2)），会在 [7.1.2 节](chapter7.html#sec-7-1-2)删除。
 
 要让测试通过，视图中还要有相应的 `h1` 和 `title`（参见代码 5.33）。
 
@@ -1697,7 +1697,7 @@ end
 <p>Find me in app/views/users/new.html.erb</p>
 ```
 
-现在，代码 5.31 中“注册”页面的测试应该可以通过了。下面要做的就是为“首页”中的注册按钮加上链接。和其他的具名路由一样，`match '/signup'` 会生成 `signup_path` 方法，代码 5.34 用来链接到“注册”页面。
+现在，代码 5.31 中“注册”页面的测试应该可以通过了。下面要做的就是为“首页”中的注册按钮加上链接。和其他的具名路由一样，`match '/signup'` 会生成 `signup_path` 方法，用来链接到“注册”页面（参见代码 5.34）。
 
 **代码 5.34** 把按钮链接到“注册”页面 <br />`app/views/static_pages/home.html.erb`
 
@@ -1754,7 +1754,7 @@ $ git push
 $ git push heroku
 ```
 
-然后在生成环境中就得到了一个可以运行的示例程序：
+然后在“生产环境”中就得到了一个可以运行的示例程序：
 
 ```sh
 $ heroku open
@@ -1770,7 +1770,7 @@ $ heroku logs
 
 <h2 id="sec-5-6">5.6 练习</h2>
 
-1. 测试静态页面的代码 5.27 已经简化了，但还有一些重复的地方。RSpec 提供了一种名为“共享用例（shared example）”的辅助功能，可以消除这些重复。按照代码 5.35 的形式，添加没有编写的“帮助”页面、“关于”页面和“联系”页面的测试。注意，代码 3.30 中用到的 `let` 方法只要需要就会用给定的值创建一个局部变量（例如，引用这个变量时），相比之下，实例变量只在赋值时才被创建。
+1. 测试静态页面的代码 5.27 已经简化了，但还有一些重复的地方。RSpec 提供了一种名为“共享用例（shared example）”的辅助功能，可以消除这些重复。按照代码 5.35 的形式，添加没有编写的“帮助”页面、“关于”页面和“联系”页面的测试。注意，代码 3.30 中用到的 `let` 方法只要需要就会用指定的值创建一个局部变量（例如，引用这个变量时），相比之下，实例变量只在赋值时才被创建。
 1. 或许你已经注意到了，对布局中链接的测试，只测试了路由设置，而没有测试链接是否指向了正确的页面。实现这个测试的方法之一是使用 RSpec 集成测试中的 `visit` 和 `click_link` 函数。加入代码 5.36 中的测试来验证一下链接的地址是否正确。
 1. 不要使用代码 5.26 中的 `full_title` 方法，另外编写一个用例，测试原来那个帮助方法，可参照代码 5.37。（需要新建 `spec/helpers` 目录和 `application_helper_spec.rb` 文件。）然后用代码 5.38 中的代码将其引入（`require`）测试。运行测试验证一下新代码是否可以正常使用。注意：代码 5.37 用到了正则表达式（regular expression），[6.2.4 节](chapter6.html#sec-6-2-4)会做介绍。（感谢 [Alex Chaffee](http://alexchaffee.com/) 的建议，并提供了本题用到的代码。）
 

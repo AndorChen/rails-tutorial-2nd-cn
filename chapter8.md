@@ -5,7 +5,7 @@ title: 第八章 登录和退出
 
 [第七章](chapter7.html)已经实现了注册新用户的功能，本章我们要为已注册的用户提供登录和退出功能。实现登录功能之后，就可以根据登录状态和当前用户的身份定制网站的内容了。例如，本章我们会更新网站的头部，显示“登录”或“退出”链接，以及到个人资料页面的链接；在第十章中，会根据当前登录用户的 id 创建关联到这个用户的微博；在第十一章，我们会实现当前登录用户关注其他用户的功能，实现之后，在首页就可以显示被关注用户发表的微博了。
 
-实现登录功能之后，还可以实现一种安全机制，即根据用户的身份限制可以访问的页面，例如，在[第九章](chapter9.html)中会介绍如何实现只有登录后才能访问编辑用户资料的页面。登录系统还可以赋予管理员级别的用户特别的权限，例如删除用户（也会在[第九章](chapter9.html)中实现）等。
+实现登录功能之后，还可以实现一种安全机制，即根据用户的身份限制可以访问的页面，例如，在[第九章](chapter9.html)中会介绍如何实现只有登入的用户才能访问编辑用户资料的页面。登录系统还可以赋予管理员级别的用户特别的权限，例如删除用户（也会在[第九章](chapter9.html)中实现）等。
 
 实现验证系统的核心功能之后，我们会简要的介绍一下 Cucumber 这个流行的行为驱动开发（Behavior-driven Development, BDD）系统，使用 Cucumber 重新实现之前的一些 RSpec 集成测试，看一下这两种方式有何不同。
 
@@ -17,22 +17,22 @@ $ git checkout -b sign-in-out
 
 <h2 id="sec-8-1">8.1 session 和登录失败</h2>
 
-[session](http://en.wikipedia.org/wiki/Session_(computer_science\)) 是两个电脑（例如运行有网页浏览器的客户端电脑和运行 Rails 的服务器）之间的半永久性连接，我们就是利用它来实现登录过程中常见问题的。网络中常见的 session 处理方式有好几种：可以在用户关闭浏览器后清除 session；也可以提供一个“记住我”单选框让用户选择持久性的 session，直到用户退出后 session 才会失效。<sup>[1](#fn-1)</sup> 在示例程序中我们选择使用第二种处理方式，即用户登录后，会永久的记住登录状态，直到用户点击“退出”链接之后才清除 session。（在 [8.2.1 节](#sec-8-2-1)中会介绍“永久”到底有多久。）
+[session](http://en.wikipedia.org/wiki/Session_(computer_science\)) 是两台电脑（例如运行有网页浏览器的客户端电脑和运行 Rails 的服务器）之间的半永久性连接，我们就是利用它来实现“登录”这一功能的。网络中常见的 session 处理方式有好几种：可以在用户关闭浏览器后清除 session；也可以提供一个“记住我”单选框让用户选择永远保存，直到用户退出后 session 才会失效。<sup>[1](#fn-1)</sup> 在示例程序中我们选择使用第二种处理方式，即用户登录后，会永久的记住登录状态，直到用户点击“退出”链接之后才清除 session。（在 [8.2.1 节](#sec-8-2-1)中会介绍“永久”到底有多久。）
 
-很显然，我们可以把 session 视作一个符合 REST 架构的资源，在登录页面中准备一个新的 session，登录后创建这个 session，退出则会销毁 session。不过 session 和 Users 资源有所不同，Users 资源使用数据库（通过 User 模型）持久的存储数据，而 Sessions 资源是利用 [cookie](http://en.wikipedia.org/wiki/HTTP_cookie) 来存储数据的。cookie 是存储在浏览器中的少量文本。实现登录功能基本上就是在实现基于 cookie 的验证机制。在本节及接下来的一节中，我们会构建 Sessions 控制器，创建登录表单，还会实现控制器中相关的动作。在 [8.2 节](#sec-8-2)中会加入处理 cookie 所需的代码。
+很显然，我们可以把 session 视作一个符合 REST 架构的资源，在登录页面中准备一个新的 session，登录后创建这个 session，退出则会销毁 session。不过 session 和 Users 资源有所不同，Users 资源使用数据库（通过 User 模型）持久的存储数据，而 Sessions 资源是利用 [cookie](http://en.wikipedia.org/wiki/HTTP_cookie) 来存储数据的。cookie 是存储在浏览器中的简单文本。实现登录功能基本上就是在实现基于 cookie 的验证机制。在本节及接下来的一节中，我们会构建 Sessions 控制器，创建登录表单，还会实现控制器中相关的动作。在 [8.2 节](#sec-8-2)中会加入处理 cookie 所需的代码。
 
 <h3 id="sec-8-1-1">8.1.1 Sessions 控制器</h3>
 
-登录和退出功能其实是由 Sessions 控制器中相应的动作处理的，登录表单在 `new` 动作中处理（本节的内容），登录的过程就是向 `create` 动作发送 `POST` 请求（[8.1 节](#sec-8-1)和 [8.2 节](#sec-8-2)），退出则是向 `destroy` 动作发送 `DELETE` 请求（[8.2.6 节](#sec-8-2-6)）。（HTTP 请求和 REST 动作之间的对应关系可以参看[表格 7.1](chapter7.html#sec-7-1)。）首先，我们要生成 Sessions 控制器，以及验证系统所需的集成测试：
+登录和退出功能其实是由 Sessions 控制器中相应的动作处理的，登录表单在 `new` 动作中处理（本节的内容），登录的过程就是向 `create` 动作发送 `POST` 请求（[8.1 节](#sec-8-1)和 [8.2 节](#sec-8-2)），退出则是向 `destroy` 动作发送 `DELETE` 请求（[8.2.6 节](#sec-8-2-6)）。（HTTP 请求和 REST 动作之间的对应关系可以查看[表格 7.1](chapter7.html#sec-7-1)。）首先，我们要生成 Sessions 控制器，以及验证系统所需的集成测试：
 
 ```sh
 $ rails generate controller Sessions --no-test-framework
 $ rails generate integration_test authentication_pages
 ```
 
-参照 [7.2 节](chapter7.html#sec-7-2)中的“注册”页面，我们要创建一个登录表单生成新的 session。注册表单的构思图如图 8.1 所示。
+参照 [7.2 节](chapter7.html#sec-7-2)中的“注册”页面，我们要创建一个登录表单，用来生成新的 session。注册表单的构思图如图 8.1 所示。
 
-“登录”页面的地址由 `singin_path`（稍后定义）获取，和之前一样，我们要先编写适量的测试，如代码 8.1 所示。（可以和代码 7.6 中对“注册”页面的测试比较一下。）
+“登录”页面的地址由 `singin_path`（稍后定义）获取，和之前一样，我们要先编写相应的测试，如代码 8.1 所示。（可以和代码 7.6 中对“注册”页面的测试比较一下。）
 
 ![signin_mockup_bootstrap](assets/images/figures/signin_mockup_bootstrap.png)
 
@@ -68,7 +68,7 @@ $ bundle exec rspec spec/
 resources :sessions, only: [:new, :create, :destroy]
 ```
 
-因为我们没必要显示或编辑 session，所以我们对动作的类型做了限制，为 `resources` 方法指定了 `:only` 选项，只创建 `new`、`create` 和 `destroy` 动作。最终的结果，包括登录和退出具名路由的设定，如代码 8.2 所示。
+因为我们没必要显示或编辑 session，所以我们对动作的种类做了限制，为 `resources` 方法指定了 `:only` 选项，只创建 `new`、`create` 和 `destroy` 动作。最终的结果，包括登录和退出具名路由的设置，如代码 8.2 所示。
 
 **代码 8.2** 设置 session 相关的路由<br />`config/routes.rb`
 
@@ -151,7 +151,7 @@ end
 <h1>Sign in</h1>
 ```
 
-现在代码 8.1 中的测试应该可以通过了，接下来我们要编写登录表单的结构。
+现在代码 8.1 中的测试应该可以通过了，接下来我们要编写登录表单。
 
 ```sh
 $ bundle exec rspec spec/
@@ -159,7 +159,7 @@ $ bundle exec rspec spec/
 
 <h3 id="sec-8-1-2">8.1.2 测试登录功能</h3>
 
-对比图 8.1 和图 7.11 之后，我们发现登录表单和注册表单外观上差不过，只是少了两个字段，只有 Email 地址和密码字段。和注册表单一样，我们可以使用 Capybara 填写表单再点击按钮进行测试。
+对比图 8.1 和图 7.11 之后，我们发现登录表单和注册表单外观上差不多，只是少了两个字段，只有 Email 地址和密码字段。和注册表单一样，我们可以使用 Capybara 填写表单，再点击按钮进行测试。
 
 在测试的过程中，我们不得不向程序中加入相应的功能，这也正式 TDD 带来的好处之一。我们先来测试填写不合法数据的登录过程，构思图如图 8.2 所示。
 
@@ -179,13 +179,13 @@ it { should have_selector('div.alert.alert-error', text: 'Invalid') }
 div.alert.alert-error
 ```
 
-我们之前介绍过，这里的点号代表 CSS 中的 class（参见 [5.1.2 节](chapter5.html#sec-5-1-2)），你也许猜到了，这里我们要查找的是同时具有 `alert` 和 `alert-error` class 的 `div` 元素。而且我们还检测了错误提示消息中是否包含了 `"Invalid"` 这个词。所以，上述的测试代码是检测下面是否有下面这种元素的：
+前面介绍过，这里的点号代表 CSS 中的 class（参见 [5.1.2 节](chapter5.html#sec-5-1-2)），你也许猜到了，这里我们要查找的是同时具有 `alert` 和 `alert-error` class 的 `div` 元素。而且我们还检测了错误提示消息中是否包含了 `"Invalid"` 这个词。所以，上述测试是检测页面中是否有下面这个元素的：
 
 ```html
 <div class="alert alert-error">Invalid...</div>
 ```
 
-代码 8.5 显示的是包含了测试标题和测试 Flash 消息的测试代码。我们可以看出，这些代码缺少了一个很重要的部分，会在 [8.1.5 节](#sec-8-1-5)中说明。
+代码 8.5 是针对标题和 Flash 消息的测试。我们可以看出，这些代码缺少了一个很重要的部分，会在 [8.1.5 节](#sec-8-1-5)中说明。
 
 **代码 8.5** 登录失败时的测试<br />`spec/requests/authentication_pages_spec.rb`
 
@@ -215,13 +215,13 @@ end
 2. 出现了“退出”链接
 3. “登录”链接消失了
 
-（对“设置（Settings）”链接的测试会在 [9.1 节](chapter9.html#9-1)中实现，对“所有用户（Users）”链接的测试会在 [9.3 节](chapter9.html#sec-9-3)中实现。）如上变化的构思图如图 8.3 所示。<sup>[2](#fn-2)</sup>注意，退出和个人资料链接出现在“账户（Account）”下拉菜单中。在 [8.2.4 节](#sec-8-2-4)中会介绍如何通过 Bootstrap 实现这种下拉菜单。
+（对“设置（Settings）”链接的测试会在 [9.1 节](chapter9.html#9-1)中实现，对“所有用户（Users）”链接的测试会在 [9.3 节](chapter9.html#sec-9-3)中实现。）如上变化的构思图如图 8.3 所示。<sup>[2](#fn-2)</sup>注意，“退出”和“个人资料”链接位于“账户（Account）”下拉菜单中。在 [8.2.4 节](#sec-8-2-4)中会介绍如何通过 Bootstrap 实现这种下拉菜单。
 
 ![signin_success_mockup_bootstrap](assets/images/figures/signin_success_mockup_bootstrap.png)
 
 图 8.3：登录成功后显示的用户资料页面构思图
 
-对登录成功时的测试代码如代码 8.6 所示。
+对登录成功时的测试如代码 8.6 所示。
 
 **代码 8.6** 登录成功时的测试<br />`spec/requests/authentication_pages_spec.rb`
 
@@ -254,7 +254,7 @@ describe "Authentication" do
 end
 ```
 
-在上面的代码中用到了 `have_link` 方法，它的第一参数是链接的文本，第二个参数是可选的 `:href`，指定链接的地址，因此如下的代码
+在代码 8.6 中用到了 `have_link` 方法，它的第一参数是链接文本，第二个参数是可选的 `:href`，指定链接的地址，因此如下的代码
 
 ```ruby
 it { should have_link('Profile', href: user_path(user)) }
@@ -274,21 +274,21 @@ it { should have_link('Profile', href: user_path(user)) }
 <% end %>
 ```
 
-注册表单和登录表单的区别在于，程序中没有 Session 模型，因此也就没有和 `@user` 类似的变量。也就是说，在构建登录表单时，我们要给 `form_for` 提供更多的信息。一般来说，如下的代码
+注册表单和登录表单的区别在于，程序中没有 Session 模型，因此也就没有类似 `@user` 的变量。也就是说，在构建登录表单时，我们要给 `form_for` 提供更多的信息。一般来说，如下的代码
 
 ```erb
 form_for(@user)
 ```
 
-Rails 会自动向 /users 地址发送 `POST` 请求。对于登录表单，我们则要明确的指定资源的名称已经相应的 URI 地址：
+Rails 会自动向 /users 地址发送 `POST` 请求。对于登录表单，我们则要明确的指定资源的名称以及相应的 URI 地址：
 
 ```erb
 form_for(:session, url: sessions_path)
 ```
 
-（第二种方法是，不用 `form_for`，而用 `form_tag`。`form_tag` 也是 Rails 程序常用的方法，不过换用 `form_tag` 之后就和注册表单有很多不同之处了，我现在是想使用相似的代码构建登录表单。使用 `form_tag` 构建登录表单会留作练习（参见 [8.5 节](#sec-8-5)）。）
+（创建表单还有另一种方法，不用 `form_for`，而用 `form_tag`。`form_tag` 也是 Rails 程序常用的方法，不过换用 `form_tag` 之后就和注册表单有很多不同之处了，我现在是想使用相似的代码构建登录表单。使用 `form_tag` 构建登录表单会留作练习（参见 [8.5 节](#sec-8-5)）。）
 
-使用上述这种 `form_for` 形式，我们可以参照代码 7.17 中的注册表单，很容易的就能编写一个符合图 8.1 的登录表单，如代码 8.7 所示。
+使用上述这种 `form_for` 形式，参照代码 7.17 中的注册表单，很容易的就能编写一个符合图 8.1 的登录表单，如代码 8.7 所示。
 
 **代码 8.7** 注册表单的代码<br />`app/views/sessions/new.html.erb`
 
@@ -320,7 +320,7 @@ form_for(:session, url: sessions_path)
 
 图 8.4：登录表单（[/signup](http://localhost:3000/signin)）
 
-时间久了你就不会老是查看 Rails 生成的 HTML（你会完全信任所用的帮助函数可以正确的完成任务），不过现在还是来看一下登录表单的 HTML 吧（如代码 8.8 所示）。
+用的多了你就不会老是查看 Rails 生成的 HTML（你会完全信任所用的帮助函数可以正确的完成任务），不过现在还是来看一下登录表单的 HTML 吧（如代码 8.8 所示）。
 
 **代码 8.8** 代码 8.7 中登录表单生成的 HTML
 
@@ -344,7 +344,7 @@ form_for(:session, url: sessions_path)
 
 <h3 id="sec-8-1-4">8.1.4 分析表单提交</h3>
 
-和创建用户类似，创建 session 时先要处理提交不合法数据的情况。我们已经编写了对提交不合法数据的测试（参见代码 8.5），也添加了有几处难理解但还算简单的代码让测试通过了。下面我们就来分析一下表单提交的过程，然后为登录失败添加失败提示信息（如图 8.2）。然后，以此为基础，验证提交的 Email 和密码，处理登录成功的情况（参见 [8.2 节](#sec-8-2)）。
+和创建用户类似，创建 session 时先要处理提交不合法数据的情况。我们已经编写了对提交不合法数据的测试（参见代码 8.5），也添加了有几处难理解但还算简单的代码让测试通过了。下面我们就来分析一下表单提交的过程，然后为登录失败添加失败提示信息（如图 8.2）。最后，以此为基础，验证提交的 Email 和密码，处理登录成功的情况（参见 [8.2 节](#sec-8-2)）。
 
 首先，我们来编写 Sessions 控制器的 `create` 动作，如代码 8.9 所示，现在只是直接渲染登录页面。在浏览器中访问 /sessions/new，然后提交空表单，显示的页面如图 8.5 所示。
 
@@ -368,7 +368,7 @@ class SessionsController < ApplicationController
 end
 ```
 
-仔细的查看一下图 8.5 中显示的调试信息，你会发现，如在 [8.1.3 节](#sec-8-1-3)末尾说过的，表单提交后会生成 `params` Hash，Email 和密码都至于 `:session` 键之中：
+仔细看一下图 8.5 中显示的调试信息，你会发现，如在 [8.1.3 节](#sec-8-1-3)末尾说过的，表单提交后会生成 `params` Hash，Email 和密码都在 `:session` 键中：
 
 ```yaml
 ---
@@ -431,7 +431,7 @@ end
 user && user.authenticate(params[:session][:password])
 ```
 
-我们使用 `&&`（逻辑与）检测获取的用户是否合法。因为除了 `nil` 和 `false` 之外的所有对象都被视作 `true`，上面这个语句可能出现的结果如[表格 8.2](#table-8-2)所示。我们可以从表格 8.2 中看出，当且仅当数据库中存在提交的 Email 和提交了对应的密码时，这个语句才会返回 `true`。
+我们使用 `&&`（逻辑与）检测获取的用户是否合法。因为除了 `nil` 和 `false` 之外的所有对象都被视作 `true`，上面这个语句可能出现的结果如[表格 8.2](#table-8-2)所示。我们可以从表格 8.2 中看出，当且仅当数据库中存在提交的 Email 并提交了对应的密码时，这个语句才会返回 `true`。
 
 <table id="table-8-2" class="tabular">
   <tbody>
@@ -493,7 +493,7 @@ end
 
 图 8.6：登录失败后显示的 Flash 消息
 
-不过，就像代码 8.10 中的注释所说，这些代码还有问题。显示的页面开起来很正常啊，那么，问题出现在哪儿呢？问题的关键在于，Flash 消息在一个请求的生命周期内是持续存在的，而重新渲染页面（使用 `render` 方法）和代码 7.27 中的转向不同，它不算新的请求，我们会发现这个 Flash 消息存在的时间比设想的要长很多。例如，我们提交了不合法的登录信息，Flash 消息生成了，然后在注册页面中显示出来（如图 8.6），这时如果我们点击链接转到其他页面（例如“首页”），这就算是表单提交后的第一次请求，所以页面中还是会显示这个 Flash 消息（如图 8.7）。
+不过，就像代码 8.10 中的注释所说，这些代码还有问题。显示的页面看起来很正常啊，那么，问题出现在哪儿呢？问题的关键在于，Flash 消息在一个请求的生命周期内是持续存在的，而重新渲染页面（使用 `render` 方法）和代码 7.27 中的转向不同，它不算新的请求，你会发现这个 Flash 消息存在的时间比设想的要长很多。例如，我们提交了不合法的登录信息，Flash 消息生成了，然后在注册页面中显示出来（如图 8.6），这时如果我们点击链接转到其他页面（例如“首页”），这只算是表单提交后的第一次请求，所以页面中还是会显示 Flash 消息（如图 8.7）。
 
 ![flash_persistence_bootstrap](assets/images/figures/flash_persistence_bootstrap.png)
 
@@ -506,7 +506,7 @@ $ bundle exec rspec spec/requests/authentication_pages_spec.rb \
 > -e "signin with invalid information"
 ```
 
-不过有错误的程序测试应该是失败的，所以我们要编写一个能够捕获这种错误的测试。幸好，捕获这种错误正是集成测试的拿手好戏，相应的代码如下：
+不过程序中有错误，测试应该是失败的，所以我们要编写一个能够捕获这种错误的测试。幸好，捕获这种错误正是集成测试的拿手好戏，所用的代码如下：
 
 ```ruby
 describe "after visiting another page" do
@@ -588,9 +588,9 @@ $ bundle exec rspec spec/requests/authentication_pages_spec.rb \
 
 <h2 id="sec-8-2">8.2 登录成功</h2>
 
-上一节处理了登录失败的情况，这一节我们要处理登录成功的情况了。实现用户登录的过程是本书目前为止最考验 Ruby 编程能力的部分，所以你要坚持读完本节，最好准备，付出大量的脑力劳动。幸好，第一步还算是简单的，完成 Sessions 控制器的 `create` 动作没什么难的，不过还是需要一点小技巧。
+上一节处理了登录失败的情况，这一节我们要处理登录成功的情况了。实现用户登录的过程是本书目前为止最考验 Ruby 编程能力的部分，你要坚持读完本节，做好心理准备，付出大量的脑力劳动。幸好，第一步还算是简单的，完成 Sessions 控制器的 `create` 动作没什么难的，不过还是需要一点小技巧。
 
-我们需要把代码 8.12 中处理登录成功分支中的注释换成具体的代码，我们要使用 `sign_in` 方法实现登录操作，然后转向到用户的资料页面，所需的代码如代码 8.13 所示。这就是我们使用的技巧，使用还没定义的方法 `sign_in`。本节后面的内容会定义这个方法。
+我们需要把代码 8.12 中处理登录成功分支中的注释换成具体的代码，使用 `sign_in` 方法实现登录操作，然后转向用户的资料页面，如代码 8.13 所示。这就是我们使用的技巧，使用还没定义的方法 `sign_in`。本节后面的内容会定义这个方法。
 
 **代码 8.13** 完整的 `create` 动作代码（还不能正常使用）<br />`app/controllers/sessions_controller.rb`
 
@@ -636,9 +636,9 @@ end
 session[:remember_token] = user.id
 ```
 
-`session` 对象把用户 id 存在浏览器的 cookie 中，这样网站的所有页面就都可以获取到了。浏览器关闭后，cookie 也随之失效。在网站中的任何页面，只需调用 `User.find(session[:remember_token])` 就可以取回用户对象了。Rails 在处理 session 时，会确保安全性。倘若用户企图伪造用户 id，Rails 可以通过每个 session 的 session id 检测到。
+`session` 对象把用户 id 保存在浏览器的 cookie 中，这样在网站的所有页面就都可以使用了。浏览器关闭后，cookie 也随之失效。在网站中的任何页面，只需调用 `User.find(session[:remember_token])` 就可以取回用户对象了。Rails 在处理 session 时，会确保安全性。倘若用户企图伪造用户 id，Rails 可以通过每个 session 的 session id 检测到。
 
-根据示例程序的设计目标，我们计划要实现的是持久保存的 session，也就是即使浏览器关闭了，登录状态依旧存在，所以，登入的用户要有一个持久保存的标识符才行。为此，我们要为每个用户生成一个唯一而安全的记忆权标，长期存储，不会随着浏览器的关闭而消失。
+根据示例程序的设计目标，我们计划要实现的是持久保存的 session，即使浏览器关闭了，登录状态依旧存在，所以，登入的用户要有一个持久保存的标识符才行。为此，我们要为每个用户生成一个唯一而安全的记忆权标，长期存储，不会随着浏览器的关闭而消失。
 
 记忆权标要附属到特定的用户对象上，而且要保存起来以待后用，所以我们就可以把它设为 User 模型的属性（如图 8.8）。我们先来编写 User 模型的测试，如代码 8.15 所示。
 
@@ -683,7 +683,7 @@ class AddRememberTokenToUsers < ActiveRecord::Migration
 end
 ```
 
-然后，还要更新开发数据据和测试数据库：
+然后，还要更新“开发数据库”和“测试数据库”：
 
 ```sh
 $ bundle exec rake db:migrate
@@ -696,9 +696,9 @@ $ bundle exec rake db:test:prepare
 $ bundle exec rspec spec/models/user_spec.rb
 ```
 
-接下来我们要考虑记忆权标要保存什么数据，这有很多种选择，其实任何足够长的随机字符串都是可以的。因为用户的密码是经过加密处理的，所以原则上我们可以直接把用户的 `password_hash` 值拿来用，不过这样做可能会向潜在的攻击者暴露用户的密码。以防万一，我们还是用 Ruby 标准库中 `SecureRandom` 模块提供的 `urlsafe_base64` 方法来生成随机字符串吧。`urlsafe_base64` 方法生成的是 Base64 字符串，可以放心的在 URI 中使用（因此也可以放心的在 cookie 中使用）。<sup>[3](#fn-3)</sup>写作本书时，`SecureRandom.urlsafe_base64` 创建的字符串长度为 16，由 A-Z、a-z、0-9、下划线（_）和连字符（-）组成，每一位字符都有 64 中可能的情况，所以两个记忆权标相等的概率就是 1/64<sup>16</sup>=2<sup>-96</sup>≈10<sup>-29</sup>，完全可以忽略。
+接下来我们要考虑记忆权标要保存什么数据，这有很多种选择，其实任何足够长的随机字符串都是可以的。因为用户的密码是经过加密处理的，所以原则上我们可以直接把用户的 `password_hash` 值拿来用，不过这么做可能会把用户的密码暴露给潜在的攻击者。以防万一，我们还是用 Ruby 标准库中 `SecureRandom` 模块提供的 `urlsafe_base64` 方法来生成随机字符串吧。`urlsafe_base64` 方法生成的是 Base64 字符串，可以放心的在 URI 中使用（因此也可以放心的在 cookie 中使用）。<sup>[3](#fn-3)</sup>写作本书时，`SecureRandom.urlsafe_base64` 创建的字符串长度为 16，由 A-Z、a-z、0-9、下划线（_）和连字符（-）组成，每一位字符都有 64 种可能的情况，所以两个记忆权标相等的概率就是 1/64<sup>16</sup>=2<sup>-96</sup>≈10<sup>-29</sup>，完全可以忽略。
 
-我们会使用回调函数来创建记忆权标，回调函数在 [6.2.5 节](chapter6.html#sec-6-2-5) 中实现 Email 属性的唯一性验证时介绍过。和 [6.2.5 节](chapter6.html#sec-6-2-5) 中的用法一样，我们还是要使用 `before_save` 回调函数，在保存用户之前创建 `remember_token` 的值。<sup>[4](#fn)</sup>要测试这个过程，我们可以先保存测试用用户对象，然后检查 `remember_token` 是否为非空。这样做，如果以后需要改变记忆权标的生成方式，就无需再修改这个测试了。测试代码如代码 8.17 所示。
+我们会使用回调函数来创建记忆权标，回调函数在 [6.2.5 节](chapter6.html#sec-6-2-5) 中实现 Email 属性的唯一性验证时介绍过。和 [6.2.5 节](chapter6.html#sec-6-2-5) 中的用法一样，我们还是要使用 `before_save` 回调函数，在保存用户之前创建 `remember_token` 的值。<sup>[4](#fn)</sup>要测试这个过程，我们可以先保存测试所需的用户对象，然后检查 `remember_token` 是否为非空值。这样做，如果以后需要改变记忆权标的生成方式，也无需修改测试。测试代码如代码 8.17 所示。
 
 **代码 8.17** 测试合法的（非空）记忆权标值<br />`spec/models/user_spec.rb`
 
@@ -741,7 +741,7 @@ it { @user.remember_token.should_not be_blank }
 before_save :create_remember_token
 ```
 
-当 Rails 执行到这行代码时，会寻找一个名为 `create_remember_token` 的方法，然后在保存用户之前执行这个方法。其二，`create_remember_token` 只会在 User 模型内部使用，所以就没必要把它开放给用户之外的对象了。在 Ruby 中，我们可以使用 `private` 关键字（译者注：其实 `private` 是方法而不是关键字，请参阅《Ruby 编程语言》P233）限制方法的可见性：
+当 Rails 执行到这行代码时，会寻找一个名为 `create_remember_token` 的方法，在保存用户之前执行。其二，`create_remember_token` 只会在 User 模型内部使用，所以没必要把它开放给用户之外的对象。在 Ruby 中，我们可以使用 `private` 关键字（译者注：其实 `private` 是方法而不是关键字，请参阅《Ruby 编程语言》P233）限制方法的可见性：
 
 ```ruby
 private
@@ -805,7 +805,7 @@ $ bundle exec rspec spec/models/user_spec.rb
 
 <h3 id="sec-8-2-2">8.2.2 定义 <code>sign_in</code> 方法</h3>
 
-本小节我们要开始实现登录功能了，首先来定义 `sign_in` 方法。上一小节已经说明了，我们计划实现的身份验证方式是，在用户的浏览器中存储记忆权标，在网站的页面与页面之间通过这个记忆权标获取数据库中的用户记录（会在 [8.2.3 节](#sec-8-2-3)]实现）。实现这一设想所需的代码如代码 8.19 所示，这段代码使用了两个新内容：`cookies` Hash 和 `current_user` 方法。
+本小节我们要开始实现登录功能了，首先来定义 `sign_in` 方法。上一小节已经说明了，我们计划实现的身份验证方式是，在用户的浏览器中存储记忆权标，在网站的页面与页面之间通过这个记忆权标获取数据库中的用户记录（会在 [8.2.3 节](#sec-8-2-3)实现）。实现这一设想所需的代码如代码 8.19 所示，这段代码使用了两个新内容：`cookies` Hash 和 `current_user` 方法。
 
 **代码 8.19** 完整但还不能正常使用的 `sign_in` 方法<br />`app/helpers/sessions_helper.rb`
 
@@ -818,7 +818,7 @@ module SessionsHelper
 end
 ```
 
-上述代码中用到的 `cookies` 是由 Rails 提供的，我们可以把它看成 Hash，其中每个元素又都是一个 Hash，包含两个元素，`value` 指定 cookie 的文本，`expires` 指定 cookie 的失效日期。例如，我们可以使用下述代码实现登录功能，把 cookie 的值设为用户的记忆权标，失效日期设为 20 年之后：
+上述代码中用到的 `cookies` 方法是由 Rails 提供的，我们可以把它看成 Hash，其中每个元素又都是一个 Hash，包含两个元素，`value` 指定 cookie 的文本，`expires` 指定 cookie 的失效日期。例如，我们可以使用下述代码实现登录功能，把 cookie 的值设为用户的记忆权标，失效日期设为 20 年之后：
 
 ```ruby
 cookies[:remember_token] = { value: user.remember_token,
@@ -862,7 +862,7 @@ Rails 的 `permanent` 方法会自动把 cookie 的失效日期设为 20 年后�
 User.find_by_remember_token(cookies[:remember_token])
 ```
 
-其实浏览器中保存的 cookie 并不是 Hash，赋值给 `cookies` 只是把值以文本的形式保存在浏览器中。这正体现了 Rails 的智能，无需关心具体的处理细节，专注地实现应用程序的功能。
+其实浏览器中保存的 cookie 并不是 Hash，赋值给 `cookies` 只是把值以文本的形式保存在浏览器中。这正体现了 Rails 的智能，我们无需关心具体的处理细节，专注地实现应用程序的功能。
 
 你可能听说过，存储在用户浏览器中的验证 cookie 在和服务器通讯时可能会导致程序被会话劫持，攻击者只需复制记忆权标就可以伪造成相应的用户登录网站了。Firesheep 这个 Firefox 扩展可以查看会话劫持，你会发现很多著名的大网站（包括 Facebook 和 Twitter）都存在这种漏洞。避免这个漏洞的方法就是整站开启 SSL，详情参见 [7.4.4 节](chapter7.html#sec-7-4-4)。
 
@@ -962,7 +962,7 @@ module SessionsHelper
 end
 ```
 
-上面的做法其实就是实现了 `attr_accessor` 方法的功能（[4.4.5 节](chapter4.html#sec-4-4-5)介绍过）。<sup>[5](#fn-5)</sup>如果按照代码 8.21 来定义 `current_user` 方法，会出现一个问题：程序不会记住用户的登录状态。一旦用户转到其他的页面，session 就失效了，会自动登出用户。若要避免这个问题，我们要使用代码 8.19 中生成的记忆权标查找用户，如代码 8.22 所示。
+上面的做法其实就是实现了 `attr_accessor` 方法的功能（[4.4.5 节](chapter4.html#sec-4-4-5)介绍过）。<sup>[5](#fn-5)</sup>如果按照代码 8.21 来定义 `current_user` 方法，会出现一个问题：程序不会记住用户的登录状态。一旦用户转到其他的页面，session 就失效了，会自动退出。若要避免这个问题，我们要使用代码 8.19 中生成的记忆权标查找用户，如代码 8.22 所示。
 
 **代码 8.22** 通过记忆权标查找当前用户<br />`app/helpers/sessions_helper.rb`
 
@@ -1034,7 +1034,7 @@ end
 
 <h3 id="sec-8-2-4">8.2.4 改变导航链接</h3>
 
-本小节我们要完成的是实现登录、退出功能的最后一步，根据登录状态改变布局中的导航链接。如图 8.3 所示，我们要在登录和退出后显示不同的导航，要添加指向列出所有用户页面的链接、到用户设置页面的链接（[第九章](chapter9.html)加入），还有到当前登录用户资料页面的链接。加入这些链接之后，代码 8.6 中的测试就可以通过了，这是本章到目前位置测试首次变绿通过。
+本小节我们要完成的是实现登录、退出功能的最后一步，根据登录状态改变布局中的导航链接。如图 8.3 所示，我们要在登录和退出后显示不同的导航，要添加指向列出所有用户页面的链接、到用户设置页面的链接（[第九章](chapter9.html)加入），还有到当前登录用户资料页面的链接。加入这些链接之后，代码 8.6 中的测试就可以通过了，这是本章目前为止测试首次变绿通过。
 
 在网站的布局中改变导航链接需要用到 ERb 的 if-else 分支结构：
 
@@ -1069,7 +1069,7 @@ module SessionsHelper
 end
 ```
 
-定义了 `signed_in?` 方法后就可以着手修改布局中的导航了。我们要添加四个新链接，其中两个的链接地址先不填（[第九章](chapter.html)再填）：
+定义了 `signed_in?` 方法后就可以着手修改布局中的导航了。我们要添加四个新链接，其中两个链接的地址先不填（[第九章](chapter.html)再填）：
 
 ```erb
 <%= link_to "Users", '#' %>
@@ -1096,7 +1096,7 @@ end
 
 不过我们可以直接把链接地址设为 `current_user`，Rails 会自动将其转换成 `user_path(current_user)`。
 
-在添加导航链接的过程中，我们还要使用 Bootstrap 实现下来菜单的效果，具体的实现方式可以参阅 Bootstrap 的文档。添加导航链接的所需的代码如代码 8.24 所示。注意其中和 Bootstrap 下来菜单有关的 CSS id 和 class。
+在添加导航链接的过程中，我们还要使用 Bootstrap 实现下拉菜单的效果，具体的实现方式可以参阅 Bootstrap 的文档。添加导航链接所需的代码如代码 8.24 所示。注意其中和 Bootstrap 下拉菜单有关的 CSS id 和 class。
 
 **代码 8.24** 根据登录状态改变导航链接<br />`app/views/layouts/_header.html.erb`
 
@@ -1153,7 +1153,7 @@ end
 $ bundle exec rspec spec/
 ```
 
-不过，如果你在浏览器中试用的话，网站还不能正常使用。这是因为“记住我”这个功能要求用户记录的记忆权标属性不为空，而现在这个用户是在 [7.4.3 节](chapter7.html#sec-7-4-3)中创建的，远在实现生成记忆权标的回调函数之前，所以记忆权标还没有值。为了解决这个问题，我们要再次保存用户，触发代码 8.18 中的 `before_save` 回调函数，生成用户的记忆权标：
+不过，如果你在浏览器中查看的话，网站还不能正常使用。这是因为“记住我”这个功能要求用户记录的记忆权标属性不为空，而现在这个用户是在 [7.4.3 节](chapter7.html#sec-7-4-3)中创建的，远在实现生成记忆权标的回调函数之前，所以记忆权标还没有值。为了解决这个问题，我们要再次保存用户，触发代码 8.18 中的 `before_save` 回调函数，生成用户的记忆权标：
 
 ```sh
 $ rails console
@@ -1277,7 +1277,7 @@ class SessionsController < ApplicationController
 end
 ```
 
-和其他身份验证相关的方法一样，我们会在 Sessions 控制的帮助方法模块中定义 `sign_out` 方法。方法本身的实现很简单，我们先把当前用户设为 `nil`，然后在 cookies 上调用 `delete` 方法从 session 中删除记忆权标，如代码 8.30 所示。（其实这里没必要把当前用户设为 `nil`，因为在 `destroy` 动作中我们加入了转向操作。现在加了这行代码是为了防止以后退出时不进行转向操作。）
+和其他身份验证相关的方法一样，我们会在 Sessions 控制器的帮助方法模块中定义 `sign_out` 方法。方法本身的实现很简单，我们先把当前用户设为 `nil`，然后在 cookies 上调用 `delete` 方法从 session 中删除记忆权标，如代码 8.30 所示。（其实这里没必要把当前用户设为 `nil`，因为在 `destroy` 动作中我们加入了转向操作。这里我们之所以这么做是为了兼容不转向的退出操作。）
 
 **代码 8.30** Sessions 帮助方法模块中定义的 `sign_out` 方法<br />`app/helpers/sessions_helper.rb`
 
@@ -1352,7 +1352,7 @@ $ rails generate cucumber:install
 
 <h3 id="sec-8-3-2">8.3.2 功能和步骤定义</h3>
 
-Cucumber 中的功能就是希望应用程序实现的行为，使用一种名为 Gherkin 的纯文本语言写就。使用 Gherkin 编写的测试和写的很好的 RSpec 测试用例差不多，不过因为 Gherkin 是纯文本，所以特别适合那些不是很懂 Ruby 代码而可以理解英语的人使用。
+Cucumber 中的“功能（feature）”就是希望应用程序实现的行为，使用一种名为 Gherkin 的纯文本语言编写。使用 Gherkin 编写的测试和写的很好的 RSpec 测试用例差不多，不过因为 Gherkin 是纯文本，所以特别适合那些不是很懂 Ruby 代码而可以理解英语的人使用。
 
 下面我们要编写一些 Cucumber 功能，实现代码 8.5 和代码 8.6 中针对登录功能的部分测试用例。首先，我们在 `features` 文件夹中新建名为 `signing_in.feature` 的文件。
 
@@ -1422,7 +1422,7 @@ $ bundle exec rake cucumber
 
 （鉴于某些原因，我经常使用的命令是 `rake cucumber:ok`。）
 
-我们只是写了一些纯文本，所以毫无意外，Cucumber 场景现在不会通过。若要让测试通过，我们要新建一个步骤定义文件，把场景中的纯文本和 Ruby 代码对应起来。步骤定义文件存放在 `features/step_definition` 文件夹中，我盟要将其命名为 `authentication_steps.rb`。
+我们只是写了一些纯文本，所以毫不意外，Cucumber 场景现在不会通过。若要让测试通过，我们要新建一个步骤定义文件，把场景中的纯文本和 Ruby 代码对应起来。步骤定义文件存放在 `features/step_definition` 文件夹中，我们要将其命名为 `authentication_steps.rb`。
 
 以 `Feature` 和 `Scenario` 开头的行基本上只被视作文档，其他的行则都要和 Ruby 代码对应。例如，功能文件中下面这行
 
@@ -1438,13 +1438,13 @@ Given /ˆa user visits the signin page$/ do
 end
 ```
 
-在功能文件中，`Given` 只是普通的字符串，而在步骤定义中 `Given` 则是一个方法，可以接受一个正则表达式作为参数，后面还可以跟着一个块。`Given` 方法的正则表达式参数是用来拼配功能文件中某个特定行的，块中的代码则是实现描述的行为所需的 Ruby 代码。本例中的“a user visits the signin page”是由下面这行代码实现的：
+在功能文件中，`Given` 只是普通的字符串，而在步骤定义中 `Given` 则是一个方法，可以接受一个正则表达式作为参数，后面还可以跟着一个块。`Given` 方法的正则表达式参数是用来匹配功能文件中某个特定行的，块中的代码则是实现描述的行为所需的 Ruby 代码。本例中的“a user visits the signin page”是由下面这行代码实现的：
 
 ```ruby
 visit signin_path
 ```
 
-你可能觉得这行代码很眼熟，不错，这就是前面用过的 Capybara 提供的方法，Cucumber 的步骤定义文件会自动引入 Capybara。接下来两行的代码实现也同样眼熟。如下的场景步骤：
+你可能觉得这行代码很眼熟，不错，这就是前面用过的 Capybara 提供的方法，Cucumber 的步骤定义文件会自动引入 Capybara。接下来的两行代码实现也同样眼熟。如下的场景步骤：
 
 ```gherkin
 When he submits invalid signin information
@@ -1565,7 +1565,7 @@ end
 
 Cucumber 这种分离方式特别便捷的地方在于，只有步骤定义是依赖具体实现的，所以假如我们修改了错误提示信息所用的 CSS class，功能描述文件是不需要修改的。
 
-那么，如果你只是向检测页面中是否显示有错误提示信息，就不想在多个地方重复的编写下面的测试：
+那么，如果你只是想检测页面中是否显示有错误提示信息，就不想在多个地方重复的编写下面的测试：
 
 ```ruby
 should have_selector('div.alert.alert-error', text: 'Invalid')
@@ -1649,7 +1649,7 @@ $ git checkout master
 $ git merge sign-in-out
 ```
 
-然后再推送到 GitHub 和 Heroku 生成环境服务器：
+然后再推送到 GitHub 和 Heroku “生产环境”服务器：
 
 ```sh
 $ git push
@@ -1657,7 +1657,7 @@ $ git push heroku
 $ heroku run rake db:migrate
 ```
 
-如果之前你在生产服务器中注册过用户，我建议你按照 [8.2.4 节](#sec-8-2-4)中介绍的方法，为各用户生成记忆权标，这时不能用本地的控制台，而要用 Heroku 的控制台：
+如果之前你在生产服务器中注册过用户，我建议你按照 [8.2.4 节](#sec-8-2-4)中介绍的方法，为各用户生成记忆权标，不能用本地的控制台，而要用 Heroku 的控制台：
 
 ```sh
 $ heroku run console
@@ -1667,18 +1667,18 @@ $ heroku run console
 <h2 id="sec-8-5">8.5 练习</h2>
 
 1. 重构登录表单，把 `form_for` 换成 `form_tag`，确保测试还是可以通过的。提示：可以参照 Railscasts 第 270 集《[Authentication in Rails 3.1](http://railscasts.com/episodes/270-authentication-in-rails-3-1)》，特别留意一下 `params` Hash 结构的变化。
-2. 参照 [8.3.3 节](#sec-8-3-3)中的示例，遍览用户和身份验证相关的集成测试，在 `spec/support/utilities.rb` 中定义帮助函数，解耦测试和具体实现。附加题：把这些帮助方法放到不同的文件和模块中，然后在引入相应的模块。
+2. 参照 [8.3.3 节](#sec-8-3-3)中的示例，遍览用户和身份验证相关的集成测试，在 `spec/support/utilities.rb` 中定义帮助函数，解耦测试和具体实现。附加题：把这些帮助方法放到不同的文件和模块中，然后再引入相应的模块。
 
 <div class="navigation">
   <a class="prev_page" href="chapter7.html">&laquo; 第七章 用户注册</a>
   <a class="next_page" href="chapter9.html">第九章 更新、显示和删除用户 &raquo;</a>
 </div>
 
-1. 另外一个常见的 session 处理方式是，在一定时间之后失效。这种方式特别适合包含敏感信心的网站，例如银行和交易账户。
+1. 另外一个常见的 session 处理方式是，在一定时间之后失效。这种方式特别适合包含敏感信息的网站，例如银行和交易账户。
 2. 图片来自 <http://www.flickr.com/photos/hermanusbackpackers/3343254977/>
 3. 我选择这么生成记忆权标是因为看了 Railscasts 第 274 集《[Remember Me & Reset Password](http://railscasts.com/episodes/274-remember-me-reset-password)》。
 4. Active Record 支持的其他回调函数[在 Rails 指南中](http://guides.rubyonrails.org/active_record_validations_callbacks.html#callbacks-overview)有介绍。
 5. 其实这两种方式是完全等效的，`attr_accessor` 会自动创建取值和设定方法。
-6. 一般来说，这句话的意思是把初始值为 `nil` 的变量附上了是新值，不过 `||=` 也会把初始值为 `false` 的变量附上新值。
+6. 一般来说，这句话的意思是把初始值为 `nil` 的变量附上了新值，不过 `||=` 也会把初始值为 `false` 的变量附上新值。
 7. 这也是一种备忘（memoization），详情参见[旁注 6.3](chapter6.html#sec-6-3)。
-8. 浏览器其实并不能发送 `DELETE` 请求，Rails 是通过 JavaScript 伪造的。
+8. 浏览器其实并不能发送 `DELETE` 请求，Rails 是通过 JavaScript 模仿的。
