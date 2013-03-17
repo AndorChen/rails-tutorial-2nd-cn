@@ -69,7 +69,7 @@ end
 
 要让测试通过，我们就要编写编辑用户页面的视图，如代码 9.3 所示。仔细观察一下视图代码，它和代码 7.17 中创建新用户页面的视图代码很相似，这就暗示我们要进行重构，把重复的代码移入局部视图了。重构的过程会留作练习，详情参见 [9.6 节](#sec-9-6)。
 
-**代码 9.6** 编辑用户页面的视图<br />`app/views/users/edit.html.erb`
+**代码 9.3** 编辑用户页面的视图<br />`app/views/users/edit.html.erb`
 
 ```erb
 <% provide(:title, "Edit user") %>
@@ -1013,7 +1013,7 @@ $ bundle exec rspec spec/
 
 在本小节中，我们要为应用程序添加更多的用户。如果要让用户列表看上去像个列表，我们可以在浏览器中访问注册页面，然后一个一个地注册用户，不过还有更好的方法，让 Ruby 和 Rake 为我们创建用户。
 
-首先，我们要在 `Gemfile` 中加入 `faker` gem（如代码 9.29 所示），使用这个 gem，我们可以使用办真实的名字和 Email 地址创建示例用户。
+首先，我们要在 `Gemfile` 中加入 `faker` gem（如代码 9.29 所示），使用这个 gem，我们可以使用半真实的名字和 Email 地址创建示例用户。
 
 **代码 9.29** 把 `faker` 加入 `Gemfile`
 
@@ -1550,7 +1550,7 @@ describe "User pages" do
 
         it { should have_link('delete', href: user_path(User.first)) }
         it "should be able to delete another user" do
-          expect { click_link('delete') }.to change(User, :count).by(-1) }
+          expect { click_link('delete') }.to change(User, :count).by(-1)
         end
         it { should_not have_link('delete', href: user_path(admin)) }
       end
