@@ -81,14 +81,14 @@ $ rails generate model Relationship follower_id:integer followed_id:integer
 class CreateRelationships < ActiveRecord::Migration
   def change
     create table :relationships do |t|
-      t.integer :follower id
-      t.integer :followed id
+      t.integer :follower_id
+      t.integer :followed_id
       t.timestamps
   end
 
-  add_index :relationships, :follower id
-  add_index :relationships, :followed id
-  add_index :relationships, [:follower id, :followed id], unique: true
+  add_index :relationships, :follower_id
+  add_index :relationships, :followed_id
+  add_index :relationships, [:follower_id, :followed_id], unique: true
   end
 end
 ```
@@ -96,7 +96,7 @@ end
 在代码 11.1 中，我们还设置了一个组合索引（composite index），其目的是确保 (`follower_id, followed_id`) 组合是唯一的，这样用户就无法多次关注同一个用户了 (可以和代码 6.22 中为保持 Email 地址唯一的 index 做比较一下)：
 
 ```ruby
-add_index :relationships, [:follower id, :followed id], unique: true
+add_index :relationships, [:follower_id, :followed_id], unique: true
 ```
 
 从 [11.1.4 节](#sec-11-1-4)开始，我们会发现，在用户界面中这样的事情是不会发生的，但是添加了组合索引后，如果用户试图二次关注时，程序会抛出异常（例如，使用像 `curl` 这样的命令行程序）。我们也可以在 Relationship 模型中添加唯一性数据验证，但因为每次尝试创建一个重复关系时都会触发错误，所以这个组合索引足以满足我们的需求了。
@@ -133,7 +133,7 @@ user.relationships.build(followed_id: ...)
 require 'spec helper' describe Relationship do
   let(:follower) { FactoryGirl.create(:user) }
   let(:followed) { FactoryGirl.create(:user) }
-  let(:relationship) { follower.relationships.build(followed id: followed.id) }
+  let(:relationship) { follower.relationships.build(followed_id: followed.id) }
 
   subject { relationship }
   it { should be_valid }
@@ -141,7 +141,7 @@ require 'spec helper' describe Relationship do
   describe "accessible attributes" do
     it "should not allow access to follower id" do
       expect do
-        Relationship.new(follower id: follower.id)
+        Relationship.new(follower_id: follower.id)
       end.should raise_error(ActiveModel::MassAssignmentSecurity::Error)
     end
   end
@@ -232,7 +232,7 @@ class Relationship < ActiveRecord::Base
   attr_accessible :followed_id
 
   belongs_to :follower, class_name: "User"
-  belongs_to :followed,class_name: "User"
+  belongs_to :followed, class_name: "User"
 end
 ```
 
@@ -255,7 +255,7 @@ describe Relationship do .
   .
   .
   describe "when followed id is not present" do
-    before { relationship.followed id = nil }
+    before { relationship.followed_id = nil }
     it { should not be valid }
   end
 
@@ -269,7 +269,8 @@ end
 **列表 11.8** 添加 Relationship 模型数据验证<br />`app/models/relationship.rb`
 
 ```ruby
-class Relationship < ActiveRecord::Base   attr accessible :followed id
+class Relationship < ActiveRecord::Base
+  attr accessible :followed_id
 
   belongs_to :follower, class_name: "User"
   belongs_to :followed, class_name: "User"
@@ -467,8 +468,8 @@ describe User do
   .
   .
   it { should respond_to(:relationships) }
-  it { should respond_to(:followed users) }
-  it { should respond_to(:reverse relationships) }
+  it { should respond_to(:followed_users) }
+  it { should respond_to(:reverse_relationships) }
   it { should respond_to(:followers) }
   .
   .
@@ -477,11 +478,11 @@ describe User do
   describe "following" do .
     .
     .
-    it { should be following(other user) }
-    its(:followed users) { should include(other user) }
+    it { should be following(other_user) }
+    its(:followed_users) { should include(other_user) }
 
     describe "followed user" do
-      subject { other user }
+      subject { other_user }
     its(:followers) { should include(@user) }
     end
     .
@@ -519,10 +520,10 @@ class User < ActiveRecord::Base
   .
   .
   .
-  has many :reverse relationships, foreign key: "followed id",
+  has_many :reverse_relationships, foreign_key: "followed_id",
     classname: "Relationship",
     dependent: :destroy
-  has many :followers, through: :reverse relationships, source: :follower
+  has_many :followers, through: :reverse_relationships, source: :follower
   .
   .
   .
