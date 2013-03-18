@@ -3,7 +3,7 @@ layout: chapter
 title: 第九章 更新、显示和删除用户
 ---
 
-本章我们要完成[表格 7.1](chapter7.html#table-7-1)所示的用户资源，添加 `edit`、`update`、`index` 和 `destroy` 动作。首先我们要实现更新用户个人资料的功能，实现这样的功能自然要依靠安全验证系统（基于[第八章](chapter8.html)中实现的权限限制））。然后要创建一个页面列出所有的用户（也需要权限限制），期间会介绍样本数据和分页功能。最后，我们还要实现删除用户的功能，从数据库中删除用户记录。我们不会为所有用户都提供这种强大的权限，而是会创建管理员，授权他们来删除用户。
+本章我们要完成[表格 7.1](chapter7.html#table-7-1)所示的Users 资源，添加 `edit`、`update`、`index` 和 `destroy` 动作。首先我们要实现更新用户个人资料的功能，实现这样的功能自然要依靠安全验证系统（基于[第八章](chapter8.html)中实现的权限限制））。然后要创建一个页面列出所有的用户（也需要权限限制），期间会介绍示例数据和分页功能。最后，我们还要实现删除用户的功能，从数据库中删除用户记录。我们不会为所有用户都提供这种强大的权限，而是会创建管理员，授权他们来删除用户。
 
 在开始之前，我们要新建 `updating-users` 分支：
 
@@ -17,7 +17,7 @@ $ git checkout -b updating-users
 
 <h3 id="sec-9-1-1">9.1.1 编辑表单</h3>
 
-我们先来创建编辑表单，其构思图如图 9.1 所示。<sup>[1](#fn-1)</sup>和之前一样，我们要先编写测试。注意构思图中修改 Gravatar 头像的链接，如果你浏览过 Gravatar 的网站，可能就知道上传和编辑头衔的地址是 http://gravatar.com/emails，我们就来测试编辑页面中有没有一个链接指向了这个地址。<sup>[2](#fn-2)</sup>
+我们先来创建编辑表单，其构思图如图 9.1 所示。<sup>[1](#fn-1)</sup>和之前一样，我们要先编写测试。注意构思图中修改 Gravatar 头像的链接，如果你浏览过 Gravatar 的网站，可能就知道上传和编辑头像的地址是 http://gravatar.com/emails，我们就来测试编辑页面中有没有一个链接指向了这个地址。<sup>[2](#fn-2)</sup>
 
 ![edit_user_mockup_bootstrap](assets/images/figures/edit_user_mockup_bootstrap.png)
 
@@ -67,7 +67,7 @@ class UsersController < ApplicationController
 end
 ```
 
-要让测试通过，我们就要编写编辑用户页面的视图，如代码 9.3 所示。仔细观察一下视图代码，它和代码 7.17 中创建新用户页面的视图代码很相似，这就暗示我们要进行重构，把重复的代码移入局部视图了。重构的过程会留作练习，详情参见 [9.6 节](#sec-9-6)。
+要让测试通过，我们就要编写编辑用户页面的视图，如代码 9.3 所示。仔细观察一下视图代码，它和代码 7.17 中创建新用户页面的视图代码很相似，这就暗示我们要进行重构，把重复的代码移入局部视图。重构会留作练习，详情参见 [9.6 节](#sec-9-6)。
 
 **代码 9.3** 编辑用户页面的视图<br />`app/views/users/edit.html.erb`
 
@@ -134,7 +134,7 @@ $ bundle exec rspec spec/requests/user_pages_spec.rb -e "edit page"
 <input name="_method" type="hidden" value="put" />
 ```
 
-因为浏览器本身并不支持发送 `PUT` 请求（[表格 7.1](chapter7.html#table-7-1)中列出的 REST 结构要用），所以 Rails 就在 `POST` 请求中使用这个隐藏字段伪造了一个 `PUT` 请求。<sup>[3](#fn-3)</sup>
+因为浏览器本身并不支持发送 `PUT` 请求（[表格 7.1](chapter7.html#table-7-1)中列出的 REST 动作要用），所以 Rails 就在 `POST` 请求中使用这个隐藏字段伪造了一个 `PUT` 请求。<sup>[3](#fn-3)</sup>
 
 还有一个细节需要注意一下，代码 9.3 和代码 7.17 都使用了相同的 `form_for(@user)` 来构建表单，那么 Rails 是怎么知道创建新用户要发送 `POST` 请求，而编辑用户时要发送 `PUT` 请求的呢？这个问题的答案是，通过 Active Record 提供的 `new_record?` 方法可以检测用户是新创建的还是已经存在于数据库中的：
 
@@ -148,7 +148,7 @@ $ rails console
 
 所以在使用 `form_for(@user)` 构建表单时，如果 `@user.new_record?` 返回 `true` 则发送 `POST` 请求，否则就发送 `PUT` 请求。
 
-最后，我们还要在导航中添加一个指向编辑用户页面的链接（“设置（Settings）”）。因为只有登录之后才会显示这个用户，所以对“设置”链接的测试要和其他的身份验证测试放在一起，如代码 9.5 所示。（如果能再测试一下没登录时不会显示“设置”链接就更完美了，这会留作练习，参见 [9.6 节](#sec-9-6)。）
+最后，我们还要在导航中添加一个指向编辑用户页面的链接（“设置（Settings）”）。因为只有登录之后才会显示这个页面，所以对“设置”链接的测试要和其他的身份验证测试放在一起，如代码 9.5 所示。（如果能再测试一下没登录时不会显示“设置”链接就更完美了，这会留作练习，参见 [9.6 节](#sec-9-6)。）
 
 **代码 9.5** 添加检测“设置”链接的测试<br />`spec/requests/authentication_pages_spec.rb`
 
@@ -176,7 +176,7 @@ describe "Authentication" do
 end
 ```
 
-为了简化，代码 9.5 中使用 `sing_in` 帮助方法，这个方法的作用是访问登录页面，提交合法的表单数据，如代码 9.6 所示。
+为了简化，代码 9.5 中使用 `sign_in` 帮助方法，这个方法的作用是访问登录页面，提交合法的表单数据，如代码 9.6 所示。
 
 **代码 9.6** 用户登录帮助方法<br />`spec/support/utilities.rb`
 
@@ -249,7 +249,7 @@ cookies[:remember_token] = user.remember_token
 
 <h3 id="sec-9-1-2">9.1.2 编辑失败</h3>
 
-本小节我们要处理编辑失败的情况，让代码 9.1 中对错误提示信息的测试通过。我们要在 Users 控制的 `update` 动作中使用 `update_attributes` 方法，传入提交的 `params` Hash，更新用户记录，如代码 9.8 所示。如果提交了不合法的数据，更新操作会返回 `false`，交由 `else` 分支处理，重新渲染编辑用户页面。我们之前用过类似的处理方式，代码结构和第一个版本的 `create` 动作类似（参见代码 7.21）。
+本小节我们要处理编辑失败的情况，让代码 9.1 中对错误提示信息的测试通过。我们要在 Users 控制器的 `update` 动作中使用 `update_attributes` 方法，传入提交的 `params` Hash，更新用户记录，如代码 9.8 所示。如果提交了不合法的数据，更新操作会返回 `false`，交由 `else` 分支处理，重新渲染编辑用户页面。我们之前用过类似的处理方式，代码结构和第一个版本的 `create` 动作类似（参见代码 7.21）。
 
 **代码 9.8** 还不完整的 `update` 动作<br />`app/controllers/users_controller.rb`
 
@@ -388,7 +388,7 @@ $ bundle exec rspec spec/
 
 <h3 id="sec-9-2-1">9.2.1 必须先登录</h3>
 
-因为对 `edit` 和 `update` 动作所做的安全限制是一样的，所以我们就在同一个 RSpec `describe` 块中进行测试。我们从要求登录开启，测试代码要检测未登录的用户视图访问这两个动作时是否转向了登录页面，如代码 9.11 所示。
+因为对 `edit` 和 `update` 动作所做的安全限制是一样的，所以我们就在同一个 RSpec `describe` 块中进行测试。我们从要求登录开始，测试代码要检测未登录的用户视图访问这两个动作时是否转向了登录页面，如代码 9.11 所示。
 
 **代码 9.11** 测试 `edit` 和 `update` 动作是否处于被保护状态<br />`spec/requests/authentication_pages_spec.rb`
 
@@ -735,7 +735,7 @@ class UsersController < ApplicationController
 end
 ```
 
-实现转向操作，要在 Sessions 控制器的 `create` 动作中加入 `redirect_back_or` 方法，在用户登录后转到适当的页面，如代码 9.20 所示。如果存储了之前请求的地址，`redirect_back_or` 方法就会转向这个地址，否则会转向参数中指定的地址。
+实现转向操作，要在 Sessions 控制器的 `create` 动作中加入 `redirect_back_or` 方法，用户登录后转到适当的页面，如代码 9.20 所示。如果存储了之前请求的地址，`redirect_back_or` 方法就会转向这个地址，否则会转向参数中指定的地址。
 
 **代码 9.20** 加入友好转向后的 `create` 动作<br />`app/controllers/sessions_controller.rb`
 
@@ -774,7 +774,7 @@ session[:return_to] || default
 $ bundle exec rspec spec/
 ```
 
-<h2 id="sec-9-3">9.3 列出所用用户</h2>
+<h2 id="sec-9-3">9.3 列出所有用户</h2>
 
 本节我们要添加计划中的倒数第二个用户动作，`index`。`index` 动作不会显示某一个用户，而是显示所有的用户。在这个过程中，我们要学习如何在数据库中生成示例用户数据，以及如何分页显示用户列表，显示任意数量的用户。用户列表、分页链接和“所有用户（Users）”导航链接的构思图如图 9.7 所示。<sup>[5](#fn-5)</sup>在 [9.4 节](#sec-9-4) 中，我们还会在用户列表中添加删除链接，这样就可以删除有问题的用户了。
 
@@ -1013,7 +1013,7 @@ $ bundle exec rspec spec/
 
 在本小节中，我们要为应用程序添加更多的用户。如果要让用户列表看上去像个列表，我们可以在浏览器中访问注册页面，然后一个一个地注册用户，不过还有更好的方法，让 Ruby 和 Rake 为我们创建用户。
 
-首先，我们要在 `Gemfile` 中加入 `faker` gem（如代码 9.29 所示），使用这个 gem，我们可以使用半真实的名字和 Email 地址创建示例用户。
+首先，我们要在 `Gemfile` 中加入 `faker`（如代码 9.29 所示），使用这个 gem，我们可以使用半真实的名字和 Email 地址创建示例用户。
 
 **代码 9.29** 把 `faker` 加入 `Gemfile`
 
@@ -1035,7 +1035,7 @@ gem 'faker', '1.0.1'
 $ bundle install
 ```
 
-接下来我们要添加一个 Rake 任务来创建示例用户。这个 Rake 任务保存在 `lib/tasks` 文件夹中，而且在 `:db` 命名空间中定义，如代码 9.30 所示。（代码中涉及到一些高级知识，现在不必深入了解。）
+接下来我们要添加一个 Rake 任务创建示例用户。这个 Rake 任务保存在 `lib/tasks` 文件夹中，而且在 `:db` 命名空间中定义，如代码 9.30 所示。（代码中涉及到一些高级知识，现在不必深入了解。）
 
 **代码 9.30** 在数据库中生成示例用户的 Rake 任务<br />`lib/tasks/sample_data.rake`
 
@@ -1084,7 +1084,7 @@ $ bundle exec rake db:test:prepare
 
 <h3 id="sec-9-3-3">9.3.3 分页</h3>
 
-现在，当初的用户不再孤单单了，但是又出现了新的问题：用户太多，全在一个页面中显示。现在的用户数量是 100 个，算是多的了，在真实的网站中，这个数量可能是以千计的。为了避免在一页中显示过多的用户，我们可以使用分页功能，一页只显示 30 个用户。
+现在，当初的用户不再孤单单了，但是又出现了新的问题：用户太多，全在一个页面中显示。现在的用户数量是 100 个，算是少的了，在真实的网站中，这个数量可能是以千计的。为了避免在一页中显示过多的用户，我们可以使用分页功能，一页只显示 30 个用户。
 
 在 Rails 中有很多实现分页的方法，我们要使用其中一个最简单也最完善的，叫做 will_paginate。我们要使用 `will_paginate` 和 `bootstrap-will_paginate` 这两个 gem，`bootstrap-will_paginate` 的作用是设置 will_paginate 使用 Bootstrap 中的分页样式。修改后的 `Gemfile` 如代码 9.31 所示。
 
@@ -1114,7 +1114,7 @@ $ bundle install
 
 因为 `will_paginate` 这个 gem 使用的范围很广，所以我们不必做大量的测试，只需简单的测试一下就可以了。首先我们要检测页面中是否包含一个 CSS class 为 `pagination` 的 `div` 元素，这个元素就是由 will_paginate 生成的。然后，我们要检测分页的第一页中是否显示有正确的用户列表。在测试中我们要用到 `paginate` 方法，稍后会做介绍。
 
-和之前一样，我们要使用 Factory Girl 生成用户，但是我们立马就会遇到一个问题：因为用户的 Email 地址必须是唯一的，那么我们就要手动生成 30 个用户，这可是一件很费事的活儿。而且，在测试用户列表时，用户的名字最好也不一样。幸好 Factory Girl 料事如神，提供了 `sequence` 方法来解决这种问题。在代码 7.8 中，我们是直接出入名字和 Email 地址来创建预构件的：
+和之前一样，我们要使用 Factory Girl 生成用户，但是我们立马就会遇到一个问题：因为用户的 Email 地址必须是唯一的，那么我们就要手动生成 30 个用户，这可是一件很费事的活儿。而且，在测试用户列表时，用户的名字最好也不一样。幸好 Factory Girl 料事如神，提供了 `sequence` 方法来解决这种问题。在代码 7.8 中，我们是直接输入名字和 Email 地址来创建预构件的：
 
 ```ruby
 FactoryGirl.define do
@@ -1161,7 +1161,7 @@ before(:all) { 30.times { FactoryGirl.create(:user) } }
 after(:all) { User.delete_all }
 ```
 
-注意，上述代码我们使用 `before(:all)` 确保在块中的所有执行之前，一次性创建 30 个示例用户。这是对速度做的优化，因为在某些系统中每个测试都创建 30 个用户会很慢。对应的，我们调用 `after(:all)` 方法，在测试结束后一次性删除所有的用户。
+注意，上述代码使用 `before(:all)` 确保在块中所有测试执行之前，一次性创建 30 个示例用户。这是对速度做的优化，因为在某些系统中每个测试都创建 30 个用户会很慢。对应的，我们调用 `after(:all)` 方法，在测试结束后一次性删除所有的用户。
 
 代码 9.33 检测了页面中是否包含正确的 `div` 元素，以及是否显示了正确的用户。注意，我们把代码 9.23 中的 `User.all` 换成了 `User.paginate(page: 1)`，这样我们才能从数据库中取回第一页中要显示的用户。还要注意一下，代码 9.33 中使用的 `before(:each)` 方法是和 `before(:all)` 方法相反的操作。
 
@@ -1199,7 +1199,7 @@ describe "User pages" do
 end
 ```
 
-要实现分页，我们要在用户列表页面的视图中加入一些代码，告诉 Rails 要分页显示用户，而且要把 `index` 动作中的 `User.all` 换成知道如何分页的方法。我们先在视图中加入特殊的 `will_paginate` 方法，如代码 9.34 所示。稍后我们看到为什么要在用户列表的前后都加入分页代码。
+要实现分页，我们要在用户列表页面的视图中加入一些代码，告诉 Rails 要分页显示用户，而且要把 `index` 动作中的 `User.all` 换成知道如何分页的方法。我们先在视图中加入特殊的 `will_paginate` 方法，如代码 9.34 所示。稍后我们会看到为什么要在用户列表的前后都加入分页代码。
 
 **代码 9.34** 在用户列表视图中加入分页<br />`app/views/users/index.html.erb`
 
@@ -1329,7 +1329,7 @@ $ bundle exec rspec spec/
 
 <h2 id="sec-9-4">9.4 删除用户</h2>
 
-至此，用户索引也完成了。符合 REST 架构的用户资源就只剩下最后一个 `destroy` 动作了。本节，我们先添加删除用户的链接（构思图如图 9.12 所示），然后在编写适当的 `destroy` 动作代码完成删除操作。不过，首先我们要先创建管理员级别的用户，并授权这些用户进行删除操作。
+至此，用户索引也完成了。符合 REST 架构的Users 资源就只剩下最后一个 `destroy` 动作了。本节，我们先添加删除用户的链接（构思图如图 9.12 所示），然后再编写适当的 `destroy` 动作代码完成删除操作。不过，首先我们要先创建管理员级别的用户，并授权这些用户进行删除操作。
 
 ![user_index_delete_links_mockup_bootstrap](assets/images/figures/user_index_delete_links_mockup_bootstrap.png)
 
@@ -1337,7 +1337,7 @@ $ bundle exec rspec spec/
 
 <h3 id="sec-9-4-1">9.4.1 管理员</h3>
 
-我们要通过 User 模型中一个名为 `admin` 的属性来判断用户是否具有管理员的权限。`admin` 属性的类型为布尔值，Active Record 会自动生成一个 `admin?` 方法，返回布尔值，判断用户是否为管理员。针对 `admin` 属性的测试如代码 9.39 所示。
+我们要通过 User 模型中一个名为 `admin` 的属性来判断用户是否具有管理员权限。`admin` 属性的类型为布尔值，Active Record 会自动生成一个 `admin?` 方法，返回布尔值，判断用户是否为管理员。针对 `admin` 属性的测试如代码 9.39 所示。
 
 **代码 9.39** 测试 `admin` 属性<br />`spec/models/user_spec.rb`
 
@@ -1373,7 +1373,7 @@ end
 $ rails generate migration add_admin_to_users admin:boolean
 ```
 
-这个名声生成的迁移文件（如代码 9.40 所示）会在 users 表中添加 `admin` 这一列，得到的数据模型如图 9.13 所示。
+这个命令生成的迁移文件（如代码 9.40 所示）会在 users 表中添加 `admin` 这一列，得到的数据模型如图 9.13 所示。
 
 ![user_model_admin_31](assets/images/figures/user_model_admin_31.png)
 
@@ -1389,7 +1389,7 @@ class AddAdminToUsers < ActiveRecord::Migration
 end
 ```
 
-注意，在代码 9.40 中，我们为 `add_column` 方法指定了 `default: false` 参数，添加了这个参数用户默认情况下就不是管理员。（如果没有指定 `default: false`，`admin` 的默认值是 `nil`，也是“假值”，所以严格来说，这个参数不是必须的。不过，指定这个参数，可以更明确地向 Rails 以及代码的阅读者表明这段代码的意图。）
+注意，在代码 9.40 中，我们为 `add_column` 方法指定了 `default: false` 参数，添加这个参数后用户默认情况下就不是管理员。（如果没有指定 `default: false`，`admin` 的默认值是 `nil`，也是“假值”，所以严格来说，这个参数不是必须的。不过，指定这个参数，可以更明确地向 Rails 以及代码的阅读者表明这段代码的意图。）
 
 然后，我们要在“开发数据库”中执行迁移操作，还要准备好“测试数据库”：
 
@@ -1577,9 +1577,9 @@ end
 
 图 9.14：显示有删除用户链接的用户列表页面（[/users](http://localhost:3000/users)）
 
-因为浏览器不能发送 `DELETE` 请求，因此 Rails 通过 JavaScript 进行了模拟。也就是说，如果用户禁止了 JavaScript，那么删除用户的链接就不可用了。如果你必须要支持没有启用 JavaScript 的浏览器，你可以使用一个发送 `POST` 请求的表单来模拟 `DELETE` 请求，这样即使浏览器的 JavaScript 被禁用了，删除用户的链接还是可用的，更多细节请观看 RailsCasts 第 77 集《[Destroy Without JavaScript](http://railscasts.com/episodes/77-destroy-without-javascript)》。
+浏览器不能发送 `DELETE` 请求，Rails 通过 JavaScript 进行模拟的。也就是说，如果用户禁用了 JavaScript，那么删除用户的链接就不可用了。如果必须要支持没有启用 JavaScript 的浏览器，你可以使用一个发送 `POST` 请求的表单来模拟 `DELETE` 请求，这样即使浏览器的 JavaScript 被禁用了，删除用户的链接还是可用的，更多细节请观看 RailsCasts 第 77 集《[Destroy Without JavaScript](http://railscasts.com/episodes/77-destroy-without-javascript)》。
 
-若要删除用户的链接起作用，我们要定义 `destroy` 动作（参见[表格 7.1](chapter7.html#table-7-1)）。在 `destroy` 动作中，先找到要删除的用户，使用 Active Record 提供的 `destroy` 方法删除这个用户，然后在转向用户列表页面，如代码 9.46 所示。
+若要删除用户的链接起作用，我们要定义 `destroy` 动作（参见[表格 7.1](chapter7.html#table-7-1)）。在 `destroy` 动作中，先找到要删除的用户，使用 Active Record 提供的 `destroy` 方法删除这个用户，然后再转向用户列表页面，如代码 9.46 所示。
 
 **代码 9.46** 加入 `destroy` 动作<br />`app/controllers/users_controller.rb`
 
@@ -1607,7 +1607,7 @@ end
 User.find(params[:id]).destroy
 ```
 
-理论上，只有管理员才能看到删除用户链接，所以只有管理员才能删除用户。但实际上，还是存在一个严重的安全隐患：只要攻击者有足够的经验，就可以在命令行中发送 `DELETE` 请求，删除网站中的用户。为了保证网站的安全，我们还要限制对 `destroy` 动作的访问，因此我们在测试中不仅要确保只有管理员才能删除用户，还要保证其他用户不能执行删除操作，如代码 9.47 所示。注意，和代码 9.11 中的 `put` 方法类似，在这段代码中我们使用 `delete` 方法向指定的地址（`user_path`，参见[表格 7.1](chapter7.html#table-7-1)）发送了一个 `DELETE` 请求。
+理论上，只有管理员才能看到删除用户的链接，所以只有管理员才能删除用户。但实际上，还是存在一个严重的安全隐患：只要攻击者有足够的经验，就可以在命令行中发送 `DELETE` 请求，删除网站中的用户。为了保证网站的安全，我们还要限制对 `destroy` 动作的访问，因此我们在测试中不仅要确保只有管理员才能删除用户，还要保证其他用户不能执行删除操作，如代码 9.47 所示。注意，和代码 9.11 中的 `put` 方法类似，在这段代码中我们使用 `delete` 方法向指定的地址（`user_path`，参见[表格 7.1](chapter7.html#table-7-1)）发送了一个 `DELETE` 请求。
 
 **代码 9.47** 测试访问受限的 `destroy` 动作<br />`spec/requests/authentication_pages_spec.rb`
 
@@ -1671,7 +1671,7 @@ $ bundle exec rspec spec/
 
 我们用了好几章来介绍如何实现 Users 资源，在 [5.4 节](chapter5.html#sec-5-4)用户还不能注册，而现在不仅可以注册，还可以登录、退出、查看个人资料、修改设置，还能浏览网站中所有的用户列表，某些用户甚至可以删除其他的用户。
 
-本书剩下的内容会以这个 Users 资源为基础（以及相关的权限授权系统），在[第十章](chapter10.html)中为示例程序加入类似 Twitter 的微博功能，在[第十一章](chapter11.html)中实现被关注用户的状态时间线。最后这两张会介绍几个 Rails 中最为强大的功能，其中就包括通过 `has_many` 和 `has_many through` 实现的数据模型关联。
+本书剩下的内容会以这个 Users 资源为基础（以及相关的权限授权系统），在[第十章](chapter10.html)中为示例程序加入类似 Twitter 的微博功能，在[第十一章](chapter11.html)中实现关注用户的状态列表。最后这两章会介绍几个 Rails 中最为强大的功能，其中就包括通过 `has_many` 和 `has_many through` 实现的数据模型关联。
 
 在继续阅读之前，先把本章所做的改动合并到主分支：
 
@@ -1743,8 +1743,8 @@ end
 
 <h2 id="sec-9-6">9.6 练习</h2>
 
-1. 参照代码 10.8，编写一个测试确保 User 模型的 `admin` 属性是不可访问的。确保测试先是红色的，然后才会变绿。（提示：先要把 `admin` 加入可访问属性列表中。）
-2. 把代码 9.3 中修改 Gravatar 头像的链接（“change”），使链接在新窗口（或新标签）中打开。提示：搜索，你会发现一个很常用的方法，涉及到 `_blank` 的用法。
+1. 参照代码 10.8，编写一个，测试确保 User 模型的 `admin` 属性是不可访问的。确保测试先是红色的，然后才会变绿。（提示：先要把 `admin` 加入可访问属性列表中。）
+2. 把代码 9.3 中修改 Gravatar 头像的链接（“change”），使链接在新窗口（或新标签）中打开。提示：请搜索，你会发现一个很常用的方法，涉及到 `_blank` 的用法。
 3. 现在针对身份验证系统的测试会确保用户登录后能看到“Profile”和“Settings”等导航链接。增加一个测试，确保用户未登录时看不到这些导航链接。
 4. 在测试中尽量多的使用代码 9.6 中的 `sign_in` 帮助方法。
 5. 使用代码 9.50 中的代码重构 `new.html.erb` 和 `edit.html.erb` 中的表单。注意，你要明确的传入 `f` 这个表单变量，如代码 9.51 所示。你还要修改相应的测试，因为表单已经不完全一样了。仔细的查找修改前后表单的差异，据此修改测试。

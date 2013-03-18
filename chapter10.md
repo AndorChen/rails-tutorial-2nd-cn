@@ -17,7 +17,7 @@ $ git checkout -b user-microposts
 
 <h3 id="sec-10-1-1">10.1.1 基本模型</h3>
 
-Micropost 模型只需要两个属性：一个是 `content`，用来保存微博的内容；<sup>[2](#fn-2)</sup>另一个是 `user_id`，把当前微博和用户关联起来。我们要使用 `generate model` 命令生成所需的模型，这一点和创建用户模型时是一样的（参见代码 6.1）：
+Micropost 模型只需要两个属性：一个是 `content`，用来保存微博的内容；<sup>[2](#fn-2)</sup>另一个是 `user_id`，把微博和用户关联起来。我们要使用 `generate model` 命令生成所需的模型，这一点和创建用户模型时是一样的（参见代码 6.1）：
 
 ```sh
 $ rails generate model Micropost content:string user_id:integer
@@ -170,7 +170,7 @@ end
     </tr>
     <tr class="top_bar">
       <td class="align_left"><code>micropost.user</code></td>
-      <td class="align_left">返回该微博对用的用户对象</td>
+      <td class="align_left">返回该微博对应的用户对象</td>
     </tr>
     <tr>
       <td class="align_left"><code>user.microposts</code></td>
@@ -805,7 +805,7 @@ user.microposts.count
 </div>
 ```
 
-微博列表稍后分析，现在先看看其他部分。在这段代码中，使用 `if @user.microposts.any?`（在代码 7.23 中见过类似的用法）的作用是，如果用户没有发布微博的话，就不会显示后面的列表。
+微博列表稍后分析，现在先看看其他部分。在这段代码中，`if @user.microposts.any?`（在代码 7.23 中见过类似的用法）的作用是，如果用户没有发布微博的话，就不会显示后面的列表。
 
 还要注意一下，在代码 10.20 中我们也加入了微博的分页显示功能：
 
@@ -1109,7 +1109,7 @@ class MicropostsController < ApplicationController
 end
 ```
 
-注意，我们没有明确指定事前过滤器要限制的动作有哪几个，因为默认情况下仅有的两个动作都会被限制。如果我们要加入第三个动作，例如 `index` 动作，未登录的用户也可以访问，那么我们就要明确的指定要限制的动作了：
+注意，我们没有明确指定事前过滤器要限制的动作有哪几个，因为默认情况下仅有的两个动作都会被限制。如果我们要加入第三个动作，例如 `index` 动作，未登录的用户可以访问，那么我们就要明确的指定要限制的动作了：
 
 ```ruby
 class MicropostsController < ApplicationController
@@ -1264,7 +1264,7 @@ end
 
 和代码 9.25 一样，代码 10.32 使用了代码 7.29 中定义的 `gravatar_for` 帮助方法。
 
-注意，和用户资料页面的侧边栏类似（参见代码 10.20），代码 10.32 中的用户信息也显示了用户发布的微博数量。不过显示上有细微的差别，在用户资料页面的侧边栏中，“Microposts” 是作为标签使用的，所以“Microposts (1)”这样的用法是合理的。而在本例中，如果说“1 microposts”的话就有点不合语法了，所以我们调用了 `pluralize` 方法，显示成“1 microposts”，“2 microposts”等。
+注意，和用户资料页面的侧边栏类似（参见代码 10.20），代码 10.32 中的用户信息也显示了用户发布的微博数量。不过显示上有细微的差别，在用户资料页面的侧边栏中，“Microposts” 是作为标签使用的，所以“Microposts (1)”这样的用法是合理的。而在本例中，如果说“1 microposts”的话就有点不合语法了，所以我们调用了 `pluralize` 方法，显示成“1 micropost”，“2 microposts”等。
 
 下面我们来编写创建微博表单的局部视图，如代码 10.33 所示，和代码 7.17 中的注册表单是类似的。
 
@@ -1337,7 +1337,7 @@ end
 $ bundle exec rspec spec/requests/micropost_pages_spec.rb
 ```
 
-不过，User 视图的 request spec 测试却失败了，因为注册和编辑用户的表单使用的仍是旧的错误提示信息局部视图。要想修正这个错误，就要换用新的局部视图，如代码 10.36 和代码 10.37 所示。（注意：如果你加入了 [9.6 节](chapter9.html#sec-9-6)练习中的代码 9.50 和代码 9.51，那么要修改的代码有点不一样，需要做适当的修改。）
+不过，Users 资源相关视图的 request spec 测试却失败了，因为注册和编辑用户的表单使用的仍是旧的错误提示信息局部视图。要想修正这个错误，就要换用新的局部视图，如代码 10.36 和代码 10.37 所示。（注意：如果你加入了 [9.6 节](chapter9.html#sec-9-6)练习中的代码 9.50 和代码 9.51，那么要修改的代码有点不一样，需要做适当的修改。）
 
 **代码 10.36** 修改用户注册表单的错误提示信息局部视图<br />`app/views/users/new.html.erb`
 
@@ -1526,13 +1526,13 @@ describe "Static pages" do
 end
 ```
 
-代码 10.40 假设每个微博都有唯一的 CSS id，所以如下代码
+代码 10.40 假设显示的每篇微博都有唯一的 CSS id，所以如下代码
 
 ```ruby
 page.should have_selector("li##{item.id}", text: item.content)
 ```
 
-会为每个微博生成一个匹配器。（注意，`li##{item.id}` 中的第一个 `#` 是 Capybara 中的对应 CSS id 的句法，而第二个 `#` 则代表 Ruby 字符串插值的操作 `#{}` 的开始。）
+会为每个微博生成一个匹配器。（注意，`li##{item.id}` 中的第一个 `#` 是 Capybara 中的对应 CSS id 的句法，而第二个 `#` 则代表 Ruby 字符串插值操作 `#{}` 的开始。）
 
 要在示例程序中使用动态列表，我们可以在 `home` 动作中定义一个 `@feed_items` 实例变量，如代码 10.41 所示。然后再在首页中（参见代码 10.44）加入一个动态列表局部视图（参见代码 10.42）。（对分页的测试会留作练习，参见 [10.5 节](#sec-10-5)。）
 
@@ -1553,7 +1553,7 @@ class StaticPagesController < ApplicationController
 end
 ```
 
-**代码 10.42** 动态列表视图<br />`app/views/shared/_feed.html.erb`
+**代码 10.42** 动态列表局部视图<br />`app/views/shared/_feed.html.erb`
 
 ```erb
 <% if @feed_items.any? %>
@@ -1658,11 +1658,11 @@ $ bundle exec rspec spec/
 
 <h3 id="sec-10-3-4">10.3.4 删除微博</h3>
 
-我们要为 Microposts 资源实现的最后一个功能是删除微博。和删除用户类似（参见 [9.4.2 节](chapter9.html#sec-9-4-2)），删除微博也是通过“delete”链接实现的，构思图如图 10.16 所示。删除用户要限制只有管理员才能进行，而删除微博的链接只对微博的创建者可用。
+我们要为 Microposts 资源实现的最后一个功能是删除微博。和删除用户类似（参见 [9.4.2 节](chapter9.html#sec-9-4-2)），删除微博也是通过“delete”链接实现的，构思图如图 10.16 所示。删除用户要限制只有管理员才能进行，而删除微博的链接只对微博的发布者可用。
 
 ![micropost delete links mockup bootstrap](assets/images/figures/micropost_delete_links_mockup_bootstrap.png)
 
-图 10.16：显示有删除链接的临时 Feed 构思图
+图 10.16：显示有删除链接的临时动态列表构思图
 
 第一步，我们要在微博局部视图（代码 10.21）中加入删除链接，同时还要在动态列表项目的局部视图（代码 10.43）中加入类似的链接，结果如代码 10.46 和代码 10.47 所示。（这两个局部视图基本上是一样的，消除代码重复会留作练习，参见 [10.5 节](#sec-10-5)。）
 
@@ -1781,7 +1781,7 @@ redirect_to root_url unless current_user?(@micropost.user)
 
 图 10.17：删除了倒数第二篇微博后的首页
 
-加入了本节的代码后，我们的 Micropost 模型以及用户界面都已经完成了，测试组件也可以通过了：
+加入了本节的代码后，我们的 Micropost 模型以及用户界面就都完成了，测试组件也可以通过了：
 
 ```sh
 $ bundle exec rspec spec/
@@ -1817,7 +1817,7 @@ $ heroku run rake db:populate
 
 到目前为止，我们已经实现了很多功能，在现有功能的基础上我们还可以实现更多的功能，下面就是一些例子。
 
-1. 添加测试，检测侧边栏中微博的数量是否正确显示了，要包对含单复数的检查。
+1. 添加测试，检测侧边栏中微博的数量是否正确显示了，要包含对单复数的检查。
 
 2. 添加测试，检测微博的分页功能。
 
@@ -1840,7 +1840,7 @@ $ heroku run rake db:populate
 else
   do_something_else
 end</pre>
-  <p>Ruby 和其他很多语言（包括 C/C++，Perl，PHP 和 Java）一样，为你提供了一种更为简单的表达式来替换这种流程控制结构——三元操作符（之所以起了这个名字，是因为三元操作符涉及三个部分）：</p>
+  <p>Ruby 和其他很多语言一样（包括 C/C++，Perl，PHP 和 Java），提供了一种更为简单的表达式来替换这种流程控制结构——三元操作符（之所以起了这个名字，是因为三元操作符涉及三个部分）：</p>
   <pre>boolean? ? do_one_thing : do_something_else</pre>
   <p>三元操作符甚至可以用来替代赋值操作：</p>
   <pre>if boolean?
@@ -1889,11 +1889,11 @@ end
 
 1. 严格来说，我们在[第八章](chapter8.html)中是把 session 当做资源来处理的，不过 session 不会像 Users 和 Microposts 资源那样被存入数据库。
 2. `content` 属性是字符串（`string`）类型，不过我们曾在 [2.1.2 节](chapter2.html#sec-2-1-2)中简要介绍过，较长的文本应该使用 `text` 类型。
-3. 一开始我忘了复制微博属性，导致本书第一版中的这个测试有点问题。这里我们加入了安全检查，避免再犯相同的错误。感谢火眼金睛的读者 Jacob Turino 发现了这个错误，让我注意到了这个问题。
+3. 一开始我忘了复制微博的属性，导致本书第一版中的这个测试有点问题。这里我们加入了安全检查，避免再犯相同的错误。感谢火眼金睛的读者 Jacob Turino 发现了这个错误，让我注意到了这个问题。
 4. 例如自定义了头像的 5 个用户和 使用 Gravatar 默认头像的 1 个用户。
 5. 如果你对这个方法生成的 SQL 感兴趣，可以查看 `log/development.log` 文件。
 6. Faker 中的 lorem ipsum 文本是被设计为随机生成的，所以你的示例微博可能和我的不一样。
-7. 为了行为方便，代码 10.24 实际上包含了本章用到的所有 CSS。
+7. 为了行文方便，代码 10.24 实际上包含了本章用到的所有 CSS。
 8. 另外两个资源分别是 [7.2 节](chapter7.html#sec-7-2) 中的 Users 资源和 [8.1 节](chapter8.html#sec-8-1)中的 Sessions 资源。
 9. 我们在 [8.2.1 节](chapter8.html#sec-8-2-1)中介绍过，默认情况下帮助方法只能在视图中使用，因此要在控制器中使用 Sessions 帮助方法就要在 Application 控制器中加入代码 `include SessionHelper`。
 10. 我之所以在 [1.1.1 节](chapter1.html#sec-1-1-1)中推荐读者在读完本书后阅读一本纯介绍 Ruby 的书，就是为了学习使用类似 `include?` 这样的方法。

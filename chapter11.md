@@ -5,7 +5,7 @@ title: 第十一章 关注用户
 
 在这一章中，我们会在现有程序的基础上增加社交功能，允许用户关注（follow）或取消关注其他人，并在用户主页上显示其所关注用户的微博更新。我们还会创建两个页面用来显示关注的用户列表和粉丝列表。我们将会在 [11.1 节](#sec-11-1)学习如何构建用户之间的模型关系，随后在 [11.2 节](#sec-11-2)设计网页界面，同时还会介绍 Ajax。最后，我们会在 [11.3 节](#sec-11-3)实现一个完整的动态列表。
 
-这是本书最后一章，其中会包含了一些本教程中最具有挑战性的内容，为了实现动态列表，我们会使用一些 Ruby/SQL 小技巧。 通过这些例子，你会了解到 Rails 是如何处理更加复杂的数据模型的，而这些知识会在你日后开发其他应用时发挥作用。 为了帮助你平稳地从教程学习到独立开发过渡，在 [11.4 节](#sec-11-4)我们推荐了几个可以在已有微博核心基础上开发的额外功能，以及一些进阶资料的链接。
+这是本书最后一章，其中会包含了一些本教程中最具有挑战性的内容，为了实现动态列表，我们会使用一些 Ruby/SQL 小技巧。 通过这些例子，你会了解到 Rails 是如何处理更加复杂的数据模型的，而这些知识会在你日后开发其他应用时发挥作用。 为了帮助你平稳地从教程学习过渡到独立开发，在 [11.4 节](#sec-11-4)我们推荐了几个可以在已有微博核心基础上开发的额外功能，以及一些进阶资料的链接。
 
 和之前章节一样，Git 用户应该创建一个新的分支：
 
@@ -37,11 +37,11 @@ $ git checkout -b following-users
 
 <h2 id="sec-11-1">11.1 关系模型</h2>
 
-为了实现关注用户这一功能，第一步我们要做的是创建一个看上去并不是那么直观的数据模型。一开始我们可能会认为一个 `has_many` 的数据关系会满足我们的要求：一个用户可以关注多个用户，同时一个用户还能被多个用户关注。但实际上这种关系存在问题的，下面我们就来学习如何使用 `has_many through` 来解决这个问题。本节很多功能的实现初看起来都有点难以理解，你需要花一点时间思考，才能真正搞清楚这样做的原因。如果在某个地方卡住了，尝试着先往后读，然后再把本节读一遍，看一下刚才卡住的地方想明白了没。
+为了实现关注用户这一功能，第一步我们要做的是创建一个看上去并不是那么直观的数据模型。一开始我们可能会认为一个 `has_many` 的数据关系能满足我们的要求：一个用户可以关注多个用户，同时一个用户还能被多个用户关注。但实际上这种关系是存在问题的，下面我们就来学习如何使用 `has_many through` 来解决这个问题。本节很多功能的实现初看起来都有点难以理解，你需要花一点时间思考，才能真正搞清楚这样做的原因。如果在某个地方卡住了，尝试着先往后读，然后再把本节读一遍，看一下刚才卡住的地方想明白了没。
 
 <h3 id="sec-11-1-1">11.1.1 数据模型带来的问题以及解决方式</h3>
 
-构造数据模型的第一步，我们先来看一个典型的情况。假如一个用户关注了另外一个用户，比如 Calvin 关注了 Hobbes，也就是 Hobbes 被 Calvin 关注了，那么 Calvin 就是关注者（follower），而 Hobbes 则是被关注者( followed )。按照 Rails 默认的复数表示习惯， 我们称关注某一特定用户的用户集合为该用户的 followers，`user.followers` 就是这些用户组成的数组。不过，当我们颠倒一下顺序，上述关系则不成立了：默认情况下，所有被关注的用户称之为 followeds，这样说在英语语法上并不通顺恰当。我们可以称被关注者为 following，但这个词有些歧义：在英语里，"following" 指关注你的人，和我们想表达的恰恰相反。考虑到上述两种情况，尽管我们将使用“following”作为标签，如“50 following, 75 followers”, 但在数据模型中会使用“followed users”表示我们关注的用户集合，以及一个对应的 `user.followed_users` 数组。<sup>[2](#fn-2)</sup>
+构造数据模型的第一步，我们先来看一个典型的情况。假如一个用户关注了另外一个用户，比如 Calvin 关注了 Hobbes，也就是 Hobbes 被 Calvin 关注了，那么 Calvin 就是关注者（follower），而 Hobbes 则是被关注者( followed )。按照 Rails 默认的复数表示习惯， 我们称关注某一特定用户的用户集合为该用户的 followers，`user.followers` 就是这些用户组成的数组。不过，当我们颠倒一下顺序，上述关系则不成立了：默认情况下，所有被关注的用户称为 followeds，这样说在英语语法上并不通顺恰当。我们可以称被关注者为 following，但这个词有些歧义：在英语里，"following" 指关注你的人，和我们想表达的恰恰相反。考虑到上述两种情况，尽管我们将使用“following”作为标签，如“50 following, 75 followers”, 但在数据模型中会使用“followed users”表示我们关注的用户集合，以及一个对应的 `user.followed_users` 数组。<sup>[2](#fn-2)</sup>
 
 经过上述的讨论，我们会按照图 11.6 的方式构建被关注用户的模型，使用 `followed_users` 表实现一对多(`has_many`)关联。由于 `user.followed_users` 应该是一个用户对象组成的数组，所以 `followed_users` 表中的每一行应该对应一个用户，并且指定 `followed_id` 列，和其他用户建立关联。<sup>[3](#fn-3)</sup>除此之外，由于每一行均对应一个用户，所以我们还要在表中加入用户的其他属性，包括名字，密码等。
 
@@ -86,9 +86,9 @@ class CreateRelationships < ActiveRecord::Migration
       t.timestamps
   end
 
-  add index :relationships, :follower id
-  add index :relationships, :followed id
-  add index :relationships, [:follower id, :followed id], unique: true
+  add_index :relationships, :follower id
+  add_index :relationships, :followed id
+  add_index :relationships, [:follower id, :followed id], unique: true
   end
 end
 ```
@@ -96,7 +96,7 @@ end
 在代码 11.1 中，我们还设置了一个组合索引（composite index），其目的是确保 (`follower_id, followed_id`) 组合是唯一的，这样用户就无法多次关注同一个用户了 (可以和代码 6.22 中为保持 Email 地址唯一的 index 做比较一下)：
 
 ```ruby
-add index :relationships, [:follower id, :followed id], unique: true
+add_index :relationships, [:follower id, :followed id], unique: true
 ```
 
 从 [11.1.4 节](#sec-11-1-4)开始，我们会发现，在用户界面中这样的事情是不会发生的，但是添加了组合索引后，如果用户试图二次关注时，程序会抛出异常（例如，使用像 `curl` 这样的命令行程序）。我们也可以在 Relationship 模型中添加唯一性数据验证，但因为每次尝试创建一个重复关系时都会触发错误，所以这个组合索引足以满足我们的需求了。
@@ -166,7 +166,7 @@ describe User do .
 end
 ```
 
-此时，你可能会想在程序中中加入类似于 [10.1.3 节](chapter10.html#sec-10-1-3)中用到的代码，我们要添加的代码却是很像，但二者之间有一处很不一样：在 Micropost 模型中， 我们使用
+此时，你可能会想在程序中中加入类似于 [10.1.3 节](chapter10.html#sec-10-1-3)中用到的代码，我们要添加的代码确实很像，但二者之间有一处很不一样：在 Micropost 模型中， 我们使用
 
 ```ruby
 class Micropost < ActiveRecord::Base
@@ -223,7 +223,7 @@ describe Relationship do .
 end
 ```
 
-下面我们开始写程序的代码，`belongs_to` 关系的建立和之间一样。Rails 会通过 Symbol 获知外键的名字（例如，`:follower` 对应的外键是 `follower_id`，`:followed` 对应的外键是 `followed_id`），但 Followed 或 Follower 模型是不存在的，因此这里就要使用 `User` 这个类名， 如代码 11.6 所示。注意，与默认生成的 Relationship 模型不同，这里只有 `followed_id` 是可以访问的。
+下面我们开始写程序的代码，`belongs_to` 关系的建立和之前一样。Rails 会通过 Symbol 获知外键的名字（例如，`:follower` 对应的外键是 `follower_id`，`:followed` 对应的外键是 `followed_id`），但 Followed 或 Follower 模型是不存在的，因此这里就要使用 `User` 这个类名， 如代码 11.6 所示。注意，与默认生成的 Relationship 模型不同，这里只有 `followed_id` 是可以访问的。
 
 **代码 11.6** 为 Relationship 模型添加 `belongs_to` 关系<br />`spec/models/relationship_spec.rb`
 
@@ -282,7 +282,7 @@ end
 
 <h3 id="sec-11-1-4">11.1.4 被关注的用户</h3>
 
-下面到了 Relationship 关联关系的核心部分了：`followed_users` 和 `followers`。 我们首先从 `followed_users` 开始，测试如代码 11.9 所示。
+下面到了 Relationship 关联关系的核心部分了，获取 `followed_users` 和 `followers`。 我们首先从 `followed_users` 开始，测试如代码 11.9 所示。
 
 **列表 11.9** 测试 `user.followed_users` 属性<br />`spec/models/user_spec.rb`
 
@@ -304,7 +304,7 @@ end
 has_may :followeds, through: :relationships
 ```
 
-会使用 `relationships` 表中的 `followed_id` 列生成一个数组。但是，正如在 [11.1.1 节](#sec-11-1-1)中说过的，`user.followeds` 这种说法比较蹩脚，若使用“followed users”作为 “followed”的复数形式会好得多，那么被关注的用户数组就要写成 `user.followed_users` 了。Rails 当然会允许我们重写默认的设置，针对本例，我们可以使用 `:source` 参数告知 Rails `followed_users` 数组的来源是 `followed` 所代表的 id 集合。
+会使用 `relationships` 表中的 `followed_id` 列生成一个数组。但是，正如在 [11.1.1 节](#sec-11-1-1)中说过的，`user.followeds` 这种说法比较蹩脚，若使用“followed users”作为 “followed”的复数形式会好得多，那么被关注的用户数组就要写成 `user.followed_users` 了。Rails 当然会允许我们重写默认的设置，针对本例，我们可以使用 `:source` 参数，告知 Rails `followed_users` 数组的来源是 `followed` 所代表的 id 集合。
 
 **列表 11.10** 在 User 模型中添加 `followed_users` 关联<br />`app/models/user.rb`
 
@@ -321,7 +321,7 @@ class User < ActiveRecord::Base .
 end
 ```
 
-为了创建关注关联关系，我们将定义一个名为 `follow!` 的方法，这样我们就能使用 `user.follow!(other_user)` 这样的代码创建关注了。（`follow!` 方法应该与 `create!` 和 `save!` 方法一样，失败时抛出异常，所以我们在后面加上了感叹号。）对应地，我们还会添加一个 `following?` 布尔值方法，检查一个用户是否关注另一个用户。<sup>[7](#fn-7)</sup>代码 11.11 中的测试表明了我们希望如何使用这两个方法。
+为了创建关注关联关系，我们将定义一个名为 `follow!` 的方法，这样我们就能使用 `user.follow!(other_user)` 这样的代码创建关注了。（`follow!` 方法应该与 `create!` 和 `save!` 方法一样，失败时抛出异常，所以我们在后面加上了感叹号。）对应地，我们还会添加一个 `following?` 布尔值方法，检查一个用户是否关注了另一个用户。<sup>[7](#fn-7)</sup>代码 11.11 中的测试表明了我们希望如何使用这两个方法。
 
 **列表 11.11** 测试关注关系用到的方法<br />`spec/models/user_spec.rb`
 
@@ -545,7 +545,7 @@ has_many :reverse_relationships, foreign_key: "followed_id",
 has_many :followers, through: :reverse_relationships
 ```
 
-对 `:followers` 属性而言，Rails 会把“followers”转成单数形式，自动寻找名为 `follower_id` 的外键。在此我保留了 `:source` 参数是为了保持调与 ` has_many :followed_users` 关系之间的对应结构，你也可以选择去掉它。
+对 `:followers` 属性而言，Rails 会把“followers”转成单数形式，自动寻找名为 `follower_id` 的外键。在此我保留了 `:source` 参数是为了保持与 `has_many :followed_users` 关系之间结构上的对称，你也可以选择去掉它。
 
 加入代码 11.16 之后，关注者和粉丝之间的关联就完成了，所有的测试应该都可以通过了：
 
@@ -625,7 +625,7 @@ end
 
 我们的安排是随机的，让第 1 个用户关注第 3 到第 51 个用户，再让第 4 到第 41 个用户关注第 1 个用户。形成了这样的用户关注网，就足够用来开发程序的界面了。
 
-和之前一样，要想运行代码 11.17，旧的执行下面的数据库命令：
+和之前一样，要想运行代码 11.17，就要执行下面的数据库命令：
 
 ```sh
 $ bundle exec rake db:reset
@@ -643,7 +643,7 @@ $ bundle exec rake db:test:prepare
 
 图 11.10：数量统计局部视图的构思图
 
-图 11.10 中显示的数量统计包含了当前用户关注的用户和关注了该用户的粉丝数，二者又分别链接到了各自详细的用户列表页面。在[第五章](chapter5.html)中，我们使用 `#` 占位符代替真是的网址，因为那时我们还没怎么接触路由。现在，虽然在 [11.2.3 节](#sec-11-2-3)中才会创建所需的页面，不过我们可以先设置路由，如代码 11.18 所示。这段代码在 `resources` 块中使用了 `:member` 方法，以前没用过，你可以猜测一下这个方法的作用是什么。（注意，代码 11.18 是用来替换原来的 `resources :users` 的。）
+图 11.10 中显示的数量统计包含了当前用户关注的用户和关注了该用户的粉丝数，二者又分别链接到了各自详细的用户列表页面。在[第五章](chapter5.html)中，我们使用 `#` 占位符代替真实的网址，因为那时我们还没怎么接触路由。现在，虽然在 [11.2.3 节](#sec-11-2-3)中才会创建所需的页面，不过我们可以先设置路由，如代码 11.18 所示。这段代码在 `resources` 块中使用了 `:member` 方法，以前没用过，你可以猜测一下这个方法的作用是什么。（注意，代码 11.18 是用来替换原来的 `resources :users` 的。）
 
 **代码 11.18** 把 `following` 和 `folloers` 动作加入 Users 控制器的路由中<br />`config/routes.rb`
 
@@ -1102,7 +1102,7 @@ class UsersController < ApplicationController
 end
 ```
 
-注意，在这两个动作中都显式的调用了 `render` 方法，渲染一个名为 `show_follow` 的视图，接下来我们就来编写这个视图。这两个动作之所以使用同一个视图是因为，两种情况用到的 ERb 代码差不多，如代码 11.31 所示。
+注意，在这两个动作中都明确的调用了 `render` 方法，渲染一个名为 `show_follow` 的视图，接下来我们就来编写这个视图。这两个动作之所以使用同一个视图，是因为两种情况用到的 ERb 代码差不多，如代码 11.31 所示。
 
 **代码 11.31** 渲染关注列表和粉丝列表的 `show_follow` 视图<br />`app/views/users/show_follow.html.erb`
 
@@ -1151,7 +1151,7 @@ end
 
 <h3 id="sec-11-2-4">11.2.4 关注按钮的常规实现方式</h3>
 
-创建好了视图后，我们就要让关注和取消关注按钮起作用了。针对这两个按钮的测试用到了本教程中介绍的很多测试技术，也是对代码阅读能力的考察。请认真的阅读代码 11.32，直到你理解的测试的内容以及为什么这么做，再阅读后面的内容。（这段代码中有一处很小的安全疏漏，看一下你是否能发现。稍后我们会说明。）
+创建好了视图后，我们就要让关注和取消关注按钮起作用了。针对这两个按钮的测试用到了本教程中介绍的很多测试技术，也是对代码阅读能力的考察。请认真的阅读代码 11.32，直到你理解了测试的内容以及为什么这么做，再阅读后面的内容。（这段代码中有一处很小的安全疏漏，看一下你是否能发现。稍后我们会说明。）
 
 **代码 11.32** 测试关注和取消关注按钮<br />`spec/requests/user_pages_spec.rb`
 
@@ -1290,7 +1290,7 @@ class RelationshipsController < ApplicationController
 end
 ```
 
-从代码 11.34 我们能够看出为什么前面提到的安全疏漏不是什么大问题，因为如果未登录的用户直接访问了任意一个动作（例如，使用命令行工具），`current_user` 的值就是 `nil`，那么动作的第二行代码就会抛出异常，因此得到是错误提示，而不会破坏程序或数据。不过，最好还是不要依靠这样的处理方式，因此我们在前面才键入了额外的安全限制。
+从代码 11.34 我们能够看出为什么前面提到的安全疏漏不是什么大问题，因为如果未登录的用户直接访问了任意一个动作（例如，使用命令行工具），`current_user` 的值就是 `nil`，那么动作的第二行代码就会抛出异常，得到错误提示，而不会破坏程序或数据。不过，最好还是不要依靠这样的处理方式，因此我们在前面才加入了额外的安全措施。
 
 至此，整个关注和取消关注的功能就都实现了，任何一个用户都可以关注或取消关注另一个用户了，你可以在程序中点击相应的链接检查一下，也可以运行测试验证一下：
 
@@ -1335,7 +1335,7 @@ Ajax 可以解决这个疑问，通过向服务器发送异步请求，在不刷
 </form>
 ```
 
-从这段代码中我们可以看到，`form` 元素中设置了 `data-remote="true"` 熟悉那个，这个属性就是用来告知 Rails 该表单可以使用 JavaScript 处理的。Rails 3 遵从了“[非侵入式 JavaScript](http://railscasts.com/episodes/205-unobtrusive-javascript)”原则（unobtrusive JavaScript），没有在视图中写入整个 JavaScript 代码（在 Rails 之前的版本中却是这么做的），而是使用了一个简单的 HTML 属性。
+从这段代码中我们可以看到，`form` 元素中设置了 `data-remote="true"`，这个属性就是用来告知 Rails 该表单可以使用 JavaScript 处理的。Rails 3 遵从了“[非侵入式 JavaScript](http://railscasts.com/episodes/205-unobtrusive-javascript)”原则（unobtrusive JavaScript），没有在视图中写入整个 JavaScript 代码（在 Rails 之前的版本中却是这么做的），而是使用了一个简单的 HTML 属性。
 
 更新表单后，我们要让 Relationships 控制器可以响应那个 Ajax 请求。针对 Ajax 的测试有点复杂，完全可以写本书了，不过我们可以先从代码 11.37 下手。这段测试中使用了 `xhr` 方法（表示“XmlHttpRequest”）发送 Ajax 请求，`xhr` 方法和之前使用的 `get`、`post`、`put` 和 `delete` 方法是类似的。然后再检查发送 Ajax 请求后，`create` 和 `destroy` 动作是否进行了正确的操作。（如果要为大量使用 Ajax 的程序编写完整的测试，请了解一下 [Selenium](http://seleniumhq.org/) 和 [Watir](http://watir.com/)。）
 
@@ -1384,7 +1384,7 @@ describe RelationshipsController do
 end
 ```
 
-代码 11.37 使我们第一次使用控制器测试（controller test），我以前经常使用控制器测试（如在本书的第一版中），但是现在我倾向于使用集成测试。这里之所以使用控制器测试是因为，`xhr` 方法在集成测试中不可用（有点让人不解）。虽然这是我们第一次使用 `xhr` 方法，但结合本书前面的内容，你应该可以理解下面这行代码的作用：
+代码 11.37 是我们第一次使用控制器测试（controller test），我以前经常使用控制器测试（如在本书的第一版中），但是现在我倾向于使用集成测试。这里之所以使用控制器测试是因为，`xhr` 方法在集成测试中不可用（有点让人不解）。虽然这是我们第一次使用 `xhr` 方法，但结合本书前面的内容，你应该可以理解下面这行代码的作用：
 
 ```ruby
 xhr :post, :create, relationship: { followed_id: other_user.id }
@@ -1423,7 +1423,7 @@ end
 代码 11.38 中使用了 `respond_to`
  方法，根据接到的请求类型进行不同的操作。（这里用到的 `respond_to` 和 RSpec 中的 `respond_to` 没任何联系。）`repond_to` 方法的写法可能有点让人迷糊，你要知道，如下的代码
 
- ```ruby
+```ruby
 respond_to do |format|
   format.html { redirect_to @user }
   format.js
@@ -1478,11 +1478,11 @@ $ bundle exec rspec spec/
 
 接下来我们要实现示例程序最难的功能：动态列表。基本上本节的内容算是全书最高深的部分了。完整的动态列表是以 [10.3.3 节](chapter10.html#sec-10-3-3)的临时动态列表为基础实现的，列表中除了当前用户自己的微博之外，还包含了他所关注用户的微博。为了实现这样的功能，我们会用到一些很高级的 Rails、Ruby 和 SQL 技术。
 
-因为我们要做的事情很多，在此之前最好先清除我们要实现的是什么样的功能。图 11.5 显示了最终要实现的动态列表，图 11.8 还是同一幅图。
+因为我们要做的事情很多，在此之前最好先清楚我们要实现的是什么样的功能。图 11.5 显示了最终要实现的动态列表，图 11.8 还是同一幅图。
 
 ![page_flow_home_page_feed_mockup_bootstrap](assets/images/figures/page_flow_home_page_feed_mockup_bootstrap.png)
 
-图 11.8：显示有动态列表的用户首页构思图
+图 11.8：显示有动态列表的用户资料页面构思图
 
 <h3 id="sec-11-3-1">11.3.1 目的和策略</h3>
 
@@ -1492,7 +1492,7 @@ $ bundle exec rspec spec/
 
 图 11.19：id 为 1 的用户关注了 id 为 2，7，8，10 的用户后得到的动态列表
 
-因为需要把指定的用户关注用户的所有微博取出来，我们计划定义一个名为 `from_users_followed_by` 方法，以下面的方式调用：
+因为需要把指定用户所关注用户的全部微博取出来，我们计划定义一个名为 `from_users_followed_by` 方法，以下面的方式调用：
 
 ```ruby
 Micropost.from_users_followed_by(user)
@@ -1564,7 +1564,7 @@ end
 
 <h3 id="sec-11-3-2">11.3.2 初步实现动态列表</h3>
 
-现在我们要来定义 `Micropost.from_users_followed_by` 方法了，为了行文简洁，在后面的内容中我会使用“动态列表”指代这个方法。因为我们要实现的结果有点复杂，因此我们会一点一点的说明动态列表的实现过程。
+现在我们要来定义 `Micropost.from_users_followed_by` 方法了，为了行文简洁，在后面的内容中我会使用“动态列表”指代这个方法。因为要实现的结果有点复杂，因此我们会一点一点的说明动态列表的实现过程。
 
 首先，我们要知道需要使用怎样的查询语句。我们要做的是，从 `microposts` 表中取出被关注用户发布的微博（也要取出用户自己的微博）。对此，我们可以使用类似下面的查询语句：
 
@@ -1587,7 +1587,7 @@ Micropost.where("user_id = ?", id)
 where("user_id in (?) OR user_id = ?", following_ids, user)
 ```
 
-（在指定查询条件时，我们使用了 Rails 中的约定，用 `users` 代替 `user.id`，Rails 会自动获取用户的 `id`。我们还省略了方法的调用者 `Micropost`，因为我们只会在 Micropost 模型中使用这个方法。）
+（在指定查询条件时，我们使用了 Rails 中的约定，用 `user` 代替 `user.id`，Rails 会自动获取用户的 `id`。我们还省略了方法的调用者 `Micropost`，因为我们只会在 Micropost 模型中使用这个方法。）
 
 从上面的查询条件可以看出，我们需要生成一个数组，其元素为被关注用户的 id。生成这个数组的方法之一是，使用 Ruby 中的 `map` 方法，这个方法可以在任意的“可枚举（enumerable）”对象上调用，例如包含了元素的集合类对象（数组，Hash 等）。<sup>[11](#fn-11)</sup>我们在 [4.3.2 节](chapter4.html#sec-4-3-2)中举例介绍过这个方法，其用法如下：
 
@@ -1638,7 +1638,7 @@ $ rails console
 43, 44, 45, 46, 47, 48, 49, 50, 51"
 ```
 
-不过，当插入 SQL 语句中时，你无须手动生成字符串，`?` 插值操作会为你代劳（同时也避免了一些数据库自检的兼容问题）。所以，我们实际要使用的只是 `user.followed_user_ids` 而已。
+不过，当插入 SQL 语句中时，你无须手动生成字符串，`?` 插值操作会为你代劳（同时也避免了一些数据库之间的兼容问题）。所以，我们实际要使用的只是 `user.followed_user_ids` 而已。
 
 现在这个阶段，你可能已经想到了，要使用 `Micropost.from_users_followed_by(user)`，就要在 `Micropost` 类中定义一个类方法（[4.4.1 节](chapter4.html#sec-4-4-1)简单的介绍过）。这个类方法的初步定义如代码 11.43 所示，其中包含了上述分析得到的一些代码：
 
@@ -1701,7 +1701,7 @@ where("user_id IN (:followed_user_ids) OR user_id = :user_id",
       followed_user_ids: followed_user_ids, user_id: user))
 ```
 
-使用问号做插值虽然可以，但当我们要在多出插入同一个值时，后一种写法就方便多了。
+使用问号做插值虽然可以，但当我们要在多处插入同一个值时，后一种写法就方便多了。
 
 上面这段话表明，我们要在 SQL 查询语句中两次用到 `user_id`。简单来说就是，我们要把下面这行 Ruby 代码
 
@@ -1808,7 +1808,7 @@ $ heroku run rake db:populate
 
 如果开始时觉得有点难也不用奇怪，从零开始实现一个功能确实有难度。为了帮助你，我可以提两点建设性的建议。第一点，在开始实现新功能之前，浏览一下 [RailsCasts 的归档](http://railscasts.com/episodes/archive)，看一下 Ryan 是否介绍过类似的功能。<sup>[15](#fn-15)</sup>如果他介绍过，先看一下相关的视频会节省很多时间。第二点，总是在 Google 中大范围的搜索你要实现的功能，寻找相关的博文和教程。Web 程序开发是有难度的，从有经验的开发者那里取经总是会对你有所帮助的。
 
-下面列出的功能很多都是有一定挑战性的，在功能的介绍中我会给你一定的提示，告诉你实现过程中可能会用法到的工具。虽然有提示，但是这些功能实现起来比章后的练习难多了，在没下真功夫之前千万别轻言放弃。因为时间有限，我无法一对一的辅导，不过如果你对这些功能感兴趣，将来我可能会发布一些独立的文章或视频介绍一下，请到本书的网站 <http://railstutorial.org/> 订阅 Feed 获取最新的更新。
+下面列出的功能很多都是有一定挑战性的，在功能的介绍中我会给你一定的提示，告诉你实现过程中可能会用到的工具。虽然有提示，但是这些功能实现起来比章后的练习难多了，在没下真功夫之前千万别轻言放弃。因为时间有限，我无法一对一的辅导，不过如果你对这些功能感兴趣，将来我可能会发布一些独立的文章或视频介绍一下，请到本书的网站 <http://railstutorial.org/> 订阅 Feed 获取最新的更新。
 
 #### 回复
 
@@ -1838,7 +1838,7 @@ Twitter 支持在微博的前面加上字母“d”发送私信。请在示例�
 
 #### REST API
 
-很多网站都提供了“应用编程接口（Application Programmer Interface，API）”，允许第三方程序获取（get），创建（post），更新（put）和删除（delete）程序的资源。请为示例程序实现这种 REST API。实现的过程中可能要为程序的多数控制器动作添加 `respond_to` 代码块（参见 [11.2.5 节](#sec-11-2-5)），相应 XML 类型的请求。请注意安全问题，API 应该只对授权的用户开放。
+很多网站都提供了“应用编程接口（Application Programmer Interface，API）”，允许第三方程序获取（get），创建（post），更新（put）和删除（delete）程序的资源。请为示例程序实现这种 REST API。实现的过程中可能要为程序的多数控制器动作添加 `respond_to` 代码块（参见 [11.2.5 节](#sec-11-2-5)），响应 XML 类型的请求。请注意安全问题，API 应该只对授权的用户开放。
 
 #### 搜索
 
@@ -1850,14 +1850,14 @@ Twitter 支持在微博的前面加上字母“d”发送私信。请在示例�
 
 - 本书配套视频：我为本书录制了内容充足的配套视频，除了覆盖本书的内容之外，在视频中我还介绍了很多小技巧，当然视频还能弥补印刷书的不足，让你观看别人是如何开发的。你可以在[本书的网站](http://railstutorial.org/)上购买这些视频。
 - RailsCasts：如何强调 RailsCasts 的重要性都不为过。我建议你浏览一下 [RailsCasts 的视频归档](http://railscasts.com/episodes/archive)，观看你感兴趣的视频。
-- Scaling Rails：本书基本没有设计的内容是性能、优化和扩放。幸好大多数网站不会面对验证的性能问题，纯 Rails 之外的都算是过早优化。如果你确实遇到了性能问题，可以观看 [Envy Labs](http://envylabs.com/) 公司 Gregg Pollack 的 [Scaling Rails](http://railslab.newrelic.com/scaling-rails) 系列视频教程。我也建议你研究一下程序监控应用 [Scout](http://scoutapp.com/) 和 [New Relic](http://www.newrelic.com/)。<sup>[16](#fn-16)</sup>而且，你可能已经猜到了，在 RailsCasts 中有很多集都涉及到性能的问题，包括性能分析，缓存和后台作业。
-- Ruby 和 Rails 相关的书：学习 Ruby 我推荐 Peter Cooper 的《[Ruby 入门](http://www.amazon.com/gp/product/1430223634)》，David A. Black 的《》和 Hal Fulton 的《Ruby 之道》。继续学习 Rails 我推荐 Obie Fernandez 的《[Rails 3 之道](http://www.amazon.com/gp/product/0321601661)》和 Ryan Bigg、Yehuda Katz 合著的《Rails 3 实战》（请阅读第 2 版）。
+- Scaling Rails：本书基本没有涉及的内容是性能、优化和扩放（scaling）。幸好大多数网站不会面对严重的性能问题，纯 Rails 之外的都算是过早优化。如果你确实遇到了性能问题，可以观看 [Envy Labs](http://envylabs.com/) 公司 Gregg Pollack 的 [Scaling Rails](http://railslab.newrelic.com/scaling-rails) 系列视频教程。我也建议你研究一下程序监控应用 [Scout](http://scoutapp.com/) 和 [New Relic](http://www.newrelic.com/)。<sup>[16](#fn-16)</sup>而且，你可能已经猜到了，在 RailsCasts 中有很多集都涉及到性能的问题，包括性能分析，缓存和后台作业。
+- Ruby 和 Rails 相关的书：学习 Ruby 我推荐 Peter Cooper 的《[Ruby 入门](http://www.amazon.com/gp/product/1430223634)》，David A. Black 的《[The Well-Grounded Rubyist](http://www.amazon.com/gp/product/1933988657)》和 Hal Fulton 的《Ruby 之道》。继续学习 Rails 我推荐 Obie Fernandez 的《[Rails 3 之道](http://www.amazon.com/gp/product/0321601661)》和 Ryan Bigg、Yehuda Katz 合著的《Rails 3 实战》（请阅读第 2 版）。
 - PeepCode 和 Code School：[PeepCode](http://peepcode.com/) 的视频教程和 [Code School](http://codeschool.com/) 的交互教程质量都很高，我真心地向你推荐。
 
 <h2 id="sec-11-5">11.5 练习</h2>
 
 1. 添加针对销毁指定用户关注关联（通过代码 11.4 和代码 11.16 中的 `dependent :destroy` 实现）的测试。提示：可参照代码 10.15。
-2. 代码 11.38 中用到的 `respond_to` 方法可以提取出来让如 Relationships 控制器中，而且 `respond_to` 代码块可以使用 Rails 中的 `respond_with` 方法代替。请运行测试组件确认上面两个操作实施后得到的代码（如代码 11.47 所示）仍是正确的。（`respond_with` 方法的详细用法，请在 Google 中搜索“rails respond_with”。）
+2. 代码 11.38 中用到的 `respond_to` 方法可以提取出来放入 Relationships 控制器中，而且 `respond_to` 代码块可以使用 Rails 中的 `respond_with` 方法代替。请运行测试组件确认上面两个操作实施后得到的代码（如代码 11.47 所示）仍是正确的。（`respond_with` 方法的详细用法，请在 Google 中搜索“rails respond_with”。）
 3. 重构代码 11.31，把关注者列表页面、粉丝列表页面，首页和用户资料页面的通用部分提取出来，创建成局部视图。
 4. 按照代码 11.19 中的方式，编写测试检测个人资料页面的关注数量统计。
 
@@ -1893,12 +1893,12 @@ end
 4. 请在 Stack Overflow 网站上阅读[关于“何时应使用 let 方法”的讨论](http://stackoverflow.com/questions/5359558/when-to-use-rspec-let)来了解更多内容
 5. 严格来说，Rails 是使用 `underscore` 方法把类名转换为 id 的。例如，`"Foobar".underscore` 的结果是 `"foo_bar"`，所以 Foobar 对象的外键是 `foo_bar_id`。（顺便说一下，`underscore` 的逆操作是 `camelize`，这个方法会把 `"camel_case"` 转换成 `"CamelCase"`。）
 6. 如果你注意到 `followed_id` 同样可以标识用户，并且担心这个解决方法会造成被关注者和粉丝之间存在非对称的关系, 你已经想到我们的前面了，我们会在 [11.1.5 节](#sec-11-1-5)解决这个问题。
-7. 当你拥有在某个领域大量建立模型的经验后，你总能提前猜到这样的工具方法，如果你没有猜到的话，你也经常能发现自己动手写这样的方法可以使测试代码更加整洁。此时，如果你没有猜到它们的话也很正常。软件开发经常是一个循序渐进的过程，你先埋头编写代码，发现代码很乱时，再重构。 但为了行文简洁，本书采取的是直捣黄龙的方法。
+7. 当你拥有在某个领域大量建立模型的经验后，总能提前猜到这样的工具方法，如果没有猜到的话，也经常能发现自己动手写这样的方法可以使测试代码更加整洁。此时，如果你没有猜到它们的话也很正常。软件开发经常是一个循序渐进的过程，你先埋头编写代码，发现代码很乱时，再重构。 但为了行文简洁，本书采取的是直捣黄龙的方法。
 8. 事实上 `unfollow!`方法在失败时不会抛出异常，我甚至不知道 Rails 是如何表明删除操作失败的。不过为了和 `follow!` 保持一致，我们还是加上了感叹号。
 9. 因为 Ajax 是 asynchronous JavaScript and XML 的缩写，所以经常被错误的拼写为“AJAX”，不过在[最初介绍 Ajax 的文章](http://www.adaptivepath.com/ideas/essays/archives/000385.php)中，通篇都拼写为“Ajax”。
-10. 只有当浏览器启用 JavaScript 时才能正常使用，不过可以优雅降级，如果禁用了 JavaScript 就会按照 [11.2.4 节](#sec-11-2-4)中大方式工作。
+10. 只有当浏览器启用 JavaScript 时才能正常使用，不过可以优雅降级，如果禁用了 JavaScript 就会按照 [11.2.4 节](#sec-11-2-4)中的方式工作。
 11. 可枚举的对象最基本的要求是必须实现 `each` 方法，用来遍历集合。
-12. 整个简写方式最初是 Rails 对 Ruby 的扩展，因为很有用，所以 Ruby 最后自己也实现了。很牛吧。
+12. 这个简写方式最初是 Rails 对 Ruby 的扩展，因为很有用，所以 Ruby 最后自己也实现了。很牛吧。
 13. 创建子查询语句更多高级的方式，请阅读《[Hacking a subselect in ActiveRecord](http://pivotallabs.com/users/jsusser/blog/articles/567-hacking-a-subselect-in-activerecord)》一文。
 14. 为了图 11.20 中显示的动态列表更好看，我自己动手在 Rails 控制台中加入了一些微博。
 15. 注意，RailsCasts 经常会省略测试，可能是为了要控制视频的质量和长度，这可能会让你会错意，认为测试并不重要。观看过 RailsCasts 中相关的视频知道怎么开发后，我建议你按照“测试驱动开发”原则实现功能。（我建议你看一下 RailsCasts 中的《[How I test](http://railscasts.com/episodes/275-how-i-test)》，你会看到 Ryan Bates 在实际的开发中经常会使用 TDD，而且他的测试风格和本书的很像。）
