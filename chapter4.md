@@ -1178,7 +1178,7 @@ end
   attr_accessor :name, :email
 ```
 
-它为用户的名字和 Email 地址创建了属性访问器（attribute accessors）。也就是定义了“获取（getter）”和“设定（setter）”方法，用来取回和赋值 `@name` 和 `@email` 实例变量，我们在 [2.2.2 节](chapter2.html#sec-2-2-2)中介绍过实例变量。在 Rails 中，实例变量的意义在于，它们自动的在视图中可用。而通常实例变量的作用是用来在 Ruby 类中不同的方法之间传递变量值。（稍后会更详细的介绍这点。）示例变量总是以 `@` 符号开头，如果未定义则其值为 `nil`。
+它为用户的名字和 Email 地址创建了属性访问器（attribute accessors）。也就是定义了“获取（getter）”和“设定（setter）”方法，用来取回和赋值 `@name` 和 `@email` 实例变量，我们在 [2.2.2 节](chapter2.html#sec-2-2-2)中介绍过实例变量。在 Rails 中，实例变量的意义在于，它们自动的在视图中可用。而通常实例变量的作用是用来在 Ruby 类中不同的方法之间传递变量值。（稍后会更详细的介绍这点。）实例变量总是以 `@` 符号开头，如果未定义则其值为 `nil`。
 
 第一个方法，`initialize`，在 Ruby 中有特殊意义：当我们执行 `User.new` 时会调用该方法。这个 `initialize` 方法可以接受一个参数，`attributes`：
 
