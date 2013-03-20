@@ -14,7 +14,7 @@ layout: default
 		<dt>Ruby：</dt>
 		<dd>1.9.3</dd>
 		<dt>Rails：</dt>
-		<dd>3.2.12</dd>
+		<dd>3.2.13</dd>
 		<dt>售价：</dt>
 		<dd>￥9.90</dd>
 		<dt>页数：</dt>

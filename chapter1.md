@@ -307,7 +307,7 @@ update: --no-rdoc --no-ri
 安装玩 RubyGems 后安装 Rails 也就简单了。本教程使用 Rails 3.2，通过以下命令安装：
 
 ```sh
-$ gem install rails -v 3.2.12
+$ gem install rails -v 3.2.13
 ```
 
 译者注：鉴于国内的“社会主义特色”，你可能无法正常下载 gem，这时你可以使用 [VPN](http://en.wikipedia.org/wiki/Vpn) 或者使用 [RubyGems 在国内的镜像](http://ruby.taobao.org)。
@@ -316,7 +316,7 @@ $ gem install rails -v 3.2.12
 
 ```sh
 $ rails -v
-Rails 3.2.12
+Rails 3.2.13
 ```
 
 注意：如果你是通过前面介绍的 Rails Installer 安装的 Rails，所得到的版本号可能会有些不同。在写这本书的时候，版本的不同还不会带来大的问题，但是如果 Rails 升级到了更高的版本，问题可能就很严重了。我目前正在和 Engine Yard 一起工作来创建一个 Rails Installer 版本列表。
@@ -488,7 +488,7 @@ $ subl Gemfile
 ```ruby
 source 'https://rubygems.org'
 
-gem 'rails', '3.2.12'
+gem 'rails', '3.2.13'
 
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
@@ -532,7 +532,7 @@ gem 'jquery-rails'
 ```ruby
 source 'https://rubygems.org'
 
-gem 'rails', '3.2.12'
+gem 'rails', '3.2.13'
 
 group :development do
   gem 'sqlite3', '1.3.5'
