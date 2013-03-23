@@ -225,7 +225,7 @@ end
 
 下面我们开始写程序的代码，`belongs_to` 关系的建立和之前一样。Rails 会通过 Symbol 获知外键的名字（例如，`:follower` 对应的外键是 `follower_id`，`:followed` 对应的外键是 `followed_id`），但 Followed 或 Follower 模型是不存在的，因此这里就要使用 `User` 这个类名， 如代码 11.6 所示。注意，与默认生成的 Relationship 模型不同，这里只有 `followed_id` 是可以访问的。
 
-**代码 11.6** 为 Relationship 模型添加 `belongs_to` 关系<br />`spec/models/relationship_spec.rb`
+**代码 11.6** 为 Relationship 模型添加 `belongs_to` 关系<br />`app/models/relationship.rb`
 
 ```ruby
 class Relationship < ActiveRecord::Base
@@ -521,7 +521,7 @@ class User < ActiveRecord::Base
   .
   .
   has_many :reverse_relationships, foreign_key: "followed_id",
-    classname: "Relationship",
+    class_name: "Relationship",
     dependent: :destroy
   has_many :followers, through: :reverse_relationships, source: :follower
   .
