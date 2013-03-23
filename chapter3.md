@@ -406,7 +406,7 @@ $ rails generate integration_test static_pages
       create    spec/requests/static_pages_spec.rb
 ```
 
-上面的代码会在 `rspec/requests` 文件夹中生成 `static_pages_spec.rb` 文件。自动生成的代码不能满足我们的需求，用文本编辑器打开 `static_pages_spec.rb`，将其内容替换成代码 3.9 所示的代码。
+上面的代码会在 `spec/requests` 文件夹中生成 `static_pages_spec.rb` 文件。自动生成的代码不能满足我们的需求，用文本编辑器打开 `static_pages_spec.rb`，将其内容替换成代码 3.9 所示的代码。
 
 **代码 3.9** 测试“首页”内容的代码 <br />`spec/requests/static_pages_spec.rb`
 
