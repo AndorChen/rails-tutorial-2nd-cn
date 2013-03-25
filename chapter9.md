@@ -701,7 +701,7 @@ module SessionsHelper
 end
 ```
 
-地址的存储使用了 Rails 提供的 `session`，`session` 可以理解成和 [8.2.1 节](chapter8.html#sec-8-2-1)中介绍的 `cookies` 是类似的东西，会在浏览器关闭后自动失效。（在 [8.5 节](chapter8.html#sec-8-5)中介绍过，其实 `session` 的实现方法正是如此。）我们还使用了 `request` 对象的 `fullpath` 方法获取了所请求页面的完整地址。在 `store_locations` 方法中，把完整的请求地址存储在 `session[:return_to]` 中。
+地址的存储使用了 Rails 提供的 `session`，`session` 可以理解成和 [8.2.1 节](chapter8.html#sec-8-2-1)中介绍的 `cookies` 是类似的东西，会在浏览器关闭后自动失效。（在 [8.5 节](chapter8.html#sec-8-5)中介绍过，其实 `session` 的实现方法正是如此。）我们还使用了 `request` 对象的 `fullpath` 方法获取了所请求页面的完整地址。在 `store_location` 方法中，把完整的请求地址存储在 `session[:return_to]` 中。
 
 要使用 `store_location`，我们要把它加入 `signed_in_user` 事前过滤器中，如代码 9.19 所示。
 
