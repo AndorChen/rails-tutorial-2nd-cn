@@ -302,7 +302,7 @@ end
 实现的代码会第一次使用 `has_many through`：用户通过 `relationships` 表拥有多个关注关系，就像图 11.7 所示的那样。默认情况下，在 `has_many through` 关联中，Rails 会寻找关联名单数形式对应的外键，也就是说，像下面的代码
 
 ```ruby
-has_may :followeds, through: :relationships
+has_many :followeds, through: :relationships
 ```
 
 会使用 `relationships` 表中的 `followed_id` 列生成一个数组。但是，正如在 [11.1.1 节](#sec-11-1-1)中说过的，`user.followeds` 这种说法比较蹩脚，若使用“followed users”作为 “followed”的复数形式会好得多，那么被关注的用户数组就要写成 `user.followed_users` 了。Rails 当然会允许我们重写默认的设置，针对本例，我们可以使用 `:source` 参数，告知 Rails `followed_users` 数组的来源是 `followed` 所代表的 id 集合。
