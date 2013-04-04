@@ -254,7 +254,7 @@ Any modifications you make will be rolled back on exit
 
 如上述代码所示，`id` 的值变成 `1` 了，那两个自动创建的时间戳属性也变成了当前的时间。<sup>[6](#fn-6)</sup> 现在这两个时间戳是一样的，[6.1.5 节](#sec-6-1-5)会看到二者不同的情况。
 
-和 [4.4.5 节](chapter4.html#sec-4-4-5)中的 `User` 类一样，User 模型的实例也可以使用点号获取属性：
+和 [4.4.5 节](chapter4.html#sec-4-4-5)中的 `User` 类一样，User 模型的实例也可以使用点号获取属性：<sup>[7](#fn-7)</sup>
 
 ```sh
 >> user.name
