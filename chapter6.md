@@ -911,7 +911,7 @@ class User < ActiveRecord::Base
 end
 ```
 
-这还不行，Email 地址是不区分大小写的，也就说 `foo@bar.com` 和 `FOO@BAR.COM` 或 `FoO@BAr.coM` 是等效的，所以验证时也要考虑这种情况。代码 6.20 是针对这种问题的测试代码。
+这还不行，一般来说 Email 地址是不区分大小写的，也就说 `foo@bar.com` 和 `FOO@BAR.COM` 或 `FoO@BAr.coM` 是等效的，所以验证时也要考虑这种情况。<sup>[14](#fn-14)</sup>代码 6.20 是针对这种问题的测试代码。
 
 **代码 6.20** 拒绝相同 Email 地址的测试，不区分大小写<br />`spec/models/user_spec.rb`
 
@@ -987,7 +987,7 @@ end
 $ rails generate migration add_index_to_users_email
 ```
 
-和 User 模型的迁移不一样，实现 Email 唯一性的迁移操作没有事先定义的模板可用，所以我们要手动把代码 6.22 中的内容写入迁移文件。<sup>[14](#fn-14)</sup>
+和 User 模型的迁移不一样，实现 Email 唯一性的迁移操作没有事先定义的模板可用，所以我们要手动把代码 6.22 中的内容写入迁移文件。<sup>[15](#fn-15)</sup>
 
 **代码 6.22** 确保 Email 唯一性的迁移文件<br />`db/migrate/[timestamp]_add_index_to_users_email.rb`
 
@@ -1013,7 +1013,7 @@ $ bundle exec rake db:migrate
 add_index "users", ["email"], :name => "index_users_on_email", :unique => true
 ```
 
-为了保证 Email 地址的唯一性，还要做些修改：存入数据库之前把 Email 地址转换成全小写字母的形式，因为不是所有数据库适配器的索引都是区分大小写的。<sup>[15](#fn-15)</sup> 为此，我们要使用回调函数（callback），在 Active Record 对象生命周期的特定时刻调用（参阅 Rails API 中关于回调函数的文档）。本例中，我们要使用的回调函数是 `before_save`，在用户存入数据库之前强行把 Email 地址转换成全小写字母形式，如代码 6.23 所示。
+为了保证 Email 地址的唯一性，还要做些修改：存入数据库之前把 Email 地址转换成全小写字母的形式，因为不是所有数据库适配器的索引都是区分大小写的。<sup>[16](#fn-16)</sup> 为此，我们要使用回调函数（callback），在 Active Record 对象生命周期的特定时刻调用（参阅 Rails API 中关于回调函数的文档）。本例中，我们要使用的回调函数是 `before_save`，在用户存入数据库之前强行把 Email 地址转换成全小写字母形式，如代码 6.23 所示。
 
 **代码 6.23** 把 Email 地址转换成全小写形式，确保唯一性<br />`app/models/user.rb`
 
@@ -1396,7 +1396,7 @@ end
 
 <h3 id="sec-6-3-4">6.3.4 用户的安全密码</h3>
 
-在较旧版本的 Rails 中，添加一个安全的密码是很麻烦也很费时的事，本书的第一版<sup>[16](#fn-16)</sup>（针对 Rails 3.0）中就从零起开发了一个用户身份验证系统。熟知用户身份验证系统的开发者完全没必要在此浪费时间，所以在 Rails 的最新版中已经集成了用户身份验证功能。因此，我们只需要几行代码就可以为用户添加一个安全的密码，还可以让前几小节的测试通过。
+在较旧版本的 Rails 中，添加一个安全的密码是很麻烦也很费时的事，本书的第一版<sup>[17](#fn-17)</sup>（针对 Rails 3.0）中就从零起开发了一个用户身份验证系统。熟知用户身份验证系统的开发者完全没必要在此浪费时间，所以在 Rails 的最新版中已经集成了用户身份验证功能。因此，我们只需要几行代码就可以为用户添加一个安全的密码，还可以让前几小节的测试通过。
 
 首先，要把 `password` 和 `password_confirmation` 属性设为可访问的（参见 [6.1.2 节](#sec-6-1-2)），然后才能使用如下的初始化参数创建用户对象；
 
@@ -1589,6 +1589,7 @@ end
 11. 如果你和我一样觉得 Rubular 很有用，我建议你向作者 [Michael Lovitt](http://lovitt.net/) 适当的[捐献一些钱](http://dwz.cn/donate-to-rubular)，以感谢他的辛勤劳动。
 12. 你知道吗，根据 Email 标准，`"Michael Hartl"@example.com` 虽有引号和空格，但也是合法的 Email 地址，很不可思议吧。如果你的 Email 地址不止包含字母、数字、下划线、点号，我建议你赶快注册一个常规的吧。注意，`VALID_EMAIL_REGEX` 还允许使用加号，因为在 Gmail 中加号有特殊的用途（或许其他电子邮件服务提供商也有用到）：若要分拣出来自 example.com 的邮件，可以使用 `username+example@gmail.com` 这样的地址，Gmail 会将这些邮件发送到 `username@gmail.com` 地址，然后将这些邮件归置到 `example` 过滤器中。
 13. 如本节介绍中所说的，这里就要用到“测试数据库” `db/test.sqlite3` 了。
-14. 当然，我们可以直接编辑代码 6.2，不过，需要先回滚再迁移回来。这不是 Rails 的风格，正确的做法是每次修改数据库结构都要使用迁移。
-15. 我在本地的 SQLite 以及 Heroku 的 PostgreSQL 中做过实验，证明这么做其实是必须的。
-16. <http://railstutorial.org/book?version=3.0>
+14. 严格的说，Email 地址只有域名部分是不区分大小写的，`foo@bar.com` 和 `Foo@bar.com` 其实是不同的地址。但在实际使用中，千万别依赖这个规则，[about.com](http://email.about.com/od/emailbehindthescenes/f/email_case_sens.htm) 中相关的文章说道，“区分大小写的 Email 地址会带来很多麻烦，不易互换使用，也不利传播，所以要求输入正确地大小写是很愚蠢的。几乎没有 Email 服务提供商或 ISP 强制要求使用区分大小写的 Email 地址，也不会提示收件人的大小写错了（例如，要全部大写）。”感谢读者 Riley Moses 指正这个问题。
+15. 当然，我们可以直接编辑代码 6.2，不过，需要先回滚再迁移回来。这不是 Rails 的风格，正确的做法是每次修改数据库结构都要使用迁移。
+16. 我在本地的 SQLite 以及 Heroku 的 PostgreSQL 中做过实验，证明这么做其实是必须的。
+17. <http://railstutorial.org/book?version=3.0>
