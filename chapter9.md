@@ -1185,14 +1185,8 @@ describe "User pages" do
     it { should have_selector('h1', text: 'All users') }
 
     describe "pagination" do
-<<<<<<< HEAD
-
-      before(:all) { 30.times { FactoryGirl.create(:user) } }
-			after(:all)  { User.delete_all }
-=======
       before(:all) { 30.times { FactoryGirl.create(:user) } }
       after(:all)  { User.delete_all }
->>>>>>> andor/gh-pages
 
       it { should have_selector('div.pagination') }
 
