@@ -19,11 +19,13 @@ var tutorialScript = {
 	enhanceFootnoteItem: function() {
 		var t = this;
 		if($('.navigation + ol').length > 0) {
+			$('.navigation + ol').addClass('footnotes');
+
 			$('.navigation + ol > li').each(function(index, ele) {
 				var order = index+1;
 				$(ele).attr('id', 'fn-'+order);
 
-				$(ele).append('&nbsp;<a href="#fnref-'+order+'">&uarr;</a>');
+				$(ele).append('&nbsp;&nbsp;<a href="#fnref-'+order+'">&#8617;</a>');
 			});
 		}
 	},

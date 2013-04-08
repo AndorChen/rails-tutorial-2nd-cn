@@ -3,13 +3,13 @@ layout: chapter
 title: 第四章 Rails 背后的 Ruby
 ---
 
-有了[第三章](chapter3.html)中的例子做铺垫，本章将为你介绍一些对 Rails 来说很重要的 Ruby 知识。Ruby 语言的知识点很多，不过对一个 Rails 开发者而言需要掌握的很少。我们采用的是有别于常规的 Ruby 学习过程，我们的目标是开发动态的 Web 应用程序，所以我建议你先学习 Rails，在这个过程中学习一些 Ruby 知识。如果要成为一个 Rails 专家，你就要更深入的掌握 Ruby 了。本书会为你成为专家的路途上奠定一个坚实的基础。如 [1.1.1 节](chapter1.html#sec-1-1-1)中说过的，读完本书后我建议你阅读一本专门针对 Ruby 的书，例如《[Ruby 入门](http://www.amazon.com/gp/product/1430223634)》、《[The Well-Frounded Rubyist](http://www.amazon.com/gp/product/1933988657)》或《[Ruby 之道](http://www.amazon.com/gp/product/0672328844)》。
+有了[第三章](chapter3.html)中的例子做铺垫，本章将为你介绍一些对 Rails 来说很重要的 Ruby 知识。Ruby 语言的知识点很多，不过对一个 Rails 开发者而言需要掌握的很少。我们采用的是有别于常规的 Ruby 学习过程，我们的目标是开发动态的 Web 应用程序，所以我建议你先学习 Rails，在这个过程中学习一些 Ruby 知识。如果要成为一个 Rails 专家，你就要更深入的掌握 Ruby 了。本书会为你在成为专家的路途上奠定一个坚实的基础。如 [1.1.1 节](chapter1.html#sec-1-1-1)中说过的，读完本书后我建议你阅读一本专门针对 Ruby 的书，例如《[Ruby 入门](http://www.amazon.com/gp/product/1430223634)》、《[The Well-Grounded Rubyist](http://www.amazon.com/gp/product/1933988657)》或《[Ruby 之道](http://www.amazon.com/gp/product/0672328844)》。
 
-本章介绍了很多内容，第一遍阅读没有掌握全部是可以理解的。在后续的章节我会经常地提到本章的内容。
+本章介绍了很多内容，第一遍阅读没有掌握全部是可以理解的。在后续的章节我会经常提到本章的内容。
 
 <h2 id="sec-4-1">4.1 导言</h2>
 
-从上一章我们可以看到，即使不懂任何背后用到的 Ruby 语言，我们也可以创建一个 Rails 应用程序骨架，也可以进行测试。不过我们依赖的是本教程中提供测试代码，得到错误信息，然后让其通过。我们不能总是这样做，所以这一章我们要暂别网站开发学习，正视我们的 Ruby 短肋。
+从上一章我们可以看到，即使不懂任何背后用到的 Ruby 语言，我们也可以创建一个 Rails 应用程序骨架，也可以进行测试。不过我们依赖的是本教程中提供的测试代码，得到错误信息，然后让其通过。我们不能总是这样做，所以这一章我们要暂别网站开发学习，正视我们的 Ruby 短肋。
 
 上次接触应用程序时，我们已经使用 Rails 布局去掉了几乎是静态的页面中的代码重复。（参见代码 4.1）
 
@@ -36,7 +36,7 @@ title: 第四章 Rails 背后的 Ruby
 <%= stylesheet_link_tag "application", :media => "all" %>
 ```
 
-这行代码使用 Rails 内置的方法 `stylesheet_link_tag`（更多内容请查看 [Rails API 文档](http://api.rubyonrails.org/v3.2.0/classes/ActionView/Helpers/AssetTagHelper/StylesheetTagHelpers.html#method-i-stylesheet_link_tag)）为所有的[媒介类型](http://www.w3.org/TR/CSS2/media.html)引入了 `application.css`。对于经验丰富的 Rails 开发者来说，这一行很简单，但是这里却至少包含了困惑着你的四个 Ruby 知识点：内置的 Rails 方法，不用括号的方法调用，Symbol，Hash。这几点本章都会介绍。
+这行代码使用 Rails 内置的方法 `stylesheet_link_tag`（更多内容请查看 [Rails API 文档](http://api.rubyonrails.org/v3.2.0/classes/ActionView/Helpers/AssetTagHelper/StylesheetTagHelpers.html#method-i-stylesheet_link_tag)）为所有的[媒介类型](http://www.w3.org/TR/CSS2/media.html)引入了 `application.css`。对于经验丰富的 Rails 开发者来说，这一行很简单，但是这里却至少包含了困惑着你的四个 Ruby 知识点：内置的 Rails 方法，不用括号的方法调用，Symbol 和 Hash。这几点本章都会介绍。
 
 除了提供很多内置的方法供我们在视图中使用之外，Rails 还允许我们自行创建。自行创建的这些方法叫做帮助方法（helper）。要说明如何自行创建一个帮助方法，我们要来看看代码 4.1 中标题那一行：
 
@@ -203,9 +203,9 @@ Ruby 中的注释以井号 `#`（也叫“Hask Mark”，或者更诗意的叫�
   end
 ```
 
-第一行就是注释，它说明了后面的方法的目的。
+第一行就是注释，说明了后面方法的作用。
 
-你一般无需在控制台中写注释，不过为了说明代码，我会按照下面的形式加上注释，例如：
+一般无需在控制台中写注释，不过为了说明代码，我会按照下面的形式加上注释，例如：
 
 ```sh
 $ rails console
@@ -217,7 +217,7 @@ $ rails console
 
 <h3 id="sec-4-2-2">4.2.2 字符串</h3>
 
-字符串算是 Web 应用程序中最有用的数据结构了，因为网页的内容就是从数据库发送到浏览器的字符串。我们现在控制台中体验一下字符串，这次我们使用 `rails c` 启动控制台，这是 `rails console` 的快捷方式：
+字符串算是 Web 应用程序中最有用的数据结构了，因为网页的内容就是从数据库发送到浏览器的字符串。我们先在控制台中体验一下字符串，这次我们使用 `rails c` 启动控制台，这是 `rails console` 的简写形式：
 
 ```sh
 $ rails c
@@ -295,7 +295,7 @@ foo=> nil
 => "foobar"
 ```
 
-不过两种方法还是有个很重要的区别的：Ruby 不会对单引号字符串进行插值操作：
+不过两种方法还是有个很重要的区别：Ruby 不会对单引号字符串进行插值操作：
 
 ```sh
 >> '#{foo} bar'     # 单引号字符串不能进行插值操作
@@ -320,7 +320,7 @@ foo=> nil
 
 <h3 id="sec-4-2-3">4.2.3 对象及向其传递消息</h3>
 
-Ruby 中一切皆对象，包括字符串和 `nil` 都是。我们会在 [4.4.2 节](#sec-4-4-2)介绍对象技术层面上的意义，不过一般很难通过阅读一本书就理解对象了，你要多看一些例子才能建立对对象的感性认识。
+Ruby 中一切皆对象，包括字符串和 `nil` 都是。我们会在 [4.4.2 节](#sec-4-4-2)介绍对象技术层面上的意义，不过一般很难通过阅读一本书就理解对象，你要多看一些例子才能建立对对象的感性认识。
 
 不过说出对象的作用就很简单：它可以响应消息。例如，一个字符串对象可以响应 `length` 这个消息，它返回字符串包含的字符数量：
 
@@ -467,7 +467,7 @@ The string is nonempty.
 
 <h3 id="sec-4-2-5">4.2.5 回顾一下标题的帮助方法</h3>
 
-下载我们来理解一下代码 4.2 中的 `full_title` 帮助方法：<sup>[5](#fn-5)</sup>
+下面我们来理解一下代码 4.2 中的 `full_title` 帮助方法：<sup>[5](#fn-5)</sup>
 
 ```ruby
 module ApplicationHelper
@@ -494,7 +494,7 @@ end
 
 数组就是一组顺序特定的元素。本书尚且没有用过数组，不过理解了数组就能很好的理解 Hash （[4.3.3 节](#sec-4-3-3)），也有助于理解 Rails 中的数据模型（例如 [2.3.3 节](chapter2.html#sec-2-3-3)中用到的 `has_many` 关联，[10.1.3 节](chapter10.html#sec-10-1-3)会做详细介绍）。
 
-目前我们已经花了很多的时间理解字符串，从字符串过度到数组可以从 `split` 方法开始：
+目前我们已经花了很多的时间理解字符串，从字符串过渡到数组可以从 `split` 方法开始：
 
 ```sh
 >>  "foo bar     baz".split     # 把字符串分割成有三个元素的数组
@@ -704,7 +704,7 @@ Range 也可使用字母：
 => ["a", "b", "c"]
 ```
 
-上面的代码说明，`map` 方法返回的是在数组或 Range 的每个元素上执行块中的代码后的结果。
+上面的代码说明，`map` 方法返回的是在数组或 Range 的每个元素上执行块中代码后的结果。
 
 现在我们就可以来理解一下我在 [1.4.4 节](chapter1.html#sec-1-4-4)中用来生成随机二级域名的那行 Ruby 代码了：
 
@@ -746,7 +746,7 @@ Hash 本质上就是数组的一个特例：你可以认为 Hash 基本上就是
 
 Hash 通过一对花括号中包含一些键值对的形式表示，只有一对花括号而没有键值对（`{}`）就是一个空 Hash。需要注意，Hash 中的花括号和块中的花括号不是一个概念。（是的，这可能会让你迷惑。）不过，Hash 虽然和数组类似，但却有一个很重要的区别：Hash 的元素没有特定的顺序。<sup>[8](#fn-8)</sup> 如果顺序很重要的话就要使用数组了。
 
-通过方括号的形式每次定义一个元素的方式不太敏捷，使用 `=>` 分隔的键和值这种字面量的形式定义 Hash 要简洁得多，我们称后一种方式为“hashrocket”：
+通过方括号的形式每次定义一个元素的方式不太敏捷，使用 `=>` 分隔的键值对这种字面量的形式定义 Hash 要简洁得多，我们称后一种方式为“hashrocket”：
 
 ```sh
 >> user = { "first_name" => "Michael", "last_name" => "Hartl" }
@@ -794,7 +794,7 @@ Symbol 是 Ruby 特有的一个数据类型，其他语言很少用到，初看�
 => true
 ```
 
-第二个代码把 hashrocket 形式的键值对变成了键后跟着一个冒号然后再跟着一个值的形式：
+第二个命令把 hashrocket 形式的键值对变成了键后跟着一个冒号然后再跟着一个值的形式：
 
 ```ruby
 { name: "Michael Hartl", email: "michael@example.com" }
@@ -881,7 +881,7 @@ stylesheet_link_tag("application", :media => "all")
 stylesheet_link_tag "application", :media => "all"
 ```
 
-第二，`:media` 部分显然是一个 Hash，但是怎么没用花括号？因为在函数调用时，如果 Hash 是最后一个参数，它的花括号是可以省略的。下面的两行代码是等价的：
+第二，`:media` 部分显然是一个 Hash，但是怎么没用花括号？因为在调用函数时，如果 Hash 是最后一个参数，它的花括号是可以省略的。下面的两行代码是等价的：
 
 ```erb
 # Hash 是最后一个参数时花括号可以省略
@@ -904,7 +904,7 @@ stylesheet_link_tag "application", :media => "all"
 type="text/css" />
 ```
 
-如果你打开 <http://localhost:3000/assets/application.css> 查看 CSS 的话，会发现是空的（除了一些注释）。在[第五章](chapter5.html)中我们会看到如何改变这个现象。
+如果你打开 <http://localhost:3000/assets/application.css> 查看 CSS 的话，会发现是空的（除了一些注释）。在[第五章](chapter5.html)中我们会看介绍如何添加样式。
 
 <h2 id="sec-4-4">4.4 Ruby 类</h2>
 
@@ -981,7 +981,7 @@ type="text/css" />
 
 图 4.1：`String` 类的继承关系
 
-要更深入的理解类，没什么比自己实际编写一个更好的方法了。我们来创建一个名为 `Word` 的类，包含一个名为 `palindrome?` 方法，如果单词顺读和反读时都一样则返回 `true`：
+要更深入的理解类，最好的方法就是自己动手编写。我们来创建一个名为 `Word` 的类，包含一个名为 `palindrome?` 方法，如果单词顺读和反读时都一样则返回 `true`：
 
 ```sh
 >> class Word
@@ -1003,7 +1003,7 @@ type="text/css" />
 => true
 ```
 
-如果你觉得这个例子有点大题小做，很好，我们的目的达到了。定义一个新类，可是只创建一个可以接受一个字符串参数的方法，这么做很古怪。既然单词是字符串，如果 `Word` 继承 `String` 不就行了，如代码 4.8 所示。（你要退出控制台然后再在控制台中输入这写代码，这样才能把之前的 `Word` 定义清除掉。）
+如果你觉得这个例子有点大题小做，很好，我们的目的达到了。定义一个新类，可是只创建一个可以接受一个字符串参数的方法，这么做很古怪。既然单词是字符串，让 `Word` 继承 `String` 不就行了，如代码 4.8 所示。（你要退出控制台然后再在控制台中输入这写代码，这样才能把之前的 `Word` 定义清除掉。）
 
 **代码 4.8** 在控制台中定义 `Word` 类
 
@@ -1091,7 +1091,7 @@ NoMethodError: undefined method `palindrome?\' for "level":String
 => true
 ```
 
-我们可以看到，一个包含空格的字符串不是空的（empty），却是空白的（blank）。还要注意，`nil` 也是空白的。因为 `nil` 不是字符串，所以上面的代码说明了 Rails 其实是把 `blank?` 添加到 `String` 的基类 `Object` 上的。我们会在 [8.2.1 节](chapter8.html#sec-8-2-1)中介绍一些 Rails 扩充 Ruby 类的例子。）
+我们可以看到，一个包含空格的字符串不是空的（empty），却是空白的（blank）。还要注意，`nil` 也是空白的。因为 `nil` 不是字符串，所以上面的代码说明了 Rails 其实是把 `blank?` 添加到 `String` 的基类 `Object` 上的。我们会在 [8.2.1 节](chapter8.html#sec-8-2-1)中介绍一些 Rails 扩展 Ruby 类的例子。）
 
 <h3 id="sec-4-4-4">4.4.4 控制器类</h3>
 
@@ -1153,9 +1153,9 @@ end
 
 我们通过创建一个完整的类来结束对 Ruby 的介绍，一个 `User` 类，提前实现[第六章](chapter6.html)的 User 模型。
 
-到目前为止，我们都是在控制台中定义类的，这样很快捷，但也有点不爽。现在我们要在应用程序的根目录创建一个名为 `example_user.rb` 的文件，写入代码 4.9 的内容。
+到目前为止，我们都是在控制台中定义类的，这样很快捷，但也有点不爽。现在我们要在应用程序的根目录创建一个名为 `example_user.rb` 的文件，写入代码 4.9 中的内容。
 
-**代码 4.9** 用户类的代码 <br />`example_user.rb`
+**代码 4.9** `User` 类的代码 <br />`example_user.rb`
 
 ```ruby
 class User
@@ -1178,7 +1178,7 @@ end
   attr_accessor :name, :email
 ```
 
-它为用户的名字和 Email 地址创建了属性访问器（attribute accessors）。也就是定义了“获取（getter）”和“设定（setter）”方法，用来取回和赋值 `@name` 和 `@email` 实例变量，我们在 [2.2.2 节](chapter2.html#sec-2-2-2)中介绍过实例变量。在 Rails 中，实例变量的意义在于，它们自动的在视图中可用。而通常实例变量的作用是用来在 Ruby 类中不同的方法之间传递变量值。（稍后会更详细的介绍这点。）示例变量总是以 `@` 符号开头，如果未定义则其值为 `nil`。
+它为用户的名字和 Email 地址创建了属性访问器（attribute accessors）。也就是定义了“获取（getter）”和“设定（setter）”方法，用来取回和赋值 `@name` 和 `@email` 实例变量，我们在 [2.2.2 节](chapter2.html#sec-2-2-2)中介绍过实例变量。在 Rails 中，实例变量的意义在于，它们自动的在视图中可用。而通常实例变量的作用是用来在 Ruby 类中不同的方法之间传递变量值。（稍后会更详细的介绍这点。）实例变量总是以 `@` 符号开头，如果未定义则其值为 `nil`。
 
 第一个方法，`initialize`，在 Ruby 中有特殊意义：当我们执行 `User.new` 时会调用该方法。这个 `initialize` 方法可以接受一个参数，`attributes`：
 
@@ -1218,7 +1218,7 @@ end
 => "Example User <user@example.com>"
 ```
 
-上面代码中 `.` 在 Unix 中是指“当前目录”，`./example_user` 告诉 Ruby 在当前目录中寻找这个文件。接下来的代码创建了一个空的用户，然后通过直接赋值给相应的属性来提供他的名字和 Email 地址（因为有了代码 4.9 中 `attr_accessor` 那行才能进行赋值操作）。我们输入
+上面代码中的点号 `.` 在 Unix 中是指“当前目录”，`./example_user` 告诉 Ruby 在当前目录中寻找这个文件。接下来的代码创建了一个空的用户，然后通过直接赋值给相应的属性来提供他的名字和 Email 地址（因为有了代码 4.9 中 `attr_accessor` 那行才能进行赋值操作）。我们输入
 
 ```ruby
 example.name = "Example User"
@@ -1293,7 +1293,7 @@ $ git commit -m "Add a full_title helper"
 1. 关于“foo”和“bar”，以及不太相关的“foobar”和“FUBAR”的起源，请查看 [Jargon File 中介绍“foo”的文章](http://www.catb.org/jargon/html/F/foo.html)。
 1. 熟悉 Perl 或 PHP 的编程人员可以把这个功能与自动插值美元符号开头的变量相对应，例如 `"foo $bar"`。
 1. 很抱歉本章在函数和方法之间随意的来回使用。在 Ruby 中这二者是同一个概念：所有的方法都是函数，所有的函数也都是方法，因为一切皆对象。
-1. 其实这里还有一个地方我们还不能理解，那就是 Rails 是怎么把这些联系在一起的：把 URI 映射到动作上，`full_title` 帮助函数可以在视图中使用，等。这是个很有意思的话题，我建议你以后好好的了解一下，不过使用 Rails 并不需要完全了解 Rails 的运作机理。（若想更深入的了解 Rails，我推荐阅读 Obie Fernandez 的《[The Rails 3 Way](http://www.amazon.com/gp/product/0321601661)》。）
+1. 其实这里还有一个地方我们还不能理解，那就是 Rails 是怎么把这些联系在一起的：把 URI 映射到动作上，`full_title` 帮助函数可以在视图中使用，等。这是个很有意思的话题，我建议你以后好好的了解一下，不过使用 Rails 并不需要完全了解 Rails 的运作机理。（若想更深入的了解 Rails，我推荐阅读 Obie Fernandez 的《[Rails 3 之道](http://www.amazon.com/gp/product/0321601661)》。）
 1. 下面代码中使用的 `second` 方法不是 Ruby 定义的，而是 Rails 添加的。在这里可以使用这个方法是因为 Rails 控制台会自动加载 Rails 对 Ruby 的功能扩展。
 1. 块是闭包（closure），知道这一点对资深编程人员可能会有点帮助。闭包是一种匿名函数，其中附带了一些数据。
 1. 在 Ruby 1.9 中，其实会按照元素输入时的顺序保存 Hash，不过依赖顺序显然是不明智的。

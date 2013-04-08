@@ -3,7 +3,7 @@ layout: chapter
 title: 第七章 用户注册
 ---
 
-User 模型可以正常使用了，接下来要实现的功能大多数网站都离不开：用户注册。在 [7.2 节](#sec-7-2)我们会创建一个表单，提交用户注册时填写的信息，然后在 [7.4 节](#sec-7-4)中使用提交的数据创建新用户，把相应的属性值存入数据库。注册功能实现后，还要创建一个用户资料页面，显示用户的个人信息，这是实现用户资源 REST 架构（参见 [2.2.2 节](chapter2.html#sec-2-2-2)）的第一步。和之前一样，开发的过程中要编写测试，结合 RSpec 和 Capybara 写出简洁有效的集成测试。
+User 模型可以正常使用了，接下来要实现的功能大多数网站都离不开：用户注册。在 [7.2 节](#sec-7-2)我们会创建一个表单，提交用户注册时填写的信息，然后在 [7.4 节](#sec-7-4)中使用提交的数据创建新用户，把相应的属性值存入数据库。注册功能实现后，还要创建一个用户资料页面，显示用户的个人信息，这是实现 Users 资源 REST 架构（参见 [2.2.2 节](chapter2.html#sec-2-2-2)）的第一步。和之前一样，开发的过程中要编写测试，结合 RSpec 和 Capybara 写出简洁有效的集成测试。
 
 创建资料页面之前，数据库中先要有用户记录。这有点类似“先有鸡还是先有蛋”的问题：网站还没实现注册功能，数据库中怎么会有用户记录呢？其实这个问题在 [6.3.5 节](chapter6.html#sec-6-3-5)中已经解决了，我们在控制台中向数据库中存储了一个用户记录。如果你跳过了那一节，现在赶快往回翻，完成相应的操作。
 
@@ -16,7 +16,7 @@ $ git checkout -b sign-up
 
 <h2 id="sec-7-1">7.1 显示用户信息</h2>
 
-本节要实现的用户资料页面是完整页面的一小部分，只显示用户的名字和头像，构思图如图 7.1 所示。<sup>[1](#fn-1)</sup> 最终完成的用户资料页面会显示用户的头像、基本信息和一些微博，构思图如图 7.2 所示。<sup>[2](#fn-2)</sup> （在图 7.2 中，我们第一次用到了“lorem ipsum”占位文字，[这些文字背后的故事](http://www.straightdope.com/columns/read/2290/what-does-the-filler-text-lorem-ipsum-mean)很有意思，用空的话你可以了解一下。）整个资料页面会和整个示例程序一起在 [第十一章](chapter11.html)完成。
+本节要实现的用户资料页面是完整页面的一小部分，只显示用户的名字和头像，构思图如图 7.1 所示。<sup>[1](#fn-1)</sup> 最终完成的用户资料页面会显示用户的头像、基本信息和一些微博，构思图如图 7.2 所示。<sup>[2](#fn-2)</sup> （在图 7.2 中，我们第一次用到了“lorem ipsum”占位文字，[这些文字背后的故事](http://www.straightdope.com/columns/read/2290/what-does-the-filler-text-lorem-ipsum-mean)很有意思，有空的话你可以了解一下。）整个资料页面会和整个示例程序一起在 [第十一章](chapter11.html)完成。
 
 ![profile_mockup_profile_name_bootstrap](assets/images/figures/profile_mockup_profile_name_bootstrap.png)
 
@@ -136,7 +136,7 @@ if Rails.env.development?
 
 <div id="box-7-1" class="aside">
   <h4>旁注 7.1 Rails 的三个环境</h4>
-  <p>Rails 定义了三种环境，分别是“生产环境”、“开发环境”和“测试环境”。Rails 控制台默认使用的是“开发环境”：</p>
+  <p>Rails 定义了三个环境，分别是“生产环境”、“开发环境”和“测试环境”。Rails 控制台默认使用的是“开发环境”：</p>
   <pre>
   $ rails console
   Loading development environment
@@ -196,7 +196,7 @@ resources :users
 
 修改后的路由文件如代码 7.3 所示。
 
-**代码 7.3** 在路由文件中添加用户资源设置 <br />`config/routes.rb`
+**代码 7.3** 在路由文件中添加 Users 资源设置 <br />`config/routes.rb`
 
 ```ruby
 SampleApp::Application.routes.draw do
@@ -211,7 +211,7 @@ SampleApp::Application.routes.draw do
 end
 ```
 
-你可能发现了，我们把下面这行代码 5.23 中出现的代码删掉了：
+你可能发现了，我们把下面这行在代码 5.23 中出现的代码删掉了：
 
 ```ruby
 get "users/new"
@@ -368,13 +368,13 @@ describe "profile page" do
 end
 ```
 
-我们要把上面代码中的注释换成相关的代码才行。在注释后面，调用 `user_path` 具名路由（参见[表格 7.1](#table-7-1)）访问用户资源页面的地址，然后检测页面中 `h1` 和 `title` 标签是否都包含用户的名字。
+我们要把上面代码中的注释换成相关的代码才行。在注释后面，调用 `user_path` 具名路由（参见[表格 7.1](#table-7-1)）访问用户资料页面的地址，然后检测页面中 `h1` 和 `title` 标签是否都包含用户的名字。
 
 一般情况下，创建 User 模型需要调用 Active Record 提供的 `User.create` 方法，不过经验告诉我们，使用预构件（factory）创建用户对象更方便，存入数据库也更容易。
 
 我们要使用 [Factory Girl](http://github.com/thoughtbot/factory_girl) 来生成预构件，这个 gem 是由 thoughtbot 公司的达人开发的。和 RSpec 类似，Factory Girl 也定义了一套领域专属语言（Domain-specific Language, DSL），用来生成 Active Record 对象。Factory Girl 的句法很简单，使用块和方法定义对象的属性值。本章还没有显出预构件的优势，不过后续的内容会多次使用预构件的高级更能，到时你就可以看到它的强大之处了。例如，在 [9.3.3 节](chapter9.html#sec-9-3-3)中，需要生成一批 Email 地址各不相同的用户对象，用预构件就可以很轻松的完成这种操作。
 
-和其他的 gem 一样，我们要在 Bundler 的 `Gemfile` 加入如代码 7.7 所示的代码来安装 Factory Girl。（因为只有测试时才会用到 Factory Girl，所以把它归入测试组中。）
+和其他的 gem 一样，我们要在 Bundler 的 `Gemfile` 中加入如代码 7.7 所示的代码来安装 Factory Girl。（因为只有测试时才会用到 Factory Girl，所以把它归入测试组中。）
 
 **代码 7.7** 把 Factory Girl 加入 `Gemfile`
 
@@ -469,7 +469,7 @@ $ bundle exec rspec spec/
 $ bundle exec rspec spec/
 ```
 
-使用 Factory Girl 后，明显可以察觉测试变慢了，这不是 Factory Girl 导致的，而是有意为之，并不是 bug。变慢的原因在于 [6.3.1 节](chapter6.html#sec-6-3-1)中用来加密密码的 BCrypt，其加密算法设计如此，因为慢速加密的密码很难破解。慢速加密的过程会延长测试的运行时间，不过我们可以做个简单的设置改变这种情况。BCrypt 使用耗时因子（cost factor）设定加密过程的耗时，耗时因子的默认值倾向于安全性而不是速度，在生产环境这种设置很好，但测试时的关注点却有所不同：测试追求的是速度，而不用在意测试数据库中用户的密码强度。我们可以在测试配置文件 `config/environments/test.rb` 中加入几行代码来解决速度慢的问题：把耗时因子的默认值修改为最小值，提升加密的速度，如代码 7.11 所示。即使测试量很少，修改设置之后速度的提升也是很明显的，所以我建议每个读者都在 `test.rb` 文件中加入代码 7.11 的内容。
+使用 Factory Girl 后，明显可以察觉测试变慢了，这不是 Factory Girl 导致的，而是有意为之，并不是 bug。变慢的原因在于 [6.3.1 节](chapter6.html#sec-6-3-1)中用来加密密码的 BCrypt，其加密算法设计如此，因为慢速加密的密码很难破解。慢速加密的过程会延长测试的运行时间，不过我们可以做个简单的设置改变这种情况。BCrypt 使用耗时因子（cost factor）设定加密过程的耗时，耗时因子的默认值倾向于安全性而不是速度，在生产环境这种设置很好，但测试时的关注点却有所不同：测试追求的是速度，而不用在意测试数据库中用户的密码强度。我们可以在“测试环境”配置文件 `config/environments/test.rb` 中加入几行代码来解决速度慢的问题：把耗时因子的默认值修改为最小值，提升加密的速度，如代码 7.11 所示。即使测试量很少，修改设置之后速度的提升也是很明显的，所以我建议每个读者都在 `test.rb` 文件中加入代码 7.11 的内容。
 
 **代码 7.11** 为测试环境重新设置 BCrypt 耗时因子<br />`config/environments/test.rb`
 
@@ -655,7 +655,7 @@ $ bundle exec rake db:test:prepare
 
 <h3 id="sec-7-2-1">7.2.1 测试用户注册功能</h3>
 
-在 WEb 框架没有完全支持测试之前，测试是件很痛苦的事，也很容易出错。例如，手动测试“注册”页面时，我们要在浏览器中访问这个页面，然后分别提交不合法的和合法的数据，检查在这两种情况下应用程序的表现是否正常。而且，每次修改程序后，都要重复上述的操作。使用 RSpec 和 Capybara 之后，以前需要手动进行的测试，现在可以编写测试用例自动执行了。
+在 Web 框架没有完全支持测试之前，测试是件很痛苦的事，也很容易出错。例如，手动测试“注册”页面时，我们要在浏览器中访问这个页面，然后分别提交不合法的和合法的数据，检查在这两种情况下应用程序的表现是否正常。而且，每次修改程序后，都要重复上述的操作。使用 RSpec 和 Capybara 之后，以前需要手动进行的测试，现在可以编写测试用例自动执行了。
 
 前面的章节已经介绍过 Capybara 访问网页时使用的很直观的句法，其中用的最多的就是访问某个页面的 `visit` 方法。Capybara 的功能可不仅限于此，它还可以填写如图 7.11 所示的表单字段，然后点击提交按钮，句法如下：
 
@@ -668,7 +668,7 @@ fill_in "Name", with: "Example User"
 click_button "Create my account"
 ```
 
-现在我们要分别提交不合法的和合法的注册数据，验证注册功能是否可以正常使用。我们要用到的测试相对高级一些，所以我们会慢慢地分析。如果你想查看最终的测试代码（以及测试文件的位置），可以直接跳到代码 7.16。先来测试没有正确填写信息的注册表单，我们访问“注册”页面，什么也不填，直接点击注册按钮（调用 `click_button` 方法），这个操作模拟的就是提交不合法数据的情况：
+现在我们要分别提交不合法的和合法的注册数据，验证注册功能是否可以正常使用。我们要用到的测试相对高级一些，所以会慢慢分析。如果你想查看最终的测试代码（以及测试文件的位置），可以直接跳到代码 7.16。先来测试没有正确填写信息的注册表单，我们访问“注册”页面，什么也不填，直接点击注册按钮（调用 `click_button` 方法），这个操作模拟的就是提交不合法数据的情况：
 
 ```ruby
 visit signup_path
@@ -741,7 +741,7 @@ expect { click_button "Create my account" }.not_to change(User, :count)
 提交合法数据的情况和上述不合法数据的情况类似，不过用户数量不是不变，而是增加了 1 个：
 
 ```ruby
-visit_signup path
+visit signup_path
 fill_in "Name", with: "Example User"
 fill_in "Email", with: "user@example.com"
 fill_in "Password", with: "foobar"
@@ -1011,7 +1011,7 @@ $ bundle exec rspec spec/requests/user_pages_spec.rb \
 
 在 [7.2.3 节](#sec-7-2-3)中介绍过，这个表单会向 /users 地址发送 `POST` 请求。
 
-添加代码 7.21 之后，代码 7.16 中对不合法数据的测试就可以通过了。代码 7.21 中再次调用了 `render` 方法，第一使用时是为了插入局部视图（参见[5.1.3 节](chapter5.html#sec-5-1-3)），不过如你所见，在控制器的动作中也可以使用这个方法。同时，我们也借此代码介绍了 `if-else` 分支结构的用法：根据 `@user.save` 的返回值分别处理用户存储成功和失败这两种情况（存储成功时返回值为 `true`，失败时返回值为 `false`）。
+添加代码 7.21 之后，代码 7.16 中对不合法数据的测试就可以通过了。代码 7.21 中再次调用了 `render` 方法，第一使用时是为了插入局部视图（参见[5.1.3 节](chapter5.html#sec-5-1-3)），不过如你所见，在控制器的动作中也可以使用这个方法。同时，我们也借此代码介绍了 `if-else` 分支结构的用法：根据 `@user.save` 的返回值，分别处理用户存储成功和失败这两种情况（存储成功时返回值为 `true`，失败时返回值为 `false`）。
 
 **代码 7.21** 处理存储失败的 `create` 动作（还不能处理存储成功的情况） <br />`app/controllers/users_controller.rb`
 
@@ -1061,7 +1061,7 @@ controller: users
 <input id="user_email" name="user[email]" size="30" type="text" />
 ```
 
-该字段的 `name` 属性的值是 `user[email]`，它代表的就是 `user` Hash 的 `email` 元素。虽然调试信息中的键是字符串形式，不过在内部，Rails 使用的却是 Symbol 形式。`params[:user]` 这个嵌套的 Hash，实际上就是 `User.new` 方法创建用户所需的参数值。（我们在 [4.4.5 节](chapter4.html#sec-4-4-5)中介绍过 `User.new` 的用法，代码 7.21 再次用到了这个方法。）也就是说，如下的代码
+该字段 `name` 属性的值是 `user[email]`，它代表的就是 `user` Hash 的 `email` 元素。虽然调试信息中的键是字符串形式，不过在内部，Rails 使用的却是 Symbol 形式。`params[:user]` 这个嵌套的 Hash，实际上就是 `User.new` 方法创建用户所需的参数值。（我们在 [4.4.5 节](chapter4.html#sec-4-4-5)中介绍过 `User.new` 的用法，代码 7.21 再次用到了这个方法。）也就是说，如下的代码
 
 ```ruby
 @user = User.new(params[:user])
@@ -1144,7 +1144,7 @@ $ rails console
 </div>
 ```
 
-注意，在上面的代码中渲染的局部视图名为 `shared/error_messages`，这里用到了 Rails 的一个约定：如果局部视图要在多个控制器重使用，则把它存放在专门的 `shared` 目录下。（这个约定 [9.1.1 节](chapter9.html#9-1-1)还会再介绍）我们除了要新建 `_error_messages.html.erb` 文件之外，还要新建 `app/views/shared` 文件夹。错误提示信息局部视图的内容如代码 7.23 所示。
+注意，在上面的代码中渲染的局部视图名为 `shared/error_messages`，这里用到了 Rails 的一个约定：如果局部视图要在多个控制器中使用，则把它存放在专门的 `shared` 目录下。（这个约定 [9.1.1 节](chapter9.html#sec-9-1-1)还会再介绍）我们除了要新建 `_error_messages.html.erb` 文件之外，还要新建 `app/views/shared` 文件夹。错误提示信息局部视图的内容如代码 7.23 所示。
 
 **代码 7.23** 显示表单错误提示信息的局部视图 <br />`app/views/shared/_error_messages.html.erb`
 
@@ -1248,11 +1248,11 @@ $ bundle exec rspec spec/requests/user_pages_spec.rb \
 
 图 7.18：访问“注册”页面后直接点击“Create my account”按钮的效果
 
-不过，图 7.18 中显示的错误提示信息还有一个小瑕疵：未填写密码的提示信息是“Password digest can't be blank”，如果显示“Password can't be blank”就好了。之所以会这么显示，是 `has_secure_password` 方法（[6.3.4 节](chapter6.html#sec-6-3-4)中介绍过）中的数据验证导致的。这个问题会在 [7.6 节](#sec-7-6)的练习中解决。
+不过，图 7.18 中显示的错误提示信息还有一个小瑕疵：未填写密码的提示信息是“Password digest can't be blank”，如果显示成“Password can't be blank”就好了。之所以会这么显示，是 `has_secure_password` 方法（[6.3.4 节](chapter6.html#sec-6-3-4)中介绍过）中的数据验证导致的。这个问题会在 [7.6 节](#sec-7-6)的练习中解决。
 
 <h2 id="sec-7-4">7.4 注册成功</h2>
 
-上一节已经处理了提交不合法数据的情况，本节我们要完成注册表单的功能，如果提交的数据合法，就把用户存入数据库。我们先尝试着保存用户，如果保存成功，用户的数据就会存入数据库中，然后网页会转向刚注册用户的资料页面，页面中会显示一个欢迎信息，构思图如图 7.19 所示。如果保存用户失败了，就交由上一节实现的功能处理。
+上一节已经处理了提交不合法数据的情况，本节我们要完成注册表单的功能，如果提交的数据合法，就把用户存入数据库。我们先尝试保存用户，如果保存成功，用户的数据就会存入数据库中，然后网页会转向刚注册用户的资料页面，页面中会显示一个欢迎信息，构思图如图 7.19 所示。如果保存用户失败了，就交由上一节实现的功能处理。
 
 ![signup_success_mockup_bootstrap](assets/images/figures/signup_success_mockup_bootstrap.png)
 
@@ -1267,7 +1267,7 @@ $ bundle exec rspec spec/requests/user_pages_spec.rb \
 > -e "signup with valid information"
 ```
 
-测试之所以会失败，是因为 Rails 处理动作的默认方式是渲染视图，可是 `create` 动作还没有（也不应该有）对应的视图。相反的，我们要转向其他的页面，最合理的转向页面是刚创建用户的资料页面。检测是否转向正确页面的测试留作练习（参见 [7.6 节](#sec-7-6)），`create` 动作的代码如代码 7.25 所示。
+测试之所以会失败，是因为 Rails 处理动作的默认方式是渲染视图，可是 `create` 动作还没有（也不应该有）对应的视图。相反的，我们要转向其他的页面，最合理的转向页面是刚创建用户的资料页面。检测是否转向正确页面的测试会留作练习（参见 [7.6 节](#sec-7-6)），`create` 动作的代码如代码 7.25 所示。
 
 **代码 7.25** `create` 动作的代码，处理了保存和转向操作<br />`app/controllers/users_controller.rb`
 
@@ -1289,7 +1289,7 @@ end
 
 注意，转向地址我们直接写了 `@user`，而没用 `user_path`，Rails 会自动转向到用户的资料页面。
 
-加入了代码 7.25 后，注册表单就可以正常使用了，你可以运行测试验证一下：
+加入代码 7.25 后，注册表单就可以正常使用了，你可以运行测试验证一下：
 
 ```sh
 $ bundle exec rspec spec/
@@ -1297,7 +1297,7 @@ $ bundle exec rspec spec/
 
 <h3 id="sec-7-4-2">7.4.2 Flash 消息</h3>
 
-验证合法数据是否能够正确提交之前，我们还要加入一个 Web 应用程序大都会实现的功能：在转向后的页面中显示一个消息（这里我们要显示的是一个欢迎新用户的消息），如果访问了其他页面或者刷新了页面，这个消息便会消失。在 Rails 中这种功能是通过 `flash` 变量实现的，`flash` 就像闪存一样，只是暂时存储数据。`flash` 变量的值其实是一个 Hash，你可能还记得，[4.3.3 节](chapter4.html#sec-4-3-3)中我们在控制台中遍历了一个名为 `flash` 的 Hash：
+验证合法数据是否能够正确提交之前，我们还要加入一个 Web 应用程序大都会实现的功能：在转向后的页面中显示一个消息（这里我们要显示的是一个欢迎新用户的消息），如果访问了其他页面或者刷新了页面，这个消息便会消失。在 Rails 中这种功能是通过 `flash` 变量实现的，`flash` 就像闪存一样，只是暂时存储的数据。`flash` 变量的值其实是一个 Hash，你可能还记得，[4.3.3 节](chapter4.html#sec-4-3-3)中我们在控制台中遍历了一个名为 `flash` 的 Hash：
 
 ```sh
 $ rails console
@@ -1313,7 +1313,7 @@ error
 It failed.
 ```
 
-我们可以把显示 Flash 消息的代码加入应用程序的布局，这样整个网站在需要的时候就会显示消息了，如代码 7.26 所示。（代码 7.26 混合了 HTML 和 ERb 代码，有点乱，[7.6 节](#sec-7-6)中的练习会对此进行重构。）
+我们可以把显示 Flash 消息的代码加入应用程序的布局，这样整个网站在需要的时候就会显示消息了，如代码 7.26 所示。（代码 7.26 混合了 HTML 和 ERb 代码，有点乱，[7.6 节](#sec-7-6)中的练习会进行重构。）
 
 **代码 7.26** 把 `flash` 消息相关的代码加入网站的布局中<br />`app/views/layouts/application.html.erb`
 
@@ -1354,7 +1354,7 @@ It failed.
 <div class="alert alert-success">Welcome to the Sample App!</div>
 ```
 
-（注意，键 `:success` 是 Symbol，在插入模板之前，ERb 会自动将其转换成字符串 `"success"`。）我们遍历了所有可能出现的 Flash 消息，这样当消息存在时才能显示。在 [8.1.5 节](chapter8.html#8-1-5) 中会使用 `flash[:error]` 显示登录失败消息。<sup>[10](#fn-10)</sup>
+（注意，键 `:success` 是 Symbol，在插入模板之前，ERb 会自动将其转换成字符串 `"success"`。）我们遍历了所有可能出现的 Flash 消息，这样当消息存在时才能显示。在 [8.1.5 节](chapter8.html#sec-8-1-5) 中会使用 `flash[:error]` 显示登录失败消息。<sup>[10](#fn-10)</sup>
 
 检测页面中是否显示了正确的 Flash 消息的测试留作练习（参见 [7.6 节](#sec-7-6)）。在 `create` 动作中给 `flash[:success]` 赋值一个欢迎信息后（如代码 7.27 所示），这个测试就可以通过了。
 
@@ -1455,7 +1455,7 @@ $ heroku open
 
 注意，在图 7.22 中，通常显示为 `http://` 的地方现在显示的是 `https://`，就是这个额外的“s”，证明我们正在使用 SSL。
 
-现在你可以打开注册页面注册一个新用户了。如果遇到问题，运行 `heroku logs`，尝试着使用 Heroku 的日志文件排错。
+现在你可以打开注册页面注册一个新用户了。如果遇到问题，运行 `heroku logs`，尝试使用 Heroku 的日志文件排错。
 
 ![signup_in_production_bootstrap](assets/images/figures/signup_in_production_bootstrap.png)
 
@@ -1463,7 +1463,7 @@ $ heroku open
 
 <h2 id="sec-7-5">7.5 小结</h2>
 
-实现注册功能对示例程序来说算是取得了很大的进展。虽然现在还没实现真正有用的功能，不过我们却为后续功能的开发奠定了坚实的基础。[第八章](chapter8.html)，我们会实现用户登录、退出功能，完成整个身份验证机制。[第九章](chapter9.html)，我们会实现更新用户个人信息的功能。我们还会实现管理员删除用户的功能，这样才算是完整的实现了[表格 7.1](#table-7-1) 中所列的用户资源相关的 REST 动作。最后，我们还会在各动作中实现权限验证功能，提升网站的安全。
+实现注册功能对示例程序来说算是取得了很大的进展。虽然现在还没实现真正有用的功能，不过我们却为后续功能的开发奠定了坚实的基础。[第八章](chapter8.html)，我们会实现用户登录、退出功能，完成整个身份验证机制。[第九章](chapter9.html)，我们会实现更新用户个人信息的功能。我们还会实现管理员删除用户的功能，这样才算是完整的实现了[表格 7.1](#table-7-1) 中所列 Users 资源相关的 REST 动作。最后，我们还会在各动作中实现权限验证功能，提升网站的安全。
 
 <h2 id="sec-7-6">7.6 练习</h2>
 

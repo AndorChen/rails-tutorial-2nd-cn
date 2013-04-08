@@ -598,27 +598,76 @@ body {
 
 /* Homepage */
 
-.thanks-giving {
-  background: #fff0d3 url("../images/alipay.gif") no-repeat 15px 50%;
-  border-radius: 3px;
-  border: 1px solid #ffd680;
-  margin: 1em 20px;
-  padding: 15px 15px 15px 70px;
+.bookinfo {
+  margin-left: 300px;
+  padding: 20px;
+}
+.bookinfo img {
+  margin-left: -300px;
+  padding-right: 20px;
+  display: block;
+  float: left;
+}
+.bookinfo dl {
+  margin: 0;
+}
+.bookinfo dt {
+  color: #666;
+  float: left;
 }
 
-.l-menu {
-    float: left;
-    width: 600px;
+.buy {
+  margin: 30px 0;
 }
-
-.menu {
+.buy ul {
   list-style-type: none;
-  padding-left: 20px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+.buy ul li {
+  display: block;
+  float: left;
+  margin-right: 10px;
+}
+.btn {
+  border: 1px solid #DEA620;
+  border-radius: 4px;
+  background: #FF0;
+  background-repeat: repeat-x;
+  background-image: -webkit-linear-gradient(top, #F4CF2D, #EDBF13);
+  color: #444;
+  line-height: 36px;
+  padding: 5px 10px;
+  text-decoration: none;
+  text-shadow: 0 1px 0 rgba(255,255,0,.5);
+  -webkit-box-shadow: 0 2px 0 #AC7B2D;
+}
+.buy .notes {
+  color: #888;
 }
 
-.r-info {
-    float: right;
-    width: 200px;
+.grid-2 {
+  padding: 20px;
+}
+.announcement {
+  float: left;
+  margin-right: 40px;
+  width: 440px;
+}
+.announcement blockquote {
+  margin: 0;
+}
+.announcement .cite {
+  text-align: right;
+}
+.menu {
+  float: left;
+  width: 280px;
+}
+.menu ol {
+  list-style-type: none;
+  padding-left: 0;
 }
 
 /* TOC */
@@ -674,16 +723,16 @@ body {
   margin: 0 auto;
 }
 
-.main code,
-.main tt {
-    background-color: #DEEAC9;
-    border: 1px solid #CAD5B7;
-    border-radius: 3px;
-    padding: 1px 3px;
-}
-
 .main .center {
   text-align: center;
+}
+
+.main .align-left {
+  text-align: left;
+}
+
+.main .align-right {
+  text-align: right;
 }
 
 .main .caption {
@@ -788,7 +837,7 @@ body {
 }
 
 .main pre {
-  line-height: 1.2em;
+  line-height: 1.5;
   font-family: monospace;
 }
 
@@ -805,10 +854,9 @@ body {
 /* navigation */
 
 .main .navigation {
-  border-bottom: 3px double #999;
   font-size: 12px;
   margin: 20px 0 40px;
-  padding: 0 0 40px 0;
+  padding-bottom: 20px;
 }
 
 .main .navigation .prev_page {
@@ -819,13 +867,22 @@ body {
   float: right;
 }
 
+/* Footnotes */
+
+.footnotes {
+  border-top: 3px double #999;
+  margin: 0!important;
+  padding-top: 40px;
+  padding-bottom: 20px;
+}
+
 /* Footer */
 
 .footer {
-    color: #888;
-    text-align: center;
-    font-size: 12px;
-    text-shadow: 0 1px 1px rgba(255,255,255,.9);
+  color: #888;
+  text-align: center;
+  font-size: 12px;
+  text-shadow: 0 1px 1px rgba(255,255,255,.9);
 }
 
 /* Code Highlight */
@@ -890,17 +947,6 @@ body {
 .vg { color: #19177C } /* Name.Variable.Global */
 .vi { color: #19177C } /* Name.Variable.Instance */
 .il { color: #666666 } /* Literal.Number.Integer.Long */
-
-
-
-
-
-
-
-
-
-
-
 
 /* ==========================================================================
    Helper classes
