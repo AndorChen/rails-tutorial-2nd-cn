@@ -246,7 +246,7 @@ $ rvm install 1.9.3 --with-readline-dir=/opt/local
 
 （就像我说过的，很多地方都可能会出错，唯一的解决办法就是网络搜索，然后自己解决。）
 
-安装 Ruby 之后，要配置一下你的系统，这样其他程序才能运行 Rails。这个过程会涉及到 gem 的安装，gem 是 Ruby 代码的打包系统。因为不同版本的 gem 会有差异，我们经常要创建一个额外的 gem 集（gemset），包含一系列的 gem。针对本教程，我推荐你创建一个名为 `rails3tutorila2ndEd` 的 gemset：
+安装 Ruby 之后，要配置一下你的系统，这样其他程序才能运行 Rails。这个过程会涉及到 gem 的安装，gem 是 Ruby 代码的打包系统。因为不同版本的 gem 会有差异，我们经常要创建一个额外的 gem 集（gemset），包含一系列的 gem。针对本教程，我推荐你创建一个名为 `rails3tutorial2ndEd` 的 gemset：
 
 ```sh
 $ rvm use 1.9.3@rails3tutorial2ndEd --create --default
@@ -304,7 +304,7 @@ update: --no-rdoc --no-ri
 
 <h4>安装 Rails</h4>
 
-安装玩 RubyGems 后安装 Rails 也就简单了。本教程使用 Rails 3.2，通过以下命令安装：
+安装完 RubyGems 后安装 Rails 也就简单了。本教程使用 Rails 3.2，通过以下命令安装：
 
 ```sh
 $ gem install rails -v 3.2.13

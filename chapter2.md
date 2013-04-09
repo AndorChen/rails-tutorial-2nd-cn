@@ -63,7 +63,7 @@ end
 $ bundle install --without production
 ```
 
-`--without production` 选项指明不安装生产环境所需的 gem，这里只有 `pg` 是生成环境所需的。（如果 Bundler 提示：
+`--without production` 选项指明不安装生产环境所需的 gem，这里只有 `pg` 是生产环境所需的。（如果 Bundler 提示：
 
 ```text
 no such file to load -- readline (LoadError)
@@ -280,7 +280,7 @@ $ rails s
 1. 视图使用内嵌 Ruby 代码的模板渲染成 HTML；
 1. 控制器将生成的 HTML 发送回浏览器。<sup>[3](#fn-3)</sup>
 
-首先我们要从浏览器中发起一个请求，你可以直接在浏览器地址栏中敲入地址，也可以点击页面中的链接。（图 2.11 中的第 1 步）接着请求到达 Rails 路由（第 2 步），根据 URI 将其分发到适当的控制器动作（而且还会考量请求的类型，[旁注 3.2](chapter3.html#box-3-2) 中会介绍）。将 Users 资源中相关的 URI 映射到控制器动作的代码如代码 2.1 所示。这些代码会按照表格 2.1 中的对应关系做映射。（`:users` 是一个 Symbol，[4.3.3 节](chapter4.html#sec-4-3-3)会介绍）
+首先我们要从浏览器中发起一个请求，你可以直接在浏览器地址栏中敲入地址，也可以点击页面中的链接。（图 2.11 中的第 1 步）接着请求到达 Rails 路由（第 2 步），根据 URI 将其分发到适当的控制器动作（而且还会考量请求的类型，[旁注 3.2](chapter3.html#box-3-2) 中会介绍）。将 Users 资源中相关的 URI 映射到控制器动作的代码如代码 2.2 所示。这些代码会按照表格 2.1 中的对应关系做映射。（`:users` 是一个 Symbol，[4.3.3 节](chapter4.html#sec-4-3-3)会介绍）
 
 **代码 2.2** Rails 的路由设置，包含一条 Users 资源的规则 <br />`config/routes.rb`
 
@@ -815,7 +815,7 @@ $ heroku create --stack cedar
 $ git push heroku master
 ```
 
-最后，迁移生成环境中的数据库（如果得到错误提示请参考下面的内容）
+最后，迁移生产环境中的数据库（如果得到错误提示请参考下面的内容）
 
 ```sh
 $ heroku run rake db:migrate
