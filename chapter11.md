@@ -206,7 +206,7 @@ class User < ActiveRecord::Base
 
 （由于删除用户后，也应该删除该用户的所有“关系”， 于是我们指定了 `dependent: :destroy` 参数；针对删除效果的测试会留作练习，参见 [11.5 节](#sec-11-5)。）
 
-和 Micropost 模型一样，Relationship 模型和 User 模型之间也有一层 `belongs_to` 关系，此时，这种关系同时属于关注着和被关注着，针对这层“关系”的测试如代码 11.5 所示。
+和 Micropost 模型一样，Relationship 模型和 User 模型之间也有一层 `belongs_to` 关系，此时，这种关系同时属于关注者和被关注者，针对这层“关系”的测试如代码 11.5 所示。
 
 **代码 11.5** 测试 User 和 Relationship 模型之间的 `belongs_to` 关系<br />`spec/models/relationship_spec.rb`
 
@@ -415,7 +415,7 @@ require 'spec helper'
       .
       describe "and unfollowing" do
         before { @user.unfollow!(other_user) }
-        it { should_not be following(other_user) }
+        it { should_not be_following(other_user) }
         its(:followed_users) { should_not include(other_user) }
       end
     end

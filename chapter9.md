@@ -1690,12 +1690,12 @@ $ git merge updating-users
 
 ```sh
 $ git push heroku
-$ heroku pg:reset SHARED_DATABASE --confirm <name-heroku-gave-to-your-app>
+$ heroku pg:reset DATABASE --confirm <name-heroku-gave-to-your-app>
 $ heroku run rake db:migrate
 $ heroku run rake db:populate
 ```
 
-（如果你忘了 Heroku 程序的名字，可以直接运行 `heroku pg:reset SHARED_DATABASE`，Heroku 会告诉你程序的名字。）
+（如果你忘了 Heroku 程序的名字，可以直接运行 `heroku pg:reset DATABASE`，Heroku 会告诉你程序的名字。）
 
 还有一点需要注意，本章我们加入了程序所需的最后一个 gem，最终的 `Gemfile` 如代码 9.49 所示。
 
