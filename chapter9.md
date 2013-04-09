@@ -1690,7 +1690,7 @@ $ git merge updating-users
 
 ```sh
 $ git push heroku
-$ heroku pg:reset DATABASE --confirm <name-heroku-gave-to-your-app>
+$ heroku pg:reset DATABASE
 $ heroku run rake db:migrate
 $ heroku run rake db:populate
 ```
