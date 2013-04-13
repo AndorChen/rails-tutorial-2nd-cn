@@ -130,7 +130,9 @@ user.relationships.build(followed_id: ...)
 **代码 11.2** 测试建立“关系”以及属性的可访问性<br />`spec/models/relationship_spec.rb`
 
 ```ruby
-require 'spec_helper' describe Relationship do
+require 'spec_helper'
+
+describe Relationship do
   let(:follower) { FactoryGirl.create(:user) }
   let(:followed) { FactoryGirl.create(:user) }
   let(:relationship) { follower.relationships.build(followed_id: followed.id) }
@@ -155,7 +157,7 @@ end
 **代码 11.3** 测试 `user.relationships`<br />`spec/models/user_spec.rb`
 
 ```ruby
-require 'spec helper'
+require 'spec_helper'
 describe User do
   .
   .
@@ -213,7 +215,8 @@ class User < ActiveRecord::Base
 **代码 11.5** 测试 User 和 Relationship 模型之间的 `belongs_to` 关系<br />`spec/models/relationship_spec.rb`
 
 ```ruby
-describe Relationship do .
+describe Relationship do
+  .
   .
   .
   describe "follower methods" do
@@ -253,7 +256,8 @@ $ bundle exec rspec spec/
 **代码 11.7** 测试 Relationship 模型的数据验证<br />`spec/models/relationship_spec.rb`
 
 ```ruby
-describe Relationship do .
+describe Relationship do
+  .
   .
   .
   describe "when followed id is not present" do
@@ -291,11 +295,14 @@ end
 
 ```ruby
 require 'spec helper'
-describe User do .
+
+describe User do
+  .
   .
   .
   it { should respond_to(:relationships) }
-  it { should respond_to(:followed_users) } .
+  it { should respond_to(:followed_users) }
+  .
   .
   .
 end
@@ -312,7 +319,8 @@ has_many :followeds, through: :relationships
 **列表 11.10** 在 User 模型中添加 `followed_users` 关联<br />`app/models/user.rb`
 
 ```ruby
-class User < ActiveRecord::Base .
+class User < ActiveRecord::Base
+  .
   .
   .
   has_many :microposts, dependent: :destroy
@@ -329,9 +337,10 @@ end
 **列表 11.11** 测试关注关系用到的方法<br />`spec/models/user_spec.rb`
 
 ```ruby
-require 'spec helper'
+require 'spec_helper'
 
-  describe User do .
+describe User do
+  .
   .
   .
   it { should respond_to(:followed_users) }
@@ -357,26 +366,27 @@ end
 **代码 11.12** 定义 `following?` 和 `follow!` 方法<br />`app/models/user.rb`
 
 ```ruby
-class User < ActiveRecord::Base .
-    .
-    .
-    def feed
-    .
-    .
-    .
-    end
+class User < ActiveRecord::Base
+  .
+  .
+  .
+  def feed
+  .
+  .
+  .
+  end
 
-    def following?(other_user)
-      relationships.find_by_followed_id(other_user.id)
-    end
+  def following?(other_user)
+    relationships.find_by_followed_id(other_user.id)
+  end
 
 
-    def follow!(other_user)
-      relationships.create!(followed_id: other_user.id)
-    end
-    .
-    .
-    .
+  def follow!(other_user)
+    relationships.create!(followed_id: other_user.id)
+  end
+  .
+  .
+  .
 end
 ```
 
@@ -399,29 +409,29 @@ self.relationships.create!(…)
 **代码 11.13** 测试取消关注用户<br />`spec/models/user_spec.rb`
 
 ```ruby
-require 'spec helper'
+require 'spec_helper'
 
-  describe User do
+describe User do
 
+  .
+  .
+  .
+  it { should respond_to(:follow!) }
+  it { should respond_to(:unfollow!) }
+  .
+  .
+  .
+  describe "following" do
     .
     .
     .
-    it { should respond_to(:follow!) }
-    it { should respond_to(:unfollow!) }
-    .
-    .
-    .
-    describe "following" do
-      .
-      .
-      .
-      describe "and unfollowing" do
-        before { @user.unfollow!(other_user) }
-        it { should_not be_following(other_user) }
-        its(:followed_users) { should_not include(other_user) }
-      end
+    describe "and unfollowing" do
+      before { @user.unfollow!(other_user) }
+      it { should_not be_following(other_user) }
+      its(:followed_users) { should_not include(other_user) }
     end
   end
+end
 ```
 
 `unfollow!` 方法的定义很容易理解，通过 `followed_id` 找到对应的“关系”删除就行了，如代码 11.14 所示。
@@ -463,9 +473,9 @@ end
 **代码 11.15** 测试对调后的关注关系<br />`spec/models/user_spec.rb`
 
 ```ruby
-require 'spec helper'
-describe User do
+require 'spec_helper'
 
+describe User do
   .
   .
   .
@@ -476,8 +486,8 @@ describe User do
   .
   .
   .
-
-  describe "following" do .
+  describe "following" do
+    .
     .
     .
     it { should be_following(other_user) }
