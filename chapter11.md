@@ -130,7 +130,7 @@ user.relationships.build(followed_id: ...)
 **代码 11.2** 测试建立“关系”以及属性的可访问性<br />`spec/models/relationship_spec.rb`
 
 ```ruby
-require 'spec helper' describe Relationship do
+require 'spec_helper' describe Relationship do
   let(:follower) { FactoryGirl.create(:user) }
   let(:followed) { FactoryGirl.create(:user) }
   let(:relationship) { follower.relationships.build(followed_id: followed.id) }
@@ -156,11 +156,13 @@ end
 
 ```ruby
 require 'spec helper'
-describe User do .
+describe User do
+  .
   .
   .
   it { should respond_to(:feed) }
-  it { should respond_to(:relationships) } .
+  it { should respond_to(:relationships) }
+  .
   .
   .
 end
