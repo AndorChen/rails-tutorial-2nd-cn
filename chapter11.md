@@ -143,8 +143,9 @@ describe Relationship do
   describe "accessible attributes" do
     it "should not allow access to follower id" do
       expect do
-        Relationship.new(follower_id: follower.id)
-      end.to raise_error(ActiveModel::MassAssignmentSecurity::Error)
+        Relationship.new(follower_id: follower.id).to 
+          raise_error(ActiveModel::MassAssignmentSecurity::Error)
+      end
     end
   end
 end
