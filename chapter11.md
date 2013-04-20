@@ -294,7 +294,7 @@ end
 **列表 11.9** 测试 `user.followed_users` 属性<br />`spec/models/user_spec.rb`
 
 ```ruby
-require 'spec helper'
+require 'spec_helper'
 
 describe User do
   .
