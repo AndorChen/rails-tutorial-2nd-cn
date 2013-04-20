@@ -736,7 +736,8 @@ end
 ?> puts address
 >> end
 user@foo.COM
-THE US-ER@foo.bar.org
+THE_US-ER@foo.bar.org
+first.last@foo.jp
 ```
 
 在上面这个控制台会话中，我们使用 `each` 方法（参见 [4.3.2 节](chapter4.html#sec-4-3-2)）遍历 `address` 数组中的元素。使用 `each` 方法可以编写一些简单的 Email 格式验证测试用例（参见代码 6.16）。
