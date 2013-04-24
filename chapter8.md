@@ -90,8 +90,6 @@ end
 
 代码 8.2 中的路由设置会生成类似[表格 7.1](chapter7.html#table-7-1) 所示的URI 地址和动作的对应关系，如[表格 8.1](#table-8-1) 所示。注意，我们修改了登录和退出具名路由，而创建 session 的路由还是使用默认值。
 
-为了让代码 8.1 中的测试通过，我们还要在 Sessions 控制器中加入 `new` 动作，相应的代码如代码 8.3 所示（同时也定义了 `create` 和 `destroy` 动作）。
-
 <table id="table-8-1" class="tabular">
   <tbody>
     <tr>
@@ -126,6 +124,8 @@ end
 </table>
 
 表格 8.1：代码 8.2 中的设置生成的符合 REST 架构的路由关系
+
+为了让代码 8.1 中的测试通过，我们还要在 Sessions 控制器中加入 `new` 动作，相应的代码如代码 8.3 所示（同时也定义了 `create` 和 `destroy` 动作）。
 
 **代码 8.3** 没什么内容的 Sessions 控制器<br />`app/controllers/sessions_controller.rb`
 
