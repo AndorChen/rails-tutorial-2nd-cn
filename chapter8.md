@@ -32,7 +32,7 @@ $ rails generate integration_test authentication_pages
 
 参照 [7.2 节](chapter7.html#sec-7-2)中的“注册”页面，我们要创建一个登录表单，用来生成新的 session。注册表单的构思图如图 8.1 所示。
 
-“登录”页面的地址由 `singin_path`（稍后定义）获取，和之前一样，我们要先编写相应的测试，如代码 8.1 所示。（可以和代码 7.6 中对“注册”页面的测试比较一下。）
+“登录”页面的地址由 `signin_path`（稍后定义）获取，和之前一样，我们要先编写相应的测试，如代码 8.1 所示。（可以和代码 7.6 中对“注册”页面的测试比较一下。）
 
 ![signin_mockup_bootstrap](assets/images/figures/signin_mockup_bootstrap.png)
 
