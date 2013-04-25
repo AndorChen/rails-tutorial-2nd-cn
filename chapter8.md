@@ -161,7 +161,7 @@ $ bundle exec rspec spec/
 
 对比图 8.1 和图 7.11 之后，我们发现登录表单和注册表单外观上差不多，只是少了两个字段，只有 Email 地址和密码字段。和注册表单一样，我们可以使用 Capybara 填写表单，再点击按钮进行测试。
 
-在测试的过程中，我们不得不向程序中加入相应的功能，这也正式 TDD 带来的好处之一。我们先来测试填写不合法数据的登录过程，构思图如图 8.2 所示。
+在测试的过程中，我们不得不向程序中加入相应的功能，这也正是 TDD 带来的好处之一。我们先来测试填写不合法数据的登录过程，构思图如图 8.2 所示。
 
 ![signin_failure_mockup_bootstrap](assets/images/figures/signin_failure_mockup_bootstrap.png)
 
@@ -240,7 +240,7 @@ describe "Authentication" do
     describe "with valid information" do
       let(:user) { FactoryGirl.create(:user) }
       before do
-       fill_in "Email", with: user.email
+       fill_in "Email",    with: user.email
        fill_in "Password", with: user.password
        click_button "Sign in"
       end
