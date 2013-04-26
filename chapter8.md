@@ -348,10 +348,6 @@ form_for(:session, url: sessions_path)
 
 首先，我们来编写 Sessions 控制器的 `create` 动作，如代码 8.9 所示，现在只是直接渲染登录页面。在浏览器中访问 /sessions/new，然后提交空表单，显示的页面如图 8.5 所示。
 
-![initial_failed_signin_rails_3_bootstrap](assets/images/figures/initial_failed_signin_rails_3_bootstrap.png)
-
-图 8.5：代码 8.9 中的 `create` 动作显示的登录失败后的页面
-
 **代码 8.9** Sessions 控制器中 `create` 动作的初始版本<br />`app/controllers/sessions_controller.rb`
 
 ```ruby
@@ -367,6 +363,10 @@ class SessionsController < ApplicationController
   .
 end
 ```
+
+![initial_failed_signin_rails_3_bootstrap](assets/images/figures/initial_failed_signin_rails_3_bootstrap.png)
+
+图 8.5：代码 8.9 中的 `create` 动作显示的登录失败后的页面
 
 仔细看一下图 8.5 中显示的调试信息，你会发现，如在 [8.1.3 节](#sec-8-1-3)末尾说过的，表单提交后会生成 `params` Hash，Email 和密码都在 `:session` 键中：
 
@@ -416,7 +416,7 @@ params[:session][:password]
 
 ```ruby
 def create
-  user = User.find_by_email(params[:session][:email])
+  user = User.find_by_email(params[:session][:email].downcase)
   if user && user.authenticate(params[:session][:password])
     # Sign the user in and redirect to the user's show page.
   else
@@ -473,7 +473,7 @@ class SessionsController < ApplicationController
   end
 
   def create
-    user = User.find_by_email(params[:session][:email])
+    user = User.find_by_email(params[:session][:email].downcase)
     if user && user.authenticate(params[:session][:password])
       # Sign the user in and redirect to the user's show page.
     else
@@ -565,7 +565,7 @@ class SessionsController < ApplicationController
   end
 
   def create
-    user = User.find_by_email(params[:session][:email])
+    user = User.find_by_email(params[:session][:email].downcase)
     if user && user.authenticate(params[:session][:password])
       # Sign the user in and redirect to the user's show page.
     else
@@ -600,7 +600,7 @@ class SessionsController < ApplicationController
   .
   .
   def create
-    user = User.find_by_email(params[:session][:email])
+    user = User.find_by_email(params[:session][:email].downcase)
     if user && user.authenticate(params[:session][:password])
       sign_in user
       redirect_to user
