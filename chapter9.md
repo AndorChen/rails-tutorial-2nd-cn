@@ -1308,7 +1308,7 @@ $ bundle exec rspec spec/
 </li>
 ```
 
-这个改进很不错，不过我们还可以做的跟好。我们可以直接把 `@users` 变量传递给 `render` 方法，如代码 9.38 所示。
+这个改进很不错，不过我们还可以做的更好。我们可以直接把 `@users` 变量传递给 `render` 方法，如代码 9.38 所示。
 
 **代码 9.38** 完全重构后的用户列表视图<br />`app/views/users/index.html.erb`
 
@@ -1572,7 +1572,7 @@ end
   <%= gravatar_for user, size: 52 %>
   <%= link_to user.name, user %>
   <% if current_user.admin? && !current_user?(user) %>
-    | <%= link_to "delete", user, method: :delete, confirm: "You sure?" %>
+    | <%= link_to "delete", user, method: :delete, data: { confirm: "You sure?" } %>
   <% end %>
 </li>
 ```
