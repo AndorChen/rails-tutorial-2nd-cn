@@ -398,7 +398,7 @@ p {
 }
 ```
 
-其中 `color: #fff;` 会把 LOGO 文字的颜色变成白色。HTML 中的颜色代码是由 3 个 16 进制数组成的，分别代表了三原色中的红、绿、蓝。`#ffffff` 是 3 中颜色都为最大值的情况，代表了纯白色。`#fff` 是 `#ffffff` 的简写形式。CSS 标准中为很多常用的 HTML 颜色定义了别名，例如 `white` 代表的是 `#fff`。代码 5.7 中的样式效果如图 5.6 所示。
+其中 `color: #fff;` 会把 LOGO 文字的颜色变成白色。HTML 中的颜色代码是由 3 个 16 进制数组成的，分别代表了三原色中的红、绿、蓝。`#ffffff` 是 3 种颜色都为最大值的情况，代表了纯白色。`#fff` 是 `#ffffff` 的简写形式。CSS 标准中为很多常用的 HTML 颜色定义了别名，例如 `white` 代表的是 `#fff`。代码 5.7 中的样式效果如图 5.6 所示。
 
 ![sample_app_logo](assets/images/figures/sample_app_logo.png)
 
