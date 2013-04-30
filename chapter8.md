@@ -791,6 +791,7 @@ class User < ActiveRecord::Base
     def create_remember_token
       self.remember_token = SecureRandom.urlsafe_base64
     end
+end
 ```
 
 顺便说一下，我们为 `create_remember_token` 方法增加了一层缩进，这样可以更好的突出这些方法是在 `private` 之后定义的。
@@ -821,7 +822,7 @@ end
 上述代码中用到的 `cookies` 方法是由 Rails 提供的，我们可以把它看成 Hash，其中每个元素又都是一个 Hash，包含两个元素，`value` 指定 cookie 的文本，`expires` 指定 cookie 的失效日期。例如，我们可以使用下述代码实现登录功能，把 cookie 的值设为用户的记忆权标，失效日期设为 20 年之后：
 
 ```ruby
-cookies[:remember_token] = { value: user.remember_token,
+cookies[:remember_token] = { value:   user.remember_token,
                              expires: 20.years.from_now.utc }
 ```
 
