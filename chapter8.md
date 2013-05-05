@@ -1493,7 +1493,7 @@ Given /ˆthe user has an account$/ do
 end
 
 When /ˆthe user submits valid signin information$/ do
-  fill_in "Email", with: @user.email
+  fill_in "Email",    with: @user.email
   fill_in "Password", with: @user.password
   click_button "Sign in"
 end
@@ -1536,7 +1536,7 @@ describe "Authentication" do
     describe "with valid information" do
       let(:user) { FactoryGirl.create(:user) }
       before do
-        fill_in "Email", with: user.email
+        fill_in "Email",    with: user.email
         fill_in "Password", with: user.password
         click_button "Sign in"
       end
@@ -1592,7 +1592,7 @@ end
 
 ```ruby
 def valid_signin(user)
-  fill_in "Email", with: user.email
+  fill_in "Email",    with: user.email
   fill_in "Password", with: user.password
   click_button "Sign in"
 end
@@ -1606,7 +1606,7 @@ end
 include ApplicationHelper
 
 def valid_signin(user)
-  fill_in "Email", with: user.email
+  fill_in "Email",    with: user.email
   fill_in "Password", with: user.password
   click_button "Sign in"
 end
