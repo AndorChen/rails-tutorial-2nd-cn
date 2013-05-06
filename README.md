@@ -30,7 +30,7 @@
 
 ## 发布协议
 
-本项目和英文原书采用相同的发布协议：[Creative Commons Attribution-ShareAlike 3.0 Unported License](http://creativecommons.org/licenses/by-sa/3.0/)
+本项目和英文原书采用相同的发布协议：[Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License](http://creativecommons.org/licenses/by-nc-sa/3.0/)
 
 在未得到本人及英文版作者许可的情况下，请勿用于任何商业用途。
 
