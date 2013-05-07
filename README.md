@@ -4,8 +4,6 @@
 
 英文原书的内容可以在 [mhartl/rails_tutorial_translation_2nd_ed](https://github.com/mhartl/rails_tutorial_translation_2nd_ed) 获取。
 
-现在你可以在淘宝网上购买本书的 PDF 版本电子书了，地址是 <http://item.taobao.com/item.htm?id=17282686017>。在购买之前，你可以先[试读](https://raw.github.com/AndorChen/rails-tutorial-2nd-cn/gh-pages/assets/sample.pdf)一下。
-
 ## 翻译状态
 
 **全书译完！**

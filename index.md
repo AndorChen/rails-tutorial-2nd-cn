@@ -22,22 +22,9 @@ layout: default
 		<dt>装帧：</dt>
 		<dd>电子书</dd>
 		<dt>格式：</dt>
-		<dd>HTML, PDF, Epub, Mobi</dd>
+		<dd>HTML</dd>
 	</dl>
-	<div class="buy">
-		<h3>购买电子书</h3>
-		<ul class="buy">
-			<li id="buy-pdf"><a class="btn" href="http://item.taobao.com/item.htm?id=17282686017" title="购买 PDF 电子书" target="_blank">PDF 格式</a></li>
-			<li id="buy-epub"><a class="btn" href="http://item.taobao.com/item.htm?id=19266423561" title="购买 ePub 电子书" target="_blank">ePub 格式</a></li>
-			<li id="buy-mobi"><a class="btn" href="http://item.taobao.com/item.htm?id=23139240628" title="购买 Mobi 电子书" target="_blank">Mobi 格式</a></li>
-		</ul>
-		<ol class="notes">
-			<li>出售行为已获原作者许可；</li>
-			<li>三种格式分开销售，售价均为 ￥9.90；</li>
-			<li>购买后，错误修正等更新免费获取，不再收费；</li>
-			<li>如果你的 Kindle 安装了多看系统，建议购买 ePub 格式；</li>
-		</ol>
-	</div>
+
 </div>
 
 <div class="clearfix"></div>
