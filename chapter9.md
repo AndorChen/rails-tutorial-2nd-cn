@@ -103,7 +103,7 @@ end
 
 在这段代码中我们再次使用了 [7.3.2 节](chapter7.html#sec-7-3-2)中创建的 `error_messages` 局部视图。
 
-添加了视图代码，再加上代码 9.2 中定义的 `@user` 变量，代码 9.1 中的编辑页面测试应该就可以通过了：
+添加了视图代码，再加上代码 9.2 中定义的 `@user` 变量，代码 9.1 中的 "编辑页面" 测试应该就可以通过了：
 
 ```sh
 $ bundle exec rspec spec/requests/user_pages_spec.rb -e "edit page"
