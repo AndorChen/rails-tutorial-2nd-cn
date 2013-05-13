@@ -388,7 +388,7 @@ $ bundle exec rspec spec/
 
 <h3 id="sec-9-2-1">9.2.1 必须先登录</h3>
 
-因为对 `edit` 和 `update` 动作所做的安全限制是一样的，所以我们就在同一个 RSpec `describe` 块中进行测试。我们从要求登录开始，测试代码要检测未登录的用户视图访问这两个动作时是否转向了登录页面，如代码 9.11 所示。
+因为对 `edit` 和 `update` 动作所做的安全限制是一样的，所以我们就在同一个 RSpec `describe` 块中进行测试。我们从要求登录开始，测试代码要检测未登录的用户试图访问这两个动作时是否转向了登录页面，如代码 9.11 所示。
 
 **代码 9.11** 测试 `edit` 和 `update` 动作是否处于被保护状态<br />`spec/requests/authentication_pages_spec.rb`
 
@@ -745,7 +745,7 @@ class SessionsController < ApplicationController
   .
   .
   def create
-    user = User.find_by_email(params[:session][:email])
+    user = User.find_by_email(params[:session][:email].downcase)
     if user && user.authenticate(params[:session][:password])
       sign_in user
       redirect_back_or user
