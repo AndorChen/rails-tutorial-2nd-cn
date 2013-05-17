@@ -1297,7 +1297,7 @@ $ bundle exec rspec spec/
 <%= will_paginate %>
 ```
 
-在上述代码中，`render` 的参数不再是指定局部试图的字符串，而是代表 `User` 类的 `user` 变量。<sup>[6](#fn-6)</sup>Rails 会自定寻找一个名为 `_user.html.erb` 的局部试图，我们要手动创建这个视图，然后写入代码 9.37 中的内容。
+在上述代码中，`render` 的参数不再是指定局部视图的字符串，而是代表 `User` 类的 `user` 变量。<sup>[6](#fn-6)</sup>Rails 会自动寻找一个名为 `_user.html.erb` 的局部视图，我们要手动创建这个视图，然后写入代码 9.37 中的内容。
 
 **代码 9.37** 显示单一用户的局部视图<br />`app/views/users/_user.html.erb`
 
