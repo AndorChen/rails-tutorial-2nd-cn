@@ -39,7 +39,7 @@ describe "User pages" do
     before { visit edit_user_path(user) }
 
     describe "page" do
-      it { should have_selector('h1', text: "Update your profile") }
+      it { should have_selector('h1',    text: "Update your profile") }
       it { should have_selector('title', text: "Edit user") }
       it { should have_link('change', href: 'http://gravatar.com/emails') }
     end
@@ -164,7 +164,7 @@ describe "Authentication" do
       before { sign_in user }
 
       it { should have_selector('title', text: user.name) }
-      it { should have_link('Profile', href: user_path(user)) }
+      it { should have_link('Profile',  href: user_path(user)) }
       it { should have_link('Settings', href: edit_user_path(user)) }
       it { should have_link('Sign out', href: signout_path) }
       it { should_not have_link('Sign in', href: signin_path) }
@@ -186,7 +186,7 @@ end
 .
 def sign_in(user)
   visit signin_path
-  fill_in "Email", with: user.email
+  fill_in "Email",    with: user.email
   fill_in "Password", with: user.password
   click_button "Sign in"
   # Sign in when not using Capybara as well.
@@ -322,7 +322,7 @@ describe "User pages" do
       it { should have_selector('title', text: new_name) }
       it { should have_selector('div.alert.alert-success') }
       it { should have_link('Sign out', href: signout_path) }
-      specify { user.reload.name.should == new_name }
+      specify { user.reload.name.should  == new_name }
       specify { user.reload.email.should == new_email }
     end
   end
@@ -332,7 +332,7 @@ end
 上述代码中出现了一个新的方法 `reload`，出现在检测用户的属性是否已经更新的测试中：
 
 ```ruby
-specify { user.reload.name.should == new_name }
+specify { user.reload.name.should  == new_name }
 specify { user.reload.email.should == new_email }
 ```
 
@@ -568,7 +568,7 @@ FactoryGirl.create(:user, email: "wrong@example.com")
 ```ruby
 class UsersController < ApplicationController
   before_filter :signed_in_user, only: [:edit, :update]
-  before_filter :correct_user, only: [:edit, :update]
+  before_filter :correct_user,   only: [:edit, :update]
   .
   .
   .
@@ -662,7 +662,7 @@ describe "Authentication" do
       describe "when attempting to visit a protected page" do
         before do
           visit edit_user_path(user)
-          fill_in "Email", with: user.email
+          fill_in "Email",    with: user.email
           fill_in "Password", with: user.password
           click_button "Sign in"
         end
@@ -710,7 +710,7 @@ end
 ```ruby
 class UsersController < ApplicationController
   before_filter :signed_in_user, only: [:edit, :update]
-  before_filter :correct_user, only: [:edit, :update]
+  before_filter :correct_user,   only: [:edit, :update]
   .
   .
   .
@@ -947,8 +947,8 @@ describe "Authentication" do
 
       it { should have_selector('title', text: user.name) }
 
-      it { should have_link('Users', href: users_path) }
-      it { should have_link('Profile', href: user_path(user)) }
+      it { should have_link('Users',    href: users_path) }
+      it { should have_link('Profile',  href: user_path(user)) }
       it { should have_link('Settings', href: edit_user_path(user)) }
       it { should have_link('Sign out', href: signout_path) }
 
@@ -1048,7 +1048,7 @@ namespace :db do
                  password: "foobar",
                  password_confirmation: "foobar")
     99.times do |n|
-      name = Faker::Name.name
+      name  = Faker::Name.name
       email = "example-#{n+1}@railstutorial.org"
       password = "password"
       User.create!(name: name,
@@ -1119,8 +1119,8 @@ $ bundle install
 ```ruby
 FactoryGirl.define do
   factory :user do
-    name "Michael Hartl"
-    email "michael@example.com"
+    name     "Michael Hartl"
+    email    "michael@example.com"
     password "foobar"
     password_confirmation "foobar"
   end
@@ -1131,7 +1131,7 @@ end
 
 ```ruby
 factory :user do
-  sequence(:name) { |n| "Person #{n}" }
+  sequence(:name)  { |n| "Person #{n}" }
   sequence(:email) { |n| "person_#{n}@example.com"}
   .
   .
@@ -1145,7 +1145,7 @@ factory :user do
 ```ruby
 FactoryGirl.define do
   factory :user do
-    sequence(:name) { |n| "Person #{n}" }
+    sequence(:name)  { |n| "Person #{n}" }
     sequence(:email) { |n| "person_#{n}@example.com"}
     password "foobar"
     password_confirmation "foobar"
@@ -1158,7 +1158,7 @@ end
 
 ```ruby
 before(:all) { 30.times { FactoryGirl.create(:user) } }
-after(:all) { User.delete_all }
+after(:all)  { User.delete_all }
 ```
 
 注意，上述代码使用 `before(:all)` 确保在块中所有测试执行之前，一次性创建 30 个示例用户。这是对速度做的优化，因为在某些系统中每个测试都创建 30 个用户会很慢。对应的，我们调用 `after(:all)` 方法，在测试结束后一次性删除所有的用户。
@@ -1225,7 +1225,7 @@ end
 <%= will_paginate %>
 ```
 
-`will_paginate` 方法有点小神奇，在 Users 控制器的视图中，它会自动寻找名为 `@users` 的对象，然后显示一个分页导航链接。代码 9.34 所示的视图现在还不能正确显示分页，因为现在 `@users` 的值是通过 `User.all` 方法获取的，是个数组；而 `will_paginate` 方法需要的是 `ActiveRecored::Relation` 类对象。will_paginate 提供的 `paginate` 方法正好可以返回 `ActiveRecored::Relation` 类对象：
+`will_paginate` 方法有点小神奇，在 Users 控制器的视图中，它会自动寻找名为 `@users` 的对象，然后显示一个分页导航链接。代码 9.34 所示的视图现在还不能正确显示分页，因为现在 `@users` 的值是通过 `User.all` 方法获取的，是个数组；而 `will_paginate` 方法需要的是 `ActiveRecord::Relation` 类对象。will_paginate 提供的 `paginate` 方法正好可以返回 `ActiveRecord::Relation` 类对象：
 
 ```sh
 $ rails console
@@ -1297,7 +1297,7 @@ $ bundle exec rspec spec/
 <%= will_paginate %>
 ```
 
-在上述代码中，`render` 的参数不再是指定局部试图的字符串，而是代表 `User` 类的 `user` 变量。<sup>[6](#fn-6)</sup>Rails 会自定寻找一个名为 `_user.html.erb` 的局部试图，我们要手动创建这个视图，然后写入代码 9.37 中的内容。
+在上述代码中，`render` 的参数不再是指定局部视图的字符串，而是代表 `User` 类的 `user` 变量。<sup>[6](#fn-6)</sup>Rails 会自动寻找一个名为 `_user.html.erb` 的局部视图，我们要手动创建这个视图，然后写入代码 9.37 中的内容。
 
 **代码 9.37** 显示单一用户的局部视图<br />`app/views/users/_user.html.erb`
 
@@ -1483,10 +1483,11 @@ put /users/17?admin=1
 ```ruby
 FactoryGirl.define do
   factory :user do
-    sequence(:name) { |n| "Person #{n}" }
+    sequence(:name)  { |n| "Person #{n}" }
     sequence(:email) { |n| "person_#{n}@example.com"}
     password "foobar"
     password_confirmation "foobar"
+
     factory :admin do
       admin true
     end
@@ -1533,7 +1534,7 @@ describe "User pages" do
     end
 
     it { should have_selector('title', text: 'All users') }
-    it { should have_selector('h1', text: 'All users') }
+    it { should have_selector('h1',    text: 'All users') }
 
     describe "pagination" do
       .
@@ -1590,7 +1591,7 @@ end
 ```ruby
 class UsersController < ApplicationController
   before_filter :signed_in_user, only: [:index, :edit, :update, :destroy]
-  before_filter :correct_user, only: [:edit, :update]
+  before_filter :correct_user,   only: [:edit, :update]
   .
   .
   .
@@ -1650,8 +1651,8 @@ end
 ```ruby
 class UsersController < ApplicationController
   before_filter :signed_in_user, only: [:index, :edit, :update, :destroy]
-  before_filter :correct_user, only: [:edit, :update]
-  before_filter :admin_user, only: :destroy
+  before_filter :correct_user,   only: [:edit, :update]
+  before_filter :admin_user,     only: :destroy
   .
   .
   .
@@ -1809,7 +1810,7 @@ describe "Authentication" do
       describe "when attempting to visit a protected page" do
         before do
           visit edit_user_path(user)
-          fill_in "Email", with: user.email
+          fill_in "Email",    with: user.email
           fill_in "Password", with: user.password
           click_button "Sign in"
         end
@@ -1823,7 +1824,7 @@ describe "Authentication" do
           describe "when signing in again" do
             before do
               visit signin_path
-              fill_in "Email", with: user.email
+              fill_in "Email",    with: user.email
               fill_in "Password", with: user.password
               click_button "Sign in"
             end
