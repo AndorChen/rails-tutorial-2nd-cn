@@ -701,7 +701,7 @@ visit signup_path
 expect { click_button "Create my account" }.not_to change(User, :count)
 ```
 
-注意，通过花括号我们可以看出，`expect` 把 `click_button` 包含在一个块中（参见 [4.3.2 节](chapter4,html#sec-4-3-2)），这是为 `change` 方法做的特殊处理。`change` 方法可接受两个参数，第一个参数是对象名，第二个是 Symbol。`change` 方法会在 `expect` 块中的代码执行前后，分别计算在第一个参数上调用第二参数代表的方法返回的结果。也就是说，如下的代码
+注意，通过花括号我们可以看出，`expect` 把 `click_button` 包含在一个块中（参见 [4.3.2 节](chapter4.html#sec-4-3-2)），这是为 `change` 方法做的特殊处理。`change` 方法可接受两个参数，第一个参数是对象名，第二个是 Symbol。`change` 方法会在 `expect` 块中的代码执行前后，分别计算在第一个参数上调用第二参数代表的方法返回的结果。也就是说，如下的代码
 
 ```ruby
 expect { click_button "Create my account" }.not_to change(User, :count)
