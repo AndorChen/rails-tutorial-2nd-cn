@@ -1,5 +1,0 @@
-url: http://railstutorial-china.org
-auto: false
-pygments: true
-markdown: redcarpet
-exclude: ['README.md', 'rails-tutorial-2nd-cn.sublime-project', 'rails-tutorial-2nd-cn.sublime-workspace', 'Gemfile', 'Gemfile.lock', 'CONTRIBUTING.md']
